@@ -62,16 +62,19 @@ AS
                    u.password_hash,
                    u.nombre_completo,
                    u.telefono,
-                   u.avatar_url,
+                   u.id_archivo_foto_perfil,
+                   arc.ruta_completa_almacenamiento AS avatar_url,
                    u.id_estado_usuario,
                    r.codigo AS codigo_rol,
                    r.nombre AS nombre_rol,
                    e.nombre_estado_usuario
               FROM smy_usuarios u,
                    smy_roles r,
-                   smy_estados_usuarios e
+                   smy_estados_usuarios e,
+                    smy_archivos arc
              WHERE u.id_rol = r.id
                AND u.id_estado_usuario = e.id
+               AND u.id_archivo_foto_perfil = arc.id(+)
                AND u.id = p_id_usuario;
     END pr_cursor_login;
 

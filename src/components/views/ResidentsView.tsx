@@ -49,9 +49,10 @@ export const ResidentsView: React.FC = () => {
     // Filtro por búsqueda
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
+      const cleanQ = q.replace(/[.,]/g, '');
       const match =
         r.nombreCompleto.toLowerCase().includes(q) ||
-        r.identificacion.includes(q) ||
+        r.identificacion.includes(cleanQ) ||
         r.habitacion.toLowerCase().includes(q) ||
         r.codigoExpediente.toLowerCase().includes(q);
       if (!match) return false;

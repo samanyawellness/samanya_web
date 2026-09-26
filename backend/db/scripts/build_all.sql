@@ -23,6 +23,17 @@ SET LINESIZE 200;
 SET PAGESIZE 100;
 
 -- -----------------------------------------------------------------------------
+-- CONFIGURACIÓN DE CODIFICACIÓN REGIONAL (NLS_LANG / UTF-8)
+-- -----------------------------------------------------------------------------
+-- NOTA OBLIGATORIA PARA EJECUCIÓN EN WINDOWS (SQL*Plus / CMD / PowerShell):
+--   En CMD:         set NLS_LANG=SPANISH_SPAIN.AL32UTF8
+--   En PowerShell:  $env:NLS_LANG = "SPANISH_SPAIN.AL32UTF8"
+--   En SQL Developer: Herramientas -> Preferencias -> Entorno -> Codificación -> UTF-8
+-- -----------------------------------------------------------------------------
+ALTER SESSION SET NLS_LANGUAGE = 'SPANISH';
+ALTER SESSION SET NLS_TERRITORY = 'COLOMBIA';
+
+-- -----------------------------------------------------------------------------
 -- INICIO DE COMPILACIÓN Y REGISTRO DE HORA OFICIAL (UTC-5 Bogotá)
 -- -----------------------------------------------------------------------------
 DECLARE

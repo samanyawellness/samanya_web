@@ -260,6 +260,8 @@ export const adminApi = {
       fechaFin: string;
       motivo: string;
       urlSoporte?: string;
+      idArchivoSoporte?: number;
+      idArchivo?: number;
       idEstadoPermiso?: number;
       observacionesAdmin?: string;
     }) {

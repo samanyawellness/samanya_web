@@ -64,7 +64,7 @@ AS
         v_fecha_inicio       DATE;
         v_fecha_fin          DATE;
         v_motivo             smy_solicitudes_permisos.motivo%TYPE;
-        v_url_soporte        smy_solicitudes_permisos.url_soporte%TYPE;
+        v_id_archivo         smy_solicitudes_permisos.id_archivo_soporte%TYPE;
         v_id_estado_permiso  smy_solicitudes_permisos.id_estado_permiso%TYPE;
         v_observaciones      smy_solicitudes_permisos.observaciones_admin%TYPE;
 
@@ -80,7 +80,7 @@ AS
         v_fecha_inicio_str  := TRIM(JSON_VALUE(pcl_json, '$.fechaInicio'));
         v_fecha_fin_str     := TRIM(JSON_VALUE(pcl_json, '$.fechaFin'));
         v_motivo            := TRIM(JSON_VALUE(pcl_json, '$.motivo'));
-        v_url_soporte       := TRIM(JSON_VALUE(pcl_json, '$.urlSoporte'));
+        v_id_archivo        := NVL(TO_NUMBER(JSON_VALUE(pcl_json, '$.idArchivoSoporte')), TO_NUMBER(JSON_VALUE(pcl_json, '$.idArchivo')));
         v_id_estado_permiso := NVL(TO_NUMBER(JSON_VALUE(pcl_json, '$.idEstadoPermiso')), 1);
         v_observaciones     := TRIM(JSON_VALUE(pcl_json, '$.observacionesAdmin'));
 
@@ -120,7 +120,7 @@ AS
         vro_permiso.fecha_inicio                   := v_fecha_inicio;
         vro_permiso.fecha_fin                      := v_fecha_fin;
         vro_permiso.motivo                         := v_motivo;
-        vro_permiso.url_soporte                    := v_url_soporte;
+        vro_permiso.id_archivo_soporte             := v_id_archivo;
         vro_permiso.id_estado_permiso              := v_id_estado_permiso;
         vro_permiso.observaciones_admin            := v_observaciones;
         vro_permiso.fecha_creacion                 := f_fecha_actual;

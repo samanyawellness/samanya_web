@@ -31,9 +31,10 @@ export const WorkersView: React.FC = () => {
   const filtered = trabajadores.filter((t) => {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
+      const cleanQ = q.replace(/[.,]/g, '');
       const match =
         t.nombreCompleto.toLowerCase().includes(q) ||
-        t.identificacion.includes(q) ||
+        t.identificacion.includes(cleanQ) ||
         t.cargo.toLowerCase().includes(q) ||
         t.area.toLowerCase().includes(q);
       if (!match) return false;

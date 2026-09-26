@@ -28,9 +28,10 @@ export const FamilyMembersView: React.FC = () => {
   const filtered = familiares.filter((f) => {
     if (searchQuery) {
       const q = searchQuery.toLowerCase();
+      const cleanQ = q.replace(/[.,]/g, '');
       const match =
         f.nombreCompleto.toLowerCase().includes(q) ||
-        f.identificacion.includes(q) ||
+        f.identificacion.includes(cleanQ) ||
         f.telefonoPrincipal.includes(q) ||
         f.residentesAsociados.some((r) => r.nombreResidente.toLowerCase().includes(q));
       if (!match) return false;

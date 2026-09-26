@@ -804,7 +804,7 @@ AS
         v_hash_archivo                smy_archivos.hash_archivo%TYPE;
         v_ruta_relativa               smy_archivos.ruta_relativa%TYPE;
         v_ruta_completa               smy_archivos.ruta_completa_almacenamiento%TYPE;
-        v_avatar_url                  smy_usuarios.avatar_url%TYPE;
+        v_avatar_url                  VARCHAR2(1000);
         v_extension                   smy_archivos.extension%TYPE;
         v_tipo_mime                   smy_archivos.tipo_mime%TYPE;
         v_tamano_bytes                smy_archivos.tamano_bytes%TYPE;
@@ -875,7 +875,7 @@ AS
             vro_usuario.email                          := LOWER(NVL(JSON_VALUE(pcl_json, '$.email'), 'colaborador' || v_id_usuario || '@samanyacare.com'));
             vro_usuario.nombre_completo                := NVL(JSON_VALUE(pcl_json, '$.nombreCompleto'), 'Colaborador ' || v_id_usuario);
             vro_usuario.telefono                       := NVL(JSON_VALUE(pcl_json, '$.telefono'), '3000000000');
-            vro_usuario.avatar_url                     := v_avatar_url;
+            vro_usuario.id_archivo_foto_perfil         := v_id;
             vro_usuario.id_canal_notif_pref            := 1;
             vro_usuario.id_estado_usuario              := 1;
             vro_usuario.fecha_creacion                 := f_fecha_actual;
@@ -966,7 +966,7 @@ AS
         END IF;
 
         -- 4. Actualización del campo avatar_url en SMY_USUARIOS vía DAO
-        vro_usuario.avatar_url                     := v_avatar_url;
+        vro_usuario.id_archivo_foto_perfil         := v_id;
         vro_usuario.fecha_creacion                 := NVL(vro_usuario.fecha_creacion, f_fecha_actual);
         vro_usuario.id_usuario_ultima_modificacion := NVL(v_id_usuario_creacion, v_id_usuario);
         PKGSMY_USUARIOS_DAO.p_actualizar(vro_usuario);
@@ -1193,9 +1193,7 @@ AS
 
         -- 2. Actualizar documento clínico vía DAO
         IF PKGSMY_DOCUMENTOS_CLINICOS_DAO.f_existe(p_id_documento_clinico, vro_doc) = TRUE THEN
-            vro_doc.url_archivo                    := pro_archivo.ruta_completa_almacenamiento;
-            vro_doc.nombre_archivo                 := pro_archivo.nombre_archivo;
-            vro_doc.peso_archivo                   := TO_CHAR(ROUND(NVL(pro_archivo.tamano_bytes, 0) / 1024, 1)) || ' KB';
+            vro_doc.id_archivo_clinico             := pro_archivo.id;
             vro_doc.id_usuario_ultima_modificacion := p_id_usuario;
             PKGSMY_DOCUMENTOS_CLINICOS_DAO.p_actualizar(vro_doc);
         END IF;
@@ -1234,9 +1232,7 @@ AS
 
         -- 2. Desvincular en documento clínico vía DAO
         IF PKGSMY_DOCUMENTOS_CLINICOS_DAO.f_existe(p_id_documento_clinico, vro_doc) = TRUE THEN
-            vro_doc.url_archivo                    := NULL;
-            vro_doc.nombre_archivo                 := NULL;
-            vro_doc.peso_archivo                   := NULL;
+            vro_doc.id_archivo_clinico             := NULL;
             vro_doc.id_usuario_ultima_modificacion := p_id_usuario;
             PKGSMY_DOCUMENTOS_CLINICOS_DAO.p_actualizar(vro_doc);
         END IF;

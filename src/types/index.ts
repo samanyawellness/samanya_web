@@ -21,6 +21,35 @@ export type MedicamentoPrescrito = {
   activo?: boolean;
 };
 
+export type ClaseArchivoResidente =
+  | 'Historia Clínica / Epicrisis'
+  | 'Exámenes / Laboratorios'
+  | 'Fórmulas y Órdenes Médicas'
+  | 'Documento de Identidad'
+  | 'Consentimiento Informado'
+  | 'Afiliación EPS / Seguro'
+  | 'Otro / Soporte General';
+
+export type ArchivoAdjuntoResidente = {
+  id?: number | string;
+  idArchivo?: number;
+  idArchivoClinico?: number;
+  nombreArchivo: string;
+  nombreAlmacenado?: string;
+  claseArchivo: ClaseArchivoResidente;
+  tamanoBytes?: number;
+  tipoMime?: string;
+  hash?: string;
+  rutaRelativa?: string;
+  rutaDrive?: string;
+  driveUrl?: string;
+  localUrl?: string;
+  url?: string;
+  fileBase64?: string;
+  fechaSubida?: string;
+  descripcion?: string;
+};
+
 export type Residente = {
   id: number;
   idCentro: number;
@@ -34,6 +63,7 @@ export type Residente = {
   edad: number;
   genero: 'M' | 'F' | 'OTRO';
   fotoUrl?: string;
+  idArchivoFotoPerfil?: number;
   habitacion: string;
   cama: string;
   eps: string;
@@ -53,6 +83,7 @@ export type Residente = {
     email: string;
     esPrincipal: boolean;
   }>;
+  archivosAdjuntos?: ArchivoAdjuntoResidente[];
 };
 
 export type FamiliarAcudiente = {
@@ -69,6 +100,7 @@ export type FamiliarAcudiente = {
   ciudad: string;
   canalNotificacionPref: 'WhatsApp' | 'Correo' | 'Push App' | 'Llamada';
   fotoUrl?: string;
+  idArchivoFotoPerfil?: number;
   residentesAsociados: Array<{
     idResidente: number;
     nombreResidente: string;
@@ -98,6 +130,7 @@ export type TrabajadorEmpleado = {
   arl: string;
   estado: 'Activo' | 'En Permiso' | 'Inactivo';
   avatarUrl?: string;
+  idArchivoFotoPerfil?: number;
   turnoHabitual?: string;
 };
 
@@ -147,6 +180,8 @@ export type PermisoAusencia = {
   fechaFin: string;
   motivo: string;
   soporteUrl?: string;
+  idArchivoSoporte?: number;
+  idArchivo?: number;
   driveUrl?: string;
   rutaDrive?: string;
   estado: 'Pendiente' | 'Aprobado' | 'Rechazado';
@@ -168,6 +203,7 @@ export type IncidenteOperativo = {
   fechaHora: string;
   estado: 'Abierto' | 'En Seguimiento' | 'Cerrado';
   notificadoFamiliar: boolean;
+  idArchivoIncidente?: number;
 };
 
 export type AdminDashboardMetrics = {

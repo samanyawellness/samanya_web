@@ -359,7 +359,7 @@ AS
                    'id_usuario_administro' VALUE t.id_usuario_administro,
                    'id_estado_admin_med' VALUE t.id_estado_admin_med,
                    'motivo_rechazo_omis' VALUE t.motivo_rechazo_omis,
-                   'foto_evidencia_url' VALUE t.foto_evidencia_url,
+                   'id_archivo_evidencia' VALUE t.id_archivo_evidencia,
                    'notas' VALUE t.notas,
                    'fecha_creacion' VALUE TO_CHAR(t.fecha_creacion, 'YYYY-MM-DD"T"HH24:MI:SS'),
                    'id_usuario_ultima_modificacion' VALUE t.id_usuario_ultima_modificacion
@@ -394,7 +394,7 @@ AS
                    'id_usuario_administro' VALUE t.id_usuario_administro,
                    'id_estado_admin_med' VALUE t.id_estado_admin_med,
                    'motivo_rechazo_omis' VALUE t.motivo_rechazo_omis,
-                   'foto_evidencia_url' VALUE t.foto_evidencia_url,
+                   'id_archivo_evidencia' VALUE t.id_archivo_evidencia,
                    'notas' VALUE t.notas,
                    'fecha_creacion' VALUE TO_CHAR(t.fecha_creacion, 'YYYY-MM-DD"T"HH24:MI:SS'),
                    'id_usuario_ultima_modificacion' VALUE t.id_usuario_ultima_modificacion

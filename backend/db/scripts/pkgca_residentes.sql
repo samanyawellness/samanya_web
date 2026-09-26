@@ -57,7 +57,8 @@ AS
                 TO_CHAR(r.fecha_nacimiento, 'YYYY-MM-DD') AS fecha_nacimiento,
                 r.habitacion,
                 r.cama,
-                r.foto_url,
+                r.id_archivo_foto_perfil,
+                arc.ruta_completa_almacenamiento AS foto_url,
                 NVL(m.nombre_nivel_movilidad, 'Independiente') AS nivel_movilidad,
                 NVL(d.nombre_tipo_dieta, 'Normal / General') AS tipo_dieta,
                 r.alertas_clinicas,
@@ -66,11 +67,13 @@ AS
                  smy_centros c,
                  smy_estados_residentes e,
                  smy_niveles_movilidad m,
-                 smy_tipos_dietas d
+                 smy_tipos_dietas d,
+                 smy_archivos arc
             WHERE r.id_centro = c.id
               AND r.id_estado_residente = e.id
               AND r.id_nivel_movilidad = m.id(+)
               AND r.id_tipo_dieta = d.id(+)
+              AND r.id_archivo_foto_perfil = arc.id(+)
               AND (v_id_centro IS NULL OR r.id_centro = v_id_centro)
               AND (v_id_estado IS NULL OR r.id_estado_residente = v_id_estado)
               AND (v_filtro_texto IS NULL OR (
@@ -104,7 +107,8 @@ AS
             'fechaNacimiento'     VALUE TO_CHAR(r.fecha_nacimiento, 'YYYY-MM-DD'),
             'habitacion'          VALUE r.habitacion,
             'cama'                VALUE r.cama,
-            'fotoUrl'             VALUE r.foto_url,
+            'idArchivo'           VALUE r.id_archivo_foto_perfil,
+            'fotoUrl'             VALUE arc.ruta_completa_almacenamiento,
             'eps'                 VALUE r.eps,
             'planComplementario'  VALUE r.plan_complementario,
             'tipoSangre'          VALUE r.tipo_sangre,
@@ -138,11 +142,13 @@ AS
              smy_centros c,
              smy_estados_residentes e,
              smy_niveles_movilidad m,
-             smy_tipos_dietas d
+             smy_tipos_dietas d,
+             smy_archivos arc
         WHERE r.id_centro = c.id
           AND r.id_estado_residente = e.id
           AND r.id_nivel_movilidad = m.id(+)
           AND r.id_tipo_dieta = d.id(+)
+          AND r.id_archivo_foto_perfil = arc.id(+)
           AND r.id = v_id_residente;
 
         RETURN vcl_resultado;

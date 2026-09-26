@@ -269,7 +269,7 @@ AS
             vro_org.email_corporativo              := LOWER(TRIM(v_in_obj.get_string('emailCorporativo')));
             vro_org.telefono_contacto              := TRIM(v_in_obj.get_string('telefonoContacto'));
             vro_org.sitio_web                      := TRIM(v_in_obj.get_string('sitioWeb'));
-            vro_org.logo_url                       := TRIM(v_in_obj.get_string('logoUrl'));
+            vro_org.id_archivo_logo                := NVL(v_in_obj.get_number('idArchivoLogo'), v_in_obj.get_number('idArchivo'));
             vro_org.id_estado_organizacion         := NVL(v_in_obj.get_number('idEstadoOrganizacion'), vro_org.id_estado_organizacion);
             vro_org.id_usuario_ultima_modificacion := v_user_id;
 
@@ -285,7 +285,7 @@ AS
             vro_org.email_corporativo              := LOWER(TRIM(v_in_obj.get_string('emailCorporativo')));
             vro_org.telefono_contacto              := TRIM(v_in_obj.get_string('telefonoContacto'));
             vro_org.sitio_web                      := TRIM(v_in_obj.get_string('sitioWeb'));
-            vro_org.logo_url                       := TRIM(v_in_obj.get_string('logoUrl'));
+            vro_org.id_archivo_logo                := NVL(v_in_obj.get_number('idArchivoLogo'), v_in_obj.get_number('idArchivo'));
             vro_org.id_estado_organizacion         := NVL(v_in_obj.get_number('idEstadoOrganizacion'), 1);
             vro_org.fecha_creacion                 := f_fecha_actual;
             vro_org.id_usuario_ultima_modificacion := v_user_id;
@@ -480,7 +480,7 @@ AS
             END IF;
             vro_usu.nombre_completo                := TRIM(v_in_obj.get_string('nombreCompleto'));
             vro_usu.telefono                       := TRIM(v_in_obj.get_string('telefono'));
-            vro_usu.avatar_url                     := TRIM(v_in_obj.get_string('avatarUrl'));
+            vro_usu.id_archivo_foto_perfil         := NVL(v_in_obj.get_number('idArchivoFotoPerfil'), v_in_obj.get_number('idArchivo'));
             vro_usu.id_canal_notif_pref            := NVL(v_in_obj.get_number('idCanalNotifPref'), vro_usu.id_canal_notif_pref);
             vro_usu.id_estado_usuario              := NVL(v_in_obj.get_number('idEstadoUsuario'), vro_usu.id_estado_usuario);
             vro_usu.id_usuario_ultima_modificacion := v_user_id;
@@ -496,7 +496,7 @@ AS
             vro_usu.password_hash                  := v_pass;
             vro_usu.nombre_completo                := TRIM(v_in_obj.get_string('nombreCompleto'));
             vro_usu.telefono                       := TRIM(v_in_obj.get_string('telefono'));
-            vro_usu.avatar_url                     := TRIM(v_in_obj.get_string('avatarUrl'));
+            vro_usu.id_archivo_foto_perfil         := NVL(v_in_obj.get_number('idArchivoFotoPerfil'), v_in_obj.get_number('idArchivo'));
             vro_usu.id_canal_notif_pref            := NVL(v_in_obj.get_number('idCanalNotifPref'), 1);
             vro_usu.id_estado_usuario              := NVL(v_in_obj.get_number('idEstadoUsuario'), 1);
             vro_usu.fecha_creacion                 := f_fecha_actual;

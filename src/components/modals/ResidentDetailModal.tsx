@@ -19,7 +19,10 @@ import {
   RotateCcw,
   ClipboardList,
   CheckCircle2,
-  Printer
+  Printer,
+  Paperclip,
+  FileText,
+  ExternalLink
 } from 'lucide-react';
 import { ResidentAvatar } from '../common/ResidentAvatar';
 import { DotacionResidente } from '../../types';
@@ -697,6 +700,105 @@ export const ResidentDetailModal: React.FC = () => {
             ) : (
               <div className="p-4 bg-[#F7F6F2] rounded-xl text-center text-xs text-[#7A745F]">
                 No tiene elementos de dotación asignados todavía. Utilice el botón "Entregar Artículo" para asignarle sábanas, cobijas o toallas.
+              </div>
+            )}
+          </div>
+
+          {/* Archivos y Documentos Adjuntos del Residente */}
+          <div className="space-y-3 pt-3 border-t border-[#DEDBD1]">
+            <div className="flex items-center justify-between">
+              <h4 className="text-xs font-mono font-bold uppercase text-[#7A745F] tracking-wider flex items-center gap-1.5">
+                <Paperclip className="w-4 h-4 text-[#274A3F]" />
+                <span>Documentos & Archivos Adjuntos ({selectedResidente.archivosAdjuntos?.length || 0})</span>
+              </h4>
+            </div>
+
+            {selectedResidente.archivosAdjuntos && selectedResidente.archivosAdjuntos.length > 0 ? (
+              <div className="grid grid-cols-1 sm:grid-cols-2 gap-2.5">
+                {selectedResidente.archivosAdjuntos.map((arch, idx) => {
+                  // Resolver la ruta oficial en la jerarquía: Samanya / {Sede} / Residentes / {id}_{identificacion} / Documentos / {nombre}
+                  const sedeNombre = activeSede?.nombre || 'Sede Central Bogotá';
+                  const docIdentificacion = selectedResidente.identificacion || 'SIN_DOC';
+                  const sujetoFolder = `${selectedResidente.id || idx + 1}_${docIdentificacion}`;
+                  const nombreFichero = arch.nombreAlmacenado || arch.nombreArchivo;
+
+                  const rutaOficialCalculada = `Samanya/${sedeNombre}/Residentes/${sujetoFolder}/Documentos/${nombreFichero}`;
+                  let rutaOficial = arch.rutaRelativa || rutaOficialCalculada;
+                  if (sedeNombre === 'Sede Campestre La Calera') {
+                    rutaOficial = rutaOficial.replace('Sede Campestre El Nogal', 'Sede Campestre La Calera');
+                  } else if (sedeNombre === 'Sede Central Bogotá') {
+                    rutaOficial = rutaOficial
+                      .replace('Sede Principal Santa Bárbara', 'Sede Central Bogotá')
+                      .replace('Sede Principal Santa Barbara', 'Sede Central Bogotá');
+                  }
+
+                  // URL prioritaria: abrir directamente en Google Drive, con fallback a URL web o ruta oficial
+                  let openUrl = arch.driveUrl || (arch.url && arch.url.includes('drive.google.com') ? arch.url : undefined);
+                  if (!openUrl) {
+                    if (arch.url && (arch.url.startsWith('http://') || arch.url.startsWith('https://'))) {
+                      openUrl = arch.url;
+                    } else {
+                      openUrl = `/${encodeURI(rutaOficial.replace(/^\//, ''))}`;
+                    }
+                  }
+
+                  return (
+                    <div
+                      key={arch.id || idx}
+                      className="p-3 bg-[#F7F6F2] rounded-xl border border-[#DEDBD1] flex items-center justify-between gap-3 shadow-2xs hover:border-[#274A3F]/50 transition-colors"
+                    >
+                      <div className="flex items-center gap-2.5 min-w-0">
+                        <div className="w-8 h-8 rounded-lg bg-white border border-[#DEDBD1] flex items-center justify-center shrink-0">
+                          <FileText className="w-4 h-4 text-[#274A3F]" />
+                        </div>
+                        <div className="min-w-0">
+                          <div className="flex items-center gap-1.5 flex-wrap">
+                            <span className="text-xs font-bold text-[#182F28] truncate block max-w-[170px]" title={arch.nombreArchivo}>
+                              {arch.nombreArchivo}
+                            </span>
+                          </div>
+                          <div className="flex items-center gap-1.5 mt-0.5">
+                            <span className="text-[10px] font-bold px-2 py-0.2 rounded-full bg-[#274A3F]/10 text-[#274A3F] border border-[#274A3F]/20">
+                              {arch.claseArchivo}
+                            </span>
+                            {arch.tamanoBytes && (
+                              <span className="text-[10px] text-[#7A745F]">
+                                {(arch.tamanoBytes / 1024).toFixed(1)} KB
+                              </span>
+                            )}
+                          </div>
+                          {arch.descripcion && (
+                            <p className="text-[11px] text-[#5C6058] truncate mt-0.5">
+                              {arch.descripcion}
+                            </p>
+                          )}
+                          {/* Ruta oficial del archivo en el sistema */}
+                          <div className="mt-1 flex items-center gap-1 text-[10px] font-mono text-[#274A3F] bg-[#EAE7DC]/70 px-2 py-0.5 rounded border border-[#DEDBD1] truncate max-w-[280px]" title={rutaOficial}>
+                            <span className="shrink-0">📁</span>
+                            <span className="truncate">{rutaOficial}</span>
+                          </div>
+                        </div>
+                      </div>
+
+                      <div className="flex items-center gap-1.5 shrink-0">
+                        <a
+                          href={openUrl}
+                          target="_blank"
+                          rel="noreferrer"
+                          className="p-1.5 bg-white hover:bg-[#ECE7DB] border border-[#DEDBD1] rounded-lg text-[#274A3F] transition-colors flex items-center gap-1 text-[11px] font-bold shadow-2xs"
+                          title="Abrir en Google Drive"
+                        >
+                          <ExternalLink className="w-3.5 h-3.5" />
+                          <span>Abrir</span>
+                        </a>
+                      </div>
+                    </div>
+                  );
+                })}
+              </div>
+            ) : (
+              <div className="p-3 bg-[#F7F6F2] rounded-xl text-center text-xs text-[#7A745F]">
+                No se adjuntaron documentos durante la admisión del residente.
               </div>
             )}
           </div>

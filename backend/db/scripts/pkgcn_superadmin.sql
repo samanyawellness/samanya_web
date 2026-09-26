@@ -84,7 +84,8 @@ AS
                    'passwordHash'         VALUE u.password_hash,
                    'nombreCompleto'       VALUE u.nombre_completo,
                    'telefono'             VALUE u.telefono,
-                   'avatarUrl'            VALUE u.avatar_url,
+                   'idArchivo'            VALUE u.id_archivo_foto_perfil,
+                   'avatarUrl'            VALUE arc.ruta_completa_almacenamiento,
                    'idTipoUsuario'        VALUE u.id_tipo_usuario,
                    'nombreTipoUsuario'    VALUE tu.nombre_tipo_usuario,
                    'idRol'                VALUE u.id_rol,
@@ -99,8 +100,10 @@ AS
           FROM smy_usuarios u,
                smy_tipos_usuarios tu,
                smy_roles r,
-               smy_estados_usuarios eu
+               smy_estados_usuarios eu,
+               smy_archivos arc
          WHERE tu.id = u.id_tipo_usuario
+           AND u.id_archivo_foto_perfil = arc.id(+)
            AND r.id = u.id_rol
            AND eu.id = u.id_estado_usuario
            AND (LOWER(u.username) = LOWER(TRIM(v_usuario_o_email))
@@ -135,7 +138,8 @@ AS
                        'emailCorporativo'         VALUE o.email_corporativo,
                        'telefonoContacto'         VALUE o.telefono_contacto,
                        'sitioWeb'                 VALUE o.sitio_web,
-                       'logoUrl'                  VALUE o.logo_url,
+                       'idArchivo'                VALUE o.id_archivo_logo,
+                       'logoUrl'                  VALUE arc.ruta_completa_almacenamiento,
                        'idEstadoOrganizacion'     VALUE o.id_estado_organizacion,
                        'nombreEstadoOrganizacion' VALUE eo.nombre_estado,
                        'fechaCreacion'            VALUE TO_CHAR(o.fecha_creacion, 'YYYY-MM-DD"T"HH24:MI:SS'),
@@ -147,8 +151,10 @@ AS
           INTO v_clob
           FROM smy_organizaciones o,
                smy_tipos_identificacion ti,
-               smy_estados_organizaciones eo
+               smy_estados_organizaciones eo,
+               smy_archivos arc
          WHERE ti.id = o.id_tipo_identificacion
+           AND o.id_archivo_logo = arc.id(+)
            AND eo.id = o.id_estado_organizacion
          ORDER BY o.id DESC;
 
@@ -235,7 +241,8 @@ AS
                        'email'                    VALUE u.email,
                        'nombreCompleto'           VALUE u.nombre_completo,
                        'telefono'                 VALUE u.telefono,
-                       'avatarUrl'                VALUE u.avatar_url,
+                       'idArchivo'                VALUE u.id_archivo_foto_perfil,
+                       'avatarUrl'                VALUE arc.ruta_completa_almacenamiento,
                        'idCanalNotifPref'         VALUE u.id_canal_notif_pref,
                        'nombreCanalNotificacion'  VALUE cn.nombre_canal_notificacion,
                        'idEstadoUsuario'          VALUE u.id_estado_usuario,
@@ -251,8 +258,10 @@ AS
                smy_roles r,
                smy_tipos_usuarios tu,
                smy_canales_notificacion cn,
-               smy_estados_usuarios eu
+               smy_estados_usuarios eu,
+               smy_archivos arc
          WHERE r.id = u.id_rol
+           AND u.id_archivo_foto_perfil = arc.id(+)
            AND tu.id = u.id_tipo_usuario
            AND cn.id = u.id_canal_notif_pref
            AND eu.id = u.id_estado_usuario

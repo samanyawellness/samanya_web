@@ -1165,7 +1165,17 @@ erDiagram
     SMY_CLASES_ARCHIVOS ||--o{ SMY_ARCHIVOS : "ID_CLASE_ARCHIVO"
     SMY_CENTROS ||--o{ SMY_ARCHIVOS : "ID_CENTRO"
     SMY_RESIDENTES ||--o{ SMY_ARCHIVOS : "ID_RESIDENTE"
-    SMY_ESTADOS_ARCHIVOS ||--o{ SMY_ARCHIVOS : "ID_ESTADO_ARCHIVO"
+    SMY_EMPLEADOS ||--o{ SMY_ARCHIVOS : "ID_EMPLEADO"
+    SMY_ARCHIVOS ||--o{ SMY_ORGANIZACIONES : "ID_ARCHIVO_LOGO"
+    SMY_ARCHIVOS ||--o{ SMY_USUARIOS : "ID_ARCHIVO_FOTO_PERFIL"
+    SMY_ARCHIVOS ||--o{ SMY_RESIDENTES : "ID_ARCHIVO_FOTO_PERFIL"
+    SMY_ARCHIVOS ||--o{ SMY_DOCUMENTOS_CLINICOS : "ID_ARCHIVO_CLINICO"
+    SMY_ARCHIVOS ||--o{ SMY_DOCUMENTOS_EMPLEADO : "ID_ARCHIVO_EMPLEADO"
+    SMY_ARCHIVOS ||--o{ SMY_SOLICITUDES_PERMISOS : "ID_ARCHIVO_SOPORTE"
+    SMY_ARCHIVOS ||--o{ SMY_CONSENTIMIENTOS : "ID_ARCHIVO_CONSENTIMIENTO"
+    SMY_ARCHIVOS ||--o{ SMY_CONSENTIMIENTO_DESTINATARIOS : "ID_ARCHIVO_CONSENTIMIENTO"
+    SMY_ARCHIVOS ||--o{ SMY_INCIDENTES : "ID_ARCHIVO_INCIDENTE"
+    SMY_ARCHIVOS ||--o{ SMY_MENSAJES_CHAT : "ID_ARCHIVO_ADJUNTO_CHAT"
 
     SMY_ORGANIZACIONES ||--o{ SMY_DOTACION_CATALOGO : "ID_ORGANIZACION"
     SMY_RESIDENTES ||--o{ SMY_DOTACION_RESIDENTES : "ID_RESIDENTE"
@@ -1727,7 +1737,7 @@ erDiagram
               <tr><td class="col-name">FECHA_INGRESO</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Fecha de admisión formal.</td></tr>
               <tr><td class="col-name">FECHA_EGRESO</td><td class="col-type">DATE</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fecha de egreso (si aplica).</td></tr>
               <tr><td class="col-name">MOTIVO_EGRESO</td><td class="col-type">VARCHAR2(255)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Causa del egreso.</td></tr>
-              <tr><td class="col-name">FOTO_URL</td><td class="col-type">VARCHAR2(500)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fotografía del residente.</td></tr>
+              <tr><td class="col-name">ID_ARCHIVO_FOTO_PERFIL</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_ARCHIVOS(ID). Fotografía oficial del residente gestionada centralizadamente.</td></tr>
               <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de auditoría.</td></tr>
               <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que modificó.</td></tr>
             </tbody>
@@ -1910,33 +1920,31 @@ erDiagram
 
       <div class="card table-block" data-table="SMY_ARCHIVOS">
         <h4>Tabla: SMY_ARCHIVOS</h4>
-        <p>Gestor centralizado de metadatos de archivos con almacenamiento en file server / directorio Oracle, hash SHA-256 de integridad, ciclo de vida por estados y borrado lógico.</p>
+        <p>Gestor centralizado universal de metadatos de archivos para todo el ecosistema SAMANYA OS. Ninguna otra tabla almacena información redundante del archivo (como URLs o nombres); cualquier entidad que lo referencie lo hace exclusivamente mediante la clave foránea <code>ID_ARCHIVO</code> hacia <code>SMY_ARCHIVOS(ID)</code>.</p>
         <div class="table-container">
           <table class="data-dict">
             <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
             <tbody>
-              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_ARCHIVOS</td><td>ID único del archivo.</td></tr>
-              <tr><td class="col-name">NOMBRE_ARCHIVO</td><td class="col-type">VARCHAR2(255)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Nombre original de carga del archivo.</td></tr>
-              <tr><td class="col-name">NOMBRE_ARCHIVO_ALMACENADO</td><td class="col-type">VARCHAR2(255)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Nombre único hasheado en disco/storage.</td></tr>
-              <tr><td class="col-name">HASH_ARCHIVO</td><td class="col-type">VARCHAR2(128)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Hash criptográfico SHA-256 para validación de integridad.</td></tr>
-              <tr><td class="col-name">NOMBRE_DIRECTORIO_BD</td><td class="col-type">VARCHAR2(128)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Objeto Directory de BD Oracle (CREATE DIRECTORY) para BFILE/UTL_FILE si aplica.</td></tr>
-              <tr><td class="col-name">RUTA_RELATIVA</td><td class="col-type">VARCHAR2(1000)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Ruta dinámica por centro/residente/clase.</td></tr>
-              <tr><td class="col-name">RUTA_COMPLETA_ALMACENAMIENTO</td><td class="col-type">VARCHAR2(1500)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>URI o ruta física completa en el storage server.</td></tr>
-              <tr><td class="col-name">EXTENSION</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Extensión del archivo (.pdf, .jpg, .docx).</td></tr>
-              <tr><td class="col-name">TIPO_MIME</td><td class="col-type">VARCHAR2(100)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Tipo MIME (application/pdf, image/jpeg).</td></tr>
-              <tr><td class="col-name">TAMANO_BYTES</td><td class="col-type">NUMBER(14)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Tamaño total exacto en bytes.</td></tr>
-              <tr><td class="col-name">ID_CLASE_ARCHIVO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CLASES_ARCHIVOS(ID).</td></tr>
-              <tr><td class="col-name">ID_CENTRO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CENTROS(ID) para jerarquía institucional.</td></tr>
-              <tr><td class="col-name">ID_RESIDENTE</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_RESIDENTES(ID) para expediente del residente.</td></tr>
-              <tr><td class="col-name">ID_ESTADO_ARCHIVO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>1</td><td>FK hacia SMY_ESTADOS_ARCHIVOS(ID) (1=Activo/Disponible, 2=Eliminado/Papelera).</td></tr>
-              <tr><td class="col-name">TABLA_ORIGEN</td><td class="col-type">VARCHAR2(50)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Nombre de la tabla asociada (ej. SMY_DOCUMENTOS_CLINICOS).</td></tr>
-              <tr><td class="col-name">ID_REGISTRO_ORIGEN</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>ID del registro en la tabla asociada.</td></tr>
-              <tr><td class="col-name">METADATOS_JSON</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Metadatos flexibles en formato JSON nativo.</td></tr>
-              <tr><td class="col-name">FECHA_ELIMINACION</td><td class="col-type">DATE</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Momento en que el archivo fue enviado a papelera.</td></tr>
-              <tr><td class="col-name">ID_USUARIO_ELIMINACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que ordenó la eliminación lógica.</td></tr>
-              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de auditoría de registro.</td></tr>
-              <tr><td class="col-name">FECHA_ULTIMA_MODIFICACION</td><td class="col-type">DATE</td><td><span class="badge badge-opt">Sí</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de última actualización en BD.</td></tr>
-              <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que realizó última modificación.</td></tr>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_ARCHIVOS</td><td>Identificador único e inmutable del archivo.</td></tr>
+              <tr><td class="col-name">ID_CENTRO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CENTROS(ID). Sede propietaria del archivo.</td></tr>
+              <tr><td class="col-name">ID_CLASE_ARCHIVO</td><td class="col-type">NUMBER(5)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CLASES_ARCHIVOS(ID) (1=Historia Clínica, 7=Foto Perfil, 8=Firma Digital, 9=Soporte Laboral, etc.).</td></tr>
+              <tr><td class="col-name">ID_RESIDENTE</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_RESIDENTES(ID) cuando el documento corresponde al módulo de Residentes.</td></tr>
+              <tr><td class="col-name">ID_EMPLEADO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_EMPLEADOS(ID) cuando el documento corresponde al módulo de Talento Humano.</td></tr>
+              <tr><td class="col-name">NOMBRE_ORIGINAL</td><td class="col-type">VARCHAR2(255)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Nombre con el que el usuario cargó el archivo originalmente.</td></tr>
+              <tr><td class="col-name">NOMBRE_ALMACENADO</td><td class="col-type">VARCHAR2(255)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Nombre en Google Drive y almacenamiento físico formado por: <code>{hash_sha256}.{extension}</code>.</td></tr>
+              <tr><td class="col-name">HASH_SHA256</td><td class="col-type">VARCHAR2(64)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Hash criptográfico SHA-256 del contenido binario para verificación de integridad.</td></tr>
+              <tr><td class="col-name">EXTENSION</td><td class="col-type">VARCHAR2(10)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Extensión normalizada en minúsculas sin punto (ej: pdf, jpg, png).</td></tr>
+              <tr><td class="col-name">MIME_TYPE</td><td class="col-type">VARCHAR2(100)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Tipo MIME estándar IANA (ej: application/pdf, image/jpeg).</td></tr>
+              <tr><td class="col-name">TAMANO_BYTES</td><td class="col-type">NUMBER(12)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Tamaño exacto del archivo en bytes.</td></tr>
+              <tr><td class="col-name">RUTA_RELATIVA</td><td class="col-type">VARCHAR2(1000)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Ruta canónica institucional: <code>Samanya/{Nombre_Sede}/{Modulo}/{id_archivo}_{identificacion}/Documentos/{hash}.{ext}</code>.</td></tr>
+              <tr><td class="col-name">RUTA_DRIVE</td><td class="col-type">VARCHAR2(1000)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Ruta de carpetas navegable en Google Drive o enlace de visualización.</td></tr>
+              <tr><td class="col-name">ID_DRIVE</td><td class="col-type">VARCHAR2(255)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Identificador único del archivo retornado por la API v3 de Google Drive.</td></tr>
+              <tr><td class="col-name">DESCRIPCION</td><td class="col-type">VARCHAR2(500)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Descripción técnica o resumen clínico/laboral del documento.</td></tr>
+              <tr><td class="col-name">ESTADO</td><td class="col-type">VARCHAR2(1)</td><td><span class="badge badge-req">No</span></td><td>'A'</td><td>Estado del ciclo de vida: 'A' = Activo, 'I' = Inactivo / Papelera.</td></tr>
+              <tr><td class="col-name">FECHA_REGISTRO</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>f_fecha_actual</td><td>Fecha oficial de creación (Hora legal Bogotá UTC-5).</td></tr>
+              <tr><td class="col-name">ID_USUARIO_REGISTRO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID) del usuario que realizó la carga.</td></tr>
+              <tr><td class="col-name">FECHA_MODIFICA</td><td class="col-type">DATE</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fecha de última modificación en el archivo.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_MODIFICA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID) que modificó el registro.</td></tr>
             </tbody>
           </table>
         </div>
@@ -1950,19 +1958,20 @@ erDiagram
         </div>
 
         <p>
-          Arquitectura empresarial desacoplada para la carga, clasificación jerárquica y ciclo de vida de documentos en <strong>Google Drive (1 TB Personal)</strong> con persistencia en <strong>SMY_ARCHIVOS</strong>. Aplica rigurosamente el estándar arquitectónico corporativo: <strong>PKGLN_ARCHIVOS</strong> para la lógica de negocio, validaciones, construcción de rutas/hashes y orquestación transaccional (con <code>COMMIT</code> al éxito, <code>ROLLBACK</code> y logging en <code>SMY_ERRORES</code> mediante <code>uti_ge_excepciones_pkg</code>), y <strong>PKGCN_ARCHIVOS</strong> para sentencias DML atómicas que involucran más de una tabla (sin lógica de negocio ni commit).
+          Arquitectura empresarial desacoplada para la carga, clasificación jerárquica y ciclo de vida de documentos en <strong>Google Drive (1 TB Personal)</strong> con persistencia centralizada en <strong>SMY_ARCHIVOS</strong>. Aplica rigurosamente el estándar arquitectónico corporativo: <strong>PKGLN_ARCHIVOS</strong> para la lógica de negocio, validaciones, construcción de rutas/hashes y orquestación transaccional (con <code>COMMIT</code> al éxito, <code>ROLLBACK</code> y logging en <code>SMY_ERRORES</code> mediante <code>uti_ge_excepciones_pkg</code>), y <strong>PKGCN_ARCHIVOS</strong> para sentencias DML atómicas multi-tabla (sin lógica de negocio ni commit).
         </p>
 
         <!-- ESTRUCTURA JERARQUICA DE DIRECTORIOS -->
         <div style="background: var(--forest-deep); color: #e8f0ed; padding: 18px 20px; border-radius: 8px; margin: 18px 0; font-family: 'IBM Plex Mono', monospace; font-size: 0.86rem; line-height: 1.6;">
-          <div style="color: var(--ochre); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; font-size: 0.78rem; letter-spacing: 1px;">📁 Jerarquía de Directorios en Google Drive</div>
-          <div>Samanya/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9ea8a2;"># Carpeta Raíz de Almacenamiento</span></div>
-          <div>└── {id_sede}_{Nombre de Sede}/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9ea8a2;"># Nivel 1: Sede (ej: 1_SEDE-CENTRAL)</span></div>
-          <div>&nbsp;&nbsp;&nbsp;&nbsp;└── {id_residente}_{identificacion}/ &nbsp;&nbsp;&nbsp;<span style="color: #9ea8a2;"># Nivel 2: Residente (ej: 1_19234567)</span></div>
-          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Documentos/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9ea8a2;"># Nivel 3: Subdirectorio de Documentos</span></div>
-          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── {hash_id}{extension} &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #dcb87f;"># Archivo: Hash SHA-256 del ID + ext</span></div>
+          <div style="color: var(--ochre); font-weight: 600; margin-bottom: 8px; text-transform: uppercase; font-size: 0.78rem; letter-spacing: 1px;">📁 Jerarquía Estricta de 5 Niveles en Google Drive</div>
+          <div>Samanya/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9ea8a2;"># Nivel 1: Carpeta Raíz Principal</span></div>
+          <div>└── {Nombre_Sede}/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9ea8a2;"># Nivel 2: Nombre de la Sede (ej: Sede Central Bogotá)</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;└── {Residentes | Talento Humano}/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9ea8a2;"># Nivel 3: Módulo funcional según aplique</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── {id_archivo}_{identificacion}/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9ea8a2;"># Nivel 4: ID del archivo + Identificación sin puntos ni comas</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── Documentos/ &nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;<span style="color: #9ea8a2;"># Nivel 5: Carpeta fija de documentos</span></div>
+          <div>&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;&nbsp;└── {hash_sha256}.{extension} &nbsp;&nbsp;<span style="color: #dcb87f;"># Archivo: nombrado exactamente con su hash SHA-256 + extensión</span></div>
           <div style="margin-top: 10px; color: #a4c2b7; font-size: 0.8rem; border-top: 1px dashed rgba(255,255,255,0.15); padding-top: 6px;">
-            Ejemplo de nombre almacenado: <strong>c51ce410c124a10e0db5e4b97fc2af393a12...pdf</strong> = LOWER(STANDARD_HASH(TO_CHAR(ID), 'SHA256')) || '.pdf'
+            Ejemplo canónico: <strong>Samanya/Sede Central Bogotá/Residentes/101_19234567/Documentos/a1b2c3d4e5f6...jpg</strong>
           </div>
         </div>
 
@@ -2716,7 +2725,7 @@ sequenceDiagram
               <tr><td class="col-name">FECHA_EVENTO</td><td class="col-type">DATE</td><td>Fecha origen</td><td>Fecha del suceso para ordenamiento cronológico inverso.</td></tr>
               <tr><td class="col-name">HORA_EVENTO</td><td class="col-type">VARCHAR2(8)</td><td>Hora origen (HH24:MI)</td><td>Hora de la novedad asistencial.</td></tr>
               <tr><td class="col-name">REGISTRADO_POR</td><td class="col-type">VARCHAR2(150)</td><td>U.NOMBRE_COMPLETO</td><td>Nombre del cuidador, profesional o acudiente que reportó.</td></tr>
-              <tr><td class="col-name">FOTO_URL</td><td class="col-type">VARCHAR2(500)</td><td>URL adjunto</td><td>Fotografía o soporte del evento (si aplica).</td></tr>
+              <tr><td class="col-name">ID_ARCHIVO</td><td class="col-type">NUMBER(10)</td><td>FK SMY_ARCHIVOS</td><td>ID del soporte gráfico/documental del evento (si aplica).</td></tr>
               <tr><td class="col-name">VISIBLE_ACUDIENTE</td><td class="col-type">CHAR(1)</td><td>'S' / 'N'</td><td>Filtro de seguridad para el portal de familias.</td></tr>
             </tbody>
           </table>
@@ -2725,26 +2734,27 @@ sequenceDiagram
 
       <div class="card table-block" data-table="VW_SMY_ARCHIVOS_ACTIVOS">
         <h4>Vista: VW_SMY_ARCHIVOS_ACTIVOS</h4>
-        <p>Vista especializada que expone únicamente los archivos activos y disponibles (<span class="mono">ID_ESTADO_ARCHIVO = 1</span>) junto con la información resuelta del centro asistencial, residente y clase de archivo para consumo ágil del frontend.</p>
+        <p>Vista especializada que expone únicamente los archivos activos y disponibles (<span class="mono">ESTADO = 'A'</span>) junto con la información resuelta del centro asistencial, residente, empleado y clase de archivo para consumo ágil del frontend.</p>
         <div class="table-container">
           <table class="data-dict">
             <thead><tr><th>Columna de la Vista</th><th>Tipo / Formato</th><th>Origen SQL</th><th>Descripción de Negocio</th></tr></thead>
             <tbody>
               <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td>a.ID</td><td>Identificador único del archivo.</td></tr>
-              <tr><td class="col-name">NOMBRE_ARCHIVO</td><td class="col-type">VARCHAR2(255)</td><td>a.NOMBRE_ARCHIVO</td><td>Nombre original del documento/adjunto.</td></tr>
-              <tr><td class="col-name">NOMBRE_ARCHIVO_ALMACENADO</td><td class="col-type">VARCHAR2(255)</td><td>a.NOMBRE_ARCHIVO_ALMACENADO</td><td>Nombre físico con hash en el storage.</td></tr>
-              <tr><td class="col-name">HASH_ARCHIVO</td><td class="col-type">VARCHAR2(128)</td><td>a.HASH_ARCHIVO</td><td>Hash SHA-256 de verificación.</td></tr>
-              <tr><td class="col-name">NOMBRE_DIRECTORIO_BD</td><td class="col-type">VARCHAR2(128)</td><td>a.NOMBRE_DIRECTORIO_BD</td><td>Directorio de BD Oracle (si aplica).</td></tr>
-              <tr><td class="col-name">RUTA_RELATIVA</td><td class="col-type">VARCHAR2(1000)</td><td>a.RUTA_RELATIVA</td><td>Ruta dinámica de carpetas.</td></tr>
-              <tr><td class="col-name">RUTA_COMPLETA_ALMACENAMIENTO</td><td class="col-type">VARCHAR2(1500)</td><td>a.RUTA_COMPLETA_ALMACENAMIENTO</td><td>URI o path físico completo en storage.</td></tr>
-              <tr><td class="col-name">EXTENSION</td><td class="col-type">VARCHAR2(20)</td><td>a.EXTENSION</td><td>Extensión del archivo.</td></tr>
-              <tr><td class="col-name">TIPO_MIME</td><td class="col-type">VARCHAR2(100)</td><td>a.TIPO_MIME</td><td>Tipo de contenido MIME.</td></tr>
-              <tr><td class="col-name">TAMANO_BYTES</td><td class="col-type">NUMBER(14)</td><td>a.TAMANO_BYTES</td><td>Tamaño en bytes.</td></tr>
+              <tr><td class="col-name">NOMBRE_ORIGINAL</td><td class="col-type">VARCHAR2(255)</td><td>a.NOMBRE_ORIGINAL</td><td>Nombre original del documento/adjunto.</td></tr>
+              <tr><td class="col-name">NOMBRE_ALMACENADO</td><td class="col-type">VARCHAR2(255)</td><td>a.NOMBRE_ALMACENADO</td><td>Nombre físico con hash en el storage ({hash}.{ext}).</td></tr>
+              <tr><td class="col-name">HASH_SHA256</td><td class="col-type">VARCHAR2(64)</td><td>a.HASH_SHA256</td><td>Hash SHA-256 de verificación.</td></tr>
+              <tr><td class="col-name">EXTENSION</td><td class="col-type">VARCHAR2(10)</td><td>a.EXTENSION</td><td>Extensión normalizada del archivo.</td></tr>
+              <tr><td class="col-name">MIME_TYPE</td><td class="col-type">VARCHAR2(100)</td><td>a.MIME_TYPE</td><td>Tipo de contenido MIME.</td></tr>
+              <tr><td class="col-name">TAMANO_BYTES</td><td class="col-type">NUMBER(12)</td><td>a.TAMANO_BYTES</td><td>Tamaño en bytes.</td></tr>
               <tr><td class="col-name">TAMANO_MB</td><td class="col-type">NUMBER</td><td>ROUND(a.TAMANO_BYTES / 1048576, 2)</td><td>Tamaño amigable en Megabytes.</td></tr>
+              <tr><td class="col-name">RUTA_RELATIVA</td><td class="col-type">VARCHAR2(1000)</td><td>a.RUTA_RELATIVA</td><td>Ruta dinámica canónica de 5 niveles.</td></tr>
+              <tr><td class="col-name">RUTA_DRIVE</td><td class="col-type">VARCHAR2(1000)</td><td>a.RUTA_DRIVE</td><td>Ruta o enlace en Google Drive.</td></tr>
+              <tr><td class="col-name">ID_DRIVE</td><td class="col-type">VARCHAR2(255)</td><td>a.ID_DRIVE</td><td>ID del archivo en Google Drive API v3.</td></tr>
               <tr><td class="col-name">NOMBRE_CLASE</td><td class="col-type">VARCHAR2(100)</td><td>c.NOMBRE_CLASE</td><td>Clasificación del documento.</td></tr>
               <tr><td class="col-name">NOMBRE_CENTRO</td><td class="col-type">VARCHAR2(120)</td><td>ce.NOMBRE_CENTRO</td><td>Sede geriátrica donde se origina.</td></tr>
-              <tr><td class="col-name">NOMBRE_RESIDENTE</td><td class="col-type">VARCHAR2(160)</td><td>r.NOMBRES || ' ' || r.APELLIDOS</td><td>Nombre completo del residente vinculado.</td></tr>
-              <tr><td class="col-name">NOMBRE_ESTADO_ARCHIVO</td><td class="col-type">VARCHAR2(50)</td><td>ea.NOMBRE_ESTADO_ARCHIVO</td><td>Estado operativo ('Activo / Disponible').</td></tr>
+              <tr><td class="col-name">NOMBRE_RESIDENTE</td><td class="col-type">VARCHAR2(160)</td><td>r.NOMBRES || ' ' || r.APELLIDOS</td><td>Nombre completo del residente vinculado (si aplica).</td></tr>
+              <tr><td class="col-name">NOMBRE_EMPLEADO</td><td class="col-type">VARCHAR2(160)</td><td>emp.NOMBRES || ' ' || emp.APELLIDOS</td><td>Nombre completo del empleado vinculado (si aplica).</td></tr>
+              <tr><td class="col-name">ESTADO</td><td class="col-type">VARCHAR2(1)</td><td>a.ESTADO</td><td>Estado operativo ('A' = Activo).</td></tr>
             </tbody>
           </table>
         </div>

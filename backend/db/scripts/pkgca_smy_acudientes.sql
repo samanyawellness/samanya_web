@@ -61,7 +61,8 @@ AS
                 a.direccion,
                 a.ciudad,
                 NVL(cn.nombre_canal_notificacion, 'WhatsApp') AS canal_notificacion_pref,
-                u.avatar_url,
+                u.id_archivo_foto_perfil,
+                arc.ruta_completa_almacenamiento AS avatar_url,
                 (
                     SELECT JSON_ARRAYAGG(
                         JSON_OBJECT(
@@ -83,10 +84,12 @@ AS
             FROM smy_acudientes a,
                  smy_usuarios u,
                  smy_tipos_identificacion t,
-                 smy_canales_notificacion cn
+                 smy_canales_notificacion cn,
+                 smy_archivos arc
             WHERE a.id_usuario = u.id(+)
               AND a.id_tipo_identificacion = t.id(+)
               AND a.id_canal_notif_pref = cn.id(+)
+              AND u.id_archivo_foto_perfil = arc.id(+)
               AND (v_filtro_texto IS NULL OR (
                     UPPER(a.nombres) LIKE '%' || UPPER(v_filtro_texto) || '%' OR
                     UPPER(a.apellidos) LIKE '%' || UPPER(v_filtro_texto) || '%' OR

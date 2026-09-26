@@ -11,7 +11,8 @@ function samanyaApiPlugin(): Plugin {
         if (
           (req.url?.startsWith('/api/drive/subir-foto-talento') ||
            req.url?.startsWith('/api/drive/subir-soporte-talento') ||
-           req.url?.startsWith('/api/drive/subir-archivo-talento')) &&
+           req.url?.startsWith('/api/drive/subir-archivo-talento') ||
+           req.url?.startsWith('/api/drive/subir-archivo-residente')) &&
           req.method === 'POST'
         ) {
           let body = '';
@@ -92,7 +93,9 @@ function samanyaApiPlugin(): Plugin {
                 payload
               });
 
-              const py = spawn('python', ['backend/oracle_bridge.py']);
+              const py = spawn('python', ['backend/oracle_bridge.py'], {
+                env: { ...process.env, PYTHONIOENCODING: 'utf-8' }
+              });
               let stdout = '';
               let stderr = '';
 
@@ -181,7 +184,17 @@ export default defineConfig({
   ],
   server: {
     port: 3000,
-    host: true
+    host: true,
+    watch: {
+      ignored: [
+        '**/graphify-out/**',
+        '**/.agents/**',
+        '**/backend/**',
+        '**/public/uploads/**',
+        '**/*.log',
+        '**/.git/**'
+      ]
+    }
   },
   build: {
     outDir: 'dist',

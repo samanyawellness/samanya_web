@@ -121,17 +121,18 @@ export const DashboardView: React.FC = () => {
           {/* Tarjetas de resultados filtrados */}
           {(() => {
             const q = searchQuery.toLowerCase().trim();
+            const cleanQ = q.replace(/[.,]/g, '');
             const matchedRes = sedeResidentes.filter(
               (r) =>
                 r.nombreCompleto.toLowerCase().includes(q) ||
-                r.identificacion.toLowerCase().includes(q) ||
+                r.identificacion.toLowerCase().includes(cleanQ) ||
                 r.habitacion.toLowerCase().includes(q) ||
                 r.codigoExpediente.toLowerCase().includes(q)
             );
             const matchedWork = trabajadores.filter(
               (t) =>
                 t.nombreCompleto.toLowerCase().includes(q) ||
-                t.identificacion.toLowerCase().includes(q) ||
+                t.identificacion.toLowerCase().includes(cleanQ) ||
                 t.cargo.toLowerCase().includes(q) ||
                 t.area.toLowerCase().includes(q)
             );

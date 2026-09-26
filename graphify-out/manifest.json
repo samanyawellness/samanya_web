@@ -1182,15 +1182,15 @@
     "semantic_hash": "b03454a5e38fe63cb9689f922148ae21"
   },
   "backend/db/scripts/build_all.sql": {
-    "mtime": 1790132412.6145654,
-    "seen": 1790132716.510435,
-    "ast_hash": "d4a17b55485bcce3469f4add150f8433",
+    "mtime": 1790462985.1966326,
+    "seen": 1790463061.6236205,
+    "ast_hash": "e7ccd1459a5675af2eae0aa90a86767a",
     "semantic_hash": ""
   },
   "backend/db/scripts/datos_prueba_dummy.sql": {
-    "mtime": 1790126652.448653,
-    "seen": 1790127533.6956353,
-    "ast_hash": "8d768356b9277dafb19a300a973a3ff6",
+    "mtime": 1790462971.868967,
+    "seen": 1790463061.623624,
+    "ast_hash": "5f9b572ea78727302bb24aa95835dee1",
     "semantic_hash": ""
   },
   "backend/db/scripts/f_fecha_actual.sql": {
@@ -1212,9 +1212,9 @@
     "semantic_hash": "77095fd2cae8914d3c2cffca2ea84b33"
   },
   "backend/db/scripts/pkgca_residentes.sql": {
-    "mtime": 1789774156.822191,
-    "seen": 1789774535.5513701,
-    "ast_hash": "6d57ae56e5b77a5b78642d57c32acb4d",
+    "mtime": 1790460870.4576833,
+    "seen": 1790461370.881817,
+    "ast_hash": "9f4fbdc24f64be63a785c6019527bfbd",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgca_smy_archivos.sql": {
@@ -1236,9 +1236,9 @@
     "semantic_hash": "1013fe24e1f4ac21bf47aec486ea7c54"
   },
   "backend/db/scripts/pkgca_smy_usuarios.sql": {
-    "mtime": 1789772670.1191552,
-    "seen": 1789772728.6861458,
-    "ast_hash": "e976705be23e7194d67217647265fdb4",
+    "mtime": 1790460870.4602387,
+    "seen": 1790461370.8818388,
+    "ast_hash": "63ce1191a412e2dc4b63409322625a90",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgcn_archivos.sql": {
@@ -1260,15 +1260,15 @@
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgcn_superadmin.sql": {
-    "mtime": 1789743499.9052079,
-    "seen": 1789744324.0608504,
-    "ast_hash": "62658a145e09da5d32099ec3ddc44a3a",
-    "semantic_hash": "62658a145e09da5d32099ec3ddc44a3a"
+    "mtime": 1790460870.4678679,
+    "seen": 1790461370.881852,
+    "ast_hash": "2655d368ab13f07c7652d45a504a50ea",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_archivos.sql": {
-    "mtime": 1790306852.115177,
-    "seen": 1790306999.3882153,
-    "ast_hash": "4bc89dc5cec47bc0c096b5fb96206817",
+    "mtime": 1790460870.471392,
+    "seen": 1790461370.881856,
+    "ast_hash": "56959a10f95f4d190dcb7df8dc2d1153",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_auth.sql": {
@@ -1284,9 +1284,9 @@
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_superadmin.sql": {
-    "mtime": 1789774379.8863764,
-    "seen": 1789774535.5514095,
-    "ast_hash": "7a251848d85c0f6c1fab3385411819a6",
+    "mtime": 1790460870.476927,
+    "seen": 1790461370.8818722,
+    "ast_hash": "0a7c3867cb3df58e84b702c6ac8c1732",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_acudientes_dao.sql": {
@@ -1302,10 +1302,10 @@
     "semantic_hash": "619b6fff6f79d8f547b9b3f3cba01c77"
   },
   "backend/db/scripts/pkgsmy_archivos_dao.sql": {
-    "mtime": 1789598044.4050193,
-    "seen": 1789744324.060863,
-    "ast_hash": "4d33970b8e2e018958c4d4a80aff92e1",
-    "semantic_hash": "4d33970b8e2e018958c4d4a80aff92e1"
+    "mtime": 1790393978.8998942,
+    "seen": 1790394885.7210581,
+    "ast_hash": "d6b27a528c22632227e7cb988b31eedd",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_areas_empleados_dao.sql": {
     "mtime": 1789700094.4208086,
@@ -1320,10 +1320,10 @@
     "semantic_hash": "d1d78a522294d2c8f58e9638ab91b885"
   },
   "backend/db/scripts/pkgsmy_bitacora_residente_dao.sql": {
-    "mtime": 1789598044.4090126,
-    "seen": 1789744324.060868,
-    "ast_hash": "b047543a0e6b1966d211e7eda66e7543",
-    "semantic_hash": "b047543a0e6b1966d211e7eda66e7543"
+    "mtime": 1790393998.9819891,
+    "seen": 1790394885.7210777,
+    "ast_hash": "7ddc7a5be7dd6557c7cc8a81d4244ead",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_canales_notificacion_dao.sql": {
     "mtime": 1789700094.4188216,
@@ -1374,16 +1374,16 @@
     "semantic_hash": "97443bb3fe177335267c9047d77fad8c"
   },
   "backend/db/scripts/pkgsmy_consentimiento_destinatarios_dao.sql": {
-    "mtime": 1789598044.4240215,
-    "seen": 1789744324.0608885,
-    "ast_hash": "b222ebd868364613c5916d80c32ec89c",
-    "semantic_hash": "b222ebd868364613c5916d80c32ec89c"
+    "mtime": 1790460830.4142294,
+    "seen": 1790461370.8819067,
+    "ast_hash": "47d8be35754552f462df49fa9839e392",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_consentimientos_dao.sql": {
-    "mtime": 1789598044.4260206,
-    "seen": 1789744324.0608904,
-    "ast_hash": "c60f5a17f6b2a7c329c04f248ddcbd25",
-    "semantic_hash": "c60f5a17f6b2a7c329c04f248ddcbd25"
+    "mtime": 1790460830.4127145,
+    "seen": 1790461370.8819084,
+    "ast_hash": "d5bccbe23d1863ad246f46233ec5f616",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_consistencias_dieta_dao.sql": {
     "mtime": 1789700094.436385,
@@ -1404,22 +1404,22 @@
     "semantic_hash": "43367fb000813a9e5883586e01483e3d"
   },
   "backend/db/scripts/pkgsmy_documentos_clinicos_dao.sql": {
-    "mtime": 1789598044.4300234,
-    "seen": 1789744324.060897,
-    "ast_hash": "f3f0ba40d3ff55890a6cb9e4272f4d0c",
-    "semantic_hash": "f3f0ba40d3ff55890a6cb9e4272f4d0c"
+    "mtime": 1790460830.4077177,
+    "seen": 1790461370.8819168,
+    "ast_hash": "54f26202ac50372dc6051a0d71084d54",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_documentos_eliminados_log_dao.sql": {
-    "mtime": 1789598044.43302,
-    "seen": 1789744324.0608985,
-    "ast_hash": "70174efa48610cfbc2b40c3dae0a6781",
-    "semantic_hash": "70174efa48610cfbc2b40c3dae0a6781"
+    "mtime": 1790394063.6497872,
+    "seen": 1790394885.721201,
+    "ast_hash": "b73269997aafcd0b9db9cfc486fb4b30",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_documentos_empleado_dao.sql": {
-    "mtime": 1789598044.4360223,
-    "seen": 1789744324.0609002,
-    "ast_hash": "a116a5642febe132d3ff7cbf8a00bc2f",
-    "semantic_hash": "a116a5642febe132d3ff7cbf8a00bc2f"
+    "mtime": 1790460830.4087334,
+    "seen": 1790461370.8819206,
+    "ast_hash": "9c69ffda45e50910c46028a4d1a9ca50",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_empleados_dao.sql": {
     "mtime": 1789610906.6774008,
@@ -1572,10 +1572,10 @@
     "semantic_hash": "ed705f22aab2c2b666bff6418c09410e"
   },
   "backend/db/scripts/pkgsmy_incidentes_dao.sql": {
-    "mtime": 1789598044.482575,
-    "seen": 1789744324.0609426,
-    "ast_hash": "e9d09ce3c1ba7acd199b06ee64a56ab2",
-    "semantic_hash": "e9d09ce3c1ba7acd199b06ee64a56ab2"
+    "mtime": 1790460830.410716,
+    "seen": 1790461370.8819816,
+    "ast_hash": "5cb6a0474f2726768f0a03785fa079c8",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_medicamentos_prescritos_dao.sql": {
     "mtime": 1789598044.4850826,
@@ -1584,10 +1584,10 @@
     "semantic_hash": "a63eb8accffae853acfee09bd10b74f0"
   },
   "backend/db/scripts/pkgsmy_mensajes_chat_dao.sql": {
-    "mtime": 1789598044.4870954,
-    "seen": 1789744324.0609457,
-    "ast_hash": "1d2ad7dcb0b896a2ef728d77dd3d93cf",
-    "semantic_hash": "1d2ad7dcb0b896a2ef728d77dd3d93cf"
+    "mtime": 1790460830.4142294,
+    "seen": 1790461370.881986,
+    "ast_hash": "fc6753b001763c9d0dcb8fcbeac16bab",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_niveles_movilidad_dao.sql": {
     "mtime": 1789700094.4348698,
@@ -1608,10 +1608,10 @@
     "semantic_hash": "b18cde69463de83f2b7d6d9259cc5651"
   },
   "backend/db/scripts/pkgsmy_organizaciones_dao.sql": {
-    "mtime": 1789616277.0817528,
-    "seen": 1789744324.0609524,
-    "ast_hash": "bda28a00e522007126425e49ce6f5d2e",
-    "semantic_hash": "bda28a00e522007126425e49ce6f5d2e"
+    "mtime": 1790460830.415244,
+    "seen": 1790461370.8819935,
+    "ast_hash": "c3f496a26c1d66865e8040e6e9cf2518",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_parametros_dao.sql": {
     "mtime": 1789610968.1780748,
@@ -1638,10 +1638,10 @@
     "semantic_hash": "ad10a83c25659b0bc4de1a41610d87d0"
   },
   "backend/db/scripts/pkgsmy_registros_admin_med_dao.sql": {
-    "mtime": 1789598044.4980307,
-    "seen": 1789744324.0609605,
-    "ast_hash": "ba55fcb2f9f94c00ecd1a231d26e4201",
-    "semantic_hash": "ba55fcb2f9f94c00ecd1a231d26e4201"
+    "mtime": 1790460830.411712,
+    "seen": 1790461370.8820066,
+    "ast_hash": "811c55641cc40710d4622a2171c1a29a",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_registros_alim_detalle_dao.sql": {
     "mtime": 1789598044.4990265,
@@ -1662,10 +1662,10 @@
     "semantic_hash": "1e8e3ea46b3850be0fefeeea7126daf4"
   },
   "backend/db/scripts/pkgsmy_residentes_dao.sql": {
-    "mtime": 1789610878.0350275,
-    "seen": 1789744324.0609674,
-    "ast_hash": "2e9b162eaf1f06a1fd06d096d8fc38d7",
-    "semantic_hash": "2e9b162eaf1f06a1fd06d096d8fc38d7"
+    "mtime": 1790460830.4046998,
+    "seen": 1790461370.8820174,
+    "ast_hash": "891ab70c1140b031633d1cf11a609b93",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_roles_dao.sql": {
     "mtime": 1789700094.5021367,
@@ -1704,10 +1704,10 @@
     "semantic_hash": "223db2b9960fcba4b923ab855f8e72d0"
   },
   "backend/db/scripts/pkgsmy_solicitudes_permisos_dao.sql": {
-    "mtime": 1789598044.5130281,
-    "seen": 1789744324.0609784,
-    "ast_hash": "d88b3137fa6d5ee8f624988500296140",
-    "semantic_hash": "d88b3137fa6d5ee8f624988500296140"
+    "mtime": 1790460830.4097135,
+    "seen": 1790461370.8820312,
+    "ast_hash": "cf3f8bb64621c04735de1e015681e223",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_suministros_registro_dao.sql": {
     "mtime": 1789598044.515026,
@@ -1824,10 +1824,10 @@
     "semantic_hash": "a943bf22d9b2581eaf4f4b5e67835e2d"
   },
   "backend/db/scripts/pkgsmy_usuarios_dao.sql": {
-    "mtime": 1789598044.5425808,
-    "seen": 1789744324.0610116,
-    "ast_hash": "41a08e0bd6c9aba5183b3d7c8fb86515",
-    "semantic_hash": "41a08e0bd6c9aba5183b3d7c8fb86515"
+    "mtime": 1790460830.4067147,
+    "seen": 1790461370.8820717,
+    "ast_hash": "0aba366afb60021b0f1681b2f3aa558b",
+    "semantic_hash": ""
   },
   "backend/db/scripts/pkgsmy_vias_administracion_dao.sql": {
     "mtime": 1789700094.4568076,
@@ -1840,12 +1840,6 @@
     "seen": 1789744324.0610144,
     "ast_hash": "7b0f48c7c39b5f9bc55f51c412e94e2f",
     "semantic_hash": "7b0f48c7c39b5f9bc55f51c412e94e2f"
-  },
-  "build_all.sql": {
-    "mtime": 1789787384.9946587,
-    "seen": 1789787771.589257,
-    "ast_hash": "c3fcd2b1070c6400cebac9bee68dc395",
-    "semantic_hash": ""
   },
   "context_referencia/mockData.ts": {
     "mtime": 1789598045.0428593,
@@ -1860,9 +1854,9 @@
     "semantic_hash": "cbb25f9314d7994543575432aeb7511a"
   },
   "creacion_modelo_relacional.sql": {
-    "mtime": 1790126590.0538602,
-    "seen": 1790127533.6959426,
-    "ast_hash": "e5aebf3fb4a9b91a321adcbc2a854eca",
+    "mtime": 1790460704.6969316,
+    "seen": 1790461370.8820915,
+    "ast_hash": "a234e59f93f3da0fbc8dc8cf959bc8bc",
     "semantic_hash": ""
   },
   "docs/diagrams/samanya.architecture.json": {
@@ -2172,9 +2166,9 @@
     "semantic_hash": ""
   },
   "documentacion_esquema.html": {
-    "mtime": 1790129312.0858371,
-    "seen": 1790129713.0096762,
-    "ast_hash": "c92a5ea4324433b0f06b6cf8c14f8c54",
+    "mtime": 1790460781.9629533,
+    "seen": 1790461370.8822854,
+    "ast_hash": "3ab8088002d50c34837cbff0269f3ad5",
     "semantic_hash": ""
   },
   "estilos.txt": {
@@ -2232,9 +2226,9 @@
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_permisos_ausencias.sql": {
-    "mtime": 1790306777.9614093,
-    "seen": 1790306999.3882303,
-    "ast_hash": "da8f92ae68bab3233e4a180e6fd3860a",
+    "mtime": 1790460870.4733891,
+    "seen": 1790461370.8818703,
+    "ast_hash": "630e24cbf82b9a252b3f8b10688b9348",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_talento_humano.sql": {
@@ -2268,27 +2262,27 @@
     "semantic_hash": ""
   },
   "src/components/modals/RegisterFamilyModal.tsx": {
-    "mtime": 1790218468.3624315,
-    "seen": 1790218564.1203508,
-    "ast_hash": "6e996e3085e075490178f9bf7ecf7928",
+    "mtime": 1790385270.3741424,
+    "seen": 1790385614.5080209,
+    "ast_hash": "004fc281e3835af14cb7df5701bfa011",
     "semantic_hash": ""
   },
   "src/components/modals/RegisterResidentModal.tsx": {
-    "mtime": 1790305309.4583206,
-    "seen": 1790305502.4649522,
-    "ast_hash": "0a611ea3a25a859aa1c24311a54b7c07",
+    "mtime": 1790461116.7968812,
+    "seen": 1790461370.8821485,
+    "ast_hash": "5558c106a58505e8594aa465b4999391",
     "semantic_hash": ""
   },
   "src/components/modals/RegisterWorkerModal.tsx": {
-    "mtime": 1789787460.3544083,
-    "seen": 1789787771.5893085,
-    "ast_hash": "4bf1d16436d252b8da1311b5bddb6e2d",
+    "mtime": 1790461134.1240168,
+    "seen": 1790461370.8821504,
+    "ast_hash": "863308ba0c75382e620857e6f6cb79d7",
     "semantic_hash": ""
   },
   "src/components/modals/ResidentDetailModal.tsx": {
-    "mtime": 1790308992.8923302,
-    "seen": 1790309086.7044477,
-    "ast_hash": "1dd0381d1c482e47473e5707a7f91a11",
+    "mtime": 1790463651.509596,
+    "seen": 1790463724.5199678,
+    "ast_hash": "17212a89dfbb1fd9e1e9984990b9b36e",
     "semantic_hash": ""
   },
   "src/components/views/ClinicalSupervisionView.tsx": {
@@ -2298,15 +2292,15 @@
     "semantic_hash": ""
   },
   "src/components/views/DashboardView.tsx": {
-    "mtime": 1790131114.0065885,
-    "seen": 1790131260.8323786,
-    "ast_hash": "08f121fd32f56f73a2a30a178a828587",
+    "mtime": 1790385415.0397904,
+    "seen": 1790385614.508069,
+    "ast_hash": "667352430927fb3f39e984f77a659ee8",
     "semantic_hash": ""
   },
   "src/components/views/FamilyMembersView.tsx": {
-    "mtime": 1790131155.5709994,
-    "seen": 1790131260.83238,
-    "ast_hash": "e40cb8303ea3fafd182491041186aeb8",
+    "mtime": 1790385407.4009423,
+    "seen": 1790385614.5080733,
+    "ast_hash": "a78a3a3ece258276921462ccbabdebeb",
     "semantic_hash": ""
   },
   "src/components/views/LeavesView.tsx": {
@@ -2316,9 +2310,9 @@
     "semantic_hash": ""
   },
   "src/components/views/ResidentsView.tsx": {
-    "mtime": 1790307829.1812747,
-    "seen": 1790308013.4366305,
-    "ast_hash": "678a7b1cc13500b56a657617d945edee",
+    "mtime": 1790385400.4196181,
+    "seen": 1790385614.5080817,
+    "ast_hash": "fba6a355894ea3c3377e94438ec0991e",
     "semantic_hash": ""
   },
   "src/components/views/ShiftsView.tsx": {
@@ -2328,21 +2322,21 @@
     "semantic_hash": ""
   },
   "src/components/views/WorkersView.tsx": {
-    "mtime": 1790131130.6643186,
-    "seen": 1790131260.832387,
-    "ast_hash": "55d9a78482065938b2f573203cc1a10e",
+    "mtime": 1790385392.32614,
+    "seen": 1790385614.508092,
+    "ast_hash": "afad63bd0091f0dfb9375e4ba6ff1760",
     "semantic_hash": ""
   },
   "src/context/AdminContext.tsx": {
-    "mtime": 1790308292.1612144,
-    "seen": 1790308407.9684882,
-    "ast_hash": "a63e67a2673dcd35582e715d3842e3b6",
+    "mtime": 1790461098.990682,
+    "seen": 1790461370.8821719,
+    "ast_hash": "4067e47678343e75f1f2c6bd85b9743a",
     "semantic_hash": ""
   },
   "src/data/seedData.ts": {
-    "mtime": 1790127079.932655,
-    "seen": 1790127533.6960166,
-    "ast_hash": "7d47f3e0bae2e3ce13c727d977901ef4",
+    "mtime": 1790399911.7067218,
+    "seen": 1790400450.7946591,
+    "ast_hash": "3f81de06add870cc903a40d47270f689",
     "semantic_hash": ""
   },
   "src/main.tsx": {
@@ -2352,15 +2346,15 @@
     "semantic_hash": ""
   },
   "src/services/api.ts": {
-    "mtime": 1790308275.4484549,
-    "seen": 1790308407.9685323,
-    "ast_hash": "a2b12b9ae00e295b77b986a8c8242640",
+    "mtime": 1790461090.1836307,
+    "seen": 1790461370.8821805,
+    "ast_hash": "1f50c3c1bcd12d07b38aaad07d67b5e3",
     "semantic_hash": ""
   },
   "src/types/index.ts": {
-    "mtime": 1790308237.1562185,
-    "seen": 1790308407.9685764,
-    "ast_hash": "a38c950d8ed9363c19b4d67038c9e86c",
+    "mtime": 1790461084.6002479,
+    "seen": 1790461370.8821845,
+    "ast_hash": "4bf6ef033f903f0c0f475252813d5bc4",
     "semantic_hash": ""
   },
   "src/vite-env.d.ts": {
@@ -2376,9 +2370,9 @@
     "semantic_hash": ""
   },
   "vite.config.ts": {
-    "mtime": 1790277679.5311737,
-    "seen": 1790305502.4650884,
-    "ast_hash": "91e2e51df0e40face0ba12cf72334406",
+    "mtime": 1790462563.5721228,
+    "seen": 1790463061.6240664,
+    "ast_hash": "25c4e5399e4d6294ba13250adcbcef6c",
     "semantic_hash": ""
   },
   "index.html": {
@@ -2400,21 +2394,21 @@
     "semantic_hash": ""
   },
   "src/components/modals/EditFamilyModal.tsx": {
-    "mtime": 1790218502.5633137,
-    "seen": 1790218564.1203375,
-    "ast_hash": "0a25a52a6f8c15e1df133ac8c389dbf7",
+    "mtime": 1790385287.2818234,
+    "seen": 1790385614.5079699,
+    "ast_hash": "7b4303bd45ba1f0da1e3c7eb16bb4cb1",
     "semantic_hash": ""
   },
   "src/components/modals/EditResidentModal.tsx": {
-    "mtime": 1790042440.3249176,
-    "seen": 1790042530.361672,
-    "ast_hash": "72852802d38e34cfb2f01ee0d5957c34",
+    "mtime": 1790461122.6350334,
+    "seen": 1790461370.8821301,
+    "ast_hash": "70fbb26c4cf44fb5dfd3702fb3df94f1",
     "semantic_hash": ""
   },
   "src/components/modals/EditWorkerModal.tsx": {
-    "mtime": 1789790799.376165,
-    "seen": 1789791050.0877366,
-    "ast_hash": "a145d969001e00c5006e1cb4031aff6d",
+    "mtime": 1790461144.5048997,
+    "seen": 1790461370.8821342,
+    "ast_hash": "3f5e6da57c128a2e285abf4876b837ba",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgca_smy_residente_acudiente.sql": {
@@ -2430,15 +2424,15 @@
     "semantic_hash": ""
   },
   "src/services/driveService.ts": {
-    "mtime": 1790110265.9093916,
-    "seen": 1790113220.8795812,
-    "ast_hash": "85b50e0dbab102132ac075952424c3bb",
+    "mtime": 1790399975.1304524,
+    "seen": 1790400450.7946775,
+    "ast_hash": "43328d33ae3151aac1d04ed9b99e3fe6",
     "semantic_hash": ""
   },
   "backend/drive_upload.py": {
-    "mtime": 1790115025.0342314,
-    "seen": 1790115171.2831655,
-    "ast_hash": "2f318e3e9e2f419f44b81b134f370e5b",
+    "mtime": 1790398620.7945838,
+    "seen": 1790400450.794443,
+    "ast_hash": "9c54327f7c2a83ef11c8e4f8b37b65ad",
     "semantic_hash": ""
   },
   "src/utils/avatarUtils.ts": {
@@ -2472,15 +2466,15 @@
     "semantic_hash": ""
   },
   "backend/oracle_bridge.py": {
-    "mtime": 1790132444.343102,
-    "seen": 1790132716.5107243,
-    "ast_hash": "1180d1387c9a7e966a0e8d3c6e3ce33a",
+    "mtime": 1790462557.9745479,
+    "seen": 1790463061.6239367,
+    "ast_hash": "999df8ffd362b62b1a37ce0f43efb019",
     "semantic_hash": ""
   },
   "src/components/modals/RegisterLeaveModal.tsx": {
-    "mtime": 1790115037.4053526,
-    "seen": 1790115171.2848926,
-    "ast_hash": "76bf87ca14265b919d30d091ba483910",
+    "mtime": 1790461111.1569035,
+    "seen": 1790461370.8821468,
+    "ast_hash": "cd0e1883966904621993db1c4ff202f4",
     "semantic_hash": ""
   },
   "src/components/modals/LeaveAttachmentModal.tsx": {
@@ -2544,15 +2538,15 @@
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgca_smy_acudientes.sql": {
-    "mtime": 1790132370.436056,
-    "seen": 1790132716.5104535,
-    "ast_hash": "3a2be7b4d16ab89a6a83de1d12a249c6",
+    "mtime": 1790460870.46686,
+    "seen": 1790461370.88182,
+    "ast_hash": "f11ced15739a7854a9c93571ccbf4fd3",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgca_smy_empleados.sql": {
-    "mtime": 1790132361.7687066,
-    "seen": 1790132716.510468,
-    "ast_hash": "f43a39dc45485b4a77bbb17f1193a469",
+    "mtime": 1790460870.46327,
+    "seen": 1790461370.8818336,
+    "ast_hash": "ae65593a7afffbd2df92a8d89523cfa6",
     "semantic_hash": ""
   },
   "src/components/modals/ProgramarTurnosModal.tsx": {
@@ -2589,6 +2583,90 @@
     "mtime": 1790310670.8595297,
     "seen": 1790310721.3269067,
     "ast_hash": "461f95e93b613e473f5cf323b670ae86",
+    "semantic_hash": ""
+  },
+  "src/utils/formatters.ts": {
+    "mtime": 1790385189.9023237,
+    "seen": 1790385614.5081973,
+    "ast_hash": "9622e392dddfac051714d2fe2053920c",
+    "semantic_hash": ""
+  },
+  "public/uploads/residentes/Scarborough_Fair.jpg": {
+    "mtime": 1790388813.9554894,
+    "seen": 1790392080.395314,
+    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
+    "semantic_hash": ""
+  },
+  "public/uploads/residentes/2_19234567/Documentos/f52ee9a2b44978ac5f3e244e2a4ccbb46e6d506f8427745c9093213a1f55003e.txt": {
+    "mtime": 1790397359.5965893,
+    "seen": 1790397572.943906,
+    "ast_hash": "17603a7adfa88737d21c1aded1753fd3",
+    "semantic_hash": ""
+  },
+  "public/uploads/residentes/3_19234567/Documentos/0d5186171dcf475a0371d3283a311a35a9f399e47a0d1366de103a85c69a648d.txt": {
+    "mtime": 1790397382.5378792,
+    "seen": 1790397572.943913,
+    "ast_hash": "09d92c3c53d8e30e4f0751f93728bacf",
+    "semantic_hash": ""
+  },
+  "public/Samanya/Sede Campestre El Nogal/Residentes/4_19876543/Documentos/1dc22a27e15ef76ba6f616f1542ed250c84b430f81c088f1905f320d5c772350.jpg": {
+    "mtime": 1790397738.4419293,
+    "seen": 1790400450.794987,
+    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
+    "semantic_hash": ""
+  },
+  "public/Samanya/Sede Campestre El Nogal/Residentes/4_19876543/Documentos/Scarborough_Fair.jpg": {
+    "mtime": 1790397738.4419293,
+    "seen": 1790400450.7949917,
+    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
+    "semantic_hash": ""
+  },
+  "public/Samanya/Sede Campestre La Calera/Residentes/4_19876543/Documentos/1dc22a27e15ef76ba6f616f1542ed250c84b430f81c088f1905f320d5c772350.jpg": {
+    "mtime": 1790397738.4419293,
+    "seen": 1790400450.7949955,
+    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
+    "semantic_hash": ""
+  },
+  "public/Samanya/Sede Campestre La Calera/Residentes/4_19876543/Documentos/Scarborough_Fair.jpg": {
+    "mtime": 1790397738.4419293,
+    "seen": 1790400450.7949991,
+    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
+    "semantic_hash": ""
+  },
+  "public/Samanya/Sede Central Bogot\u00e1/Residentes/4_19876543/Documentos/1dc22a27e15ef76ba6f616f1542ed250c84b430f81c088f1905f320d5c772350.jpg": {
+    "mtime": 1790397738.4419293,
+    "seen": 1790400450.7950058,
+    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
+    "semantic_hash": ""
+  },
+  "public/Samanya/Sede Central Bogot\u00e1/Residentes/4_19876543/Documentos/Scarborough_Fair.jpg": {
+    "mtime": 1790397738.4419293,
+    "seen": 1790400450.795011,
+    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
+    "semantic_hash": ""
+  },
+  "public/uploads/residentes/4_19876543/Documentos/1dc22a27e15ef76ba6f616f1542ed250c84b430f81c088f1905f320d5c772350.jpg": {
+    "mtime": 1790397738.4419293,
+    "seen": 1790400450.795015,
+    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
+    "semantic_hash": ""
+  },
+  "build_all.sql": {
+    "mtime": 1790462985.1966326,
+    "seen": 1790463061.6239395,
+    "ast_hash": "e7ccd1459a5675af2eae0aa90a86767a",
+    "semantic_hash": ""
+  },
+  "public/Samanya/Sede Campestre La Calera/Residentes/6_19876543/Documentos/1dc22a27e15ef76ba6f616f1542ed250c84b430f81c088f1905f320d5c772350.jpg": {
+    "mtime": 1790463260.5960858,
+    "seen": 1790463724.520133,
+    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
+    "semantic_hash": ""
+  },
+  "public/uploads/residentes/6_19876543/Documentos/1dc22a27e15ef76ba6f616f1542ed250c84b430f81c088f1905f320d5c772350.jpg": {
+    "mtime": 1790463260.5986042,
+    "seen": 1790463724.5201445,
+    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
     "semantic_hash": ""
   }
 }

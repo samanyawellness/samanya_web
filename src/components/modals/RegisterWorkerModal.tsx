@@ -2,6 +2,7 @@ import React, { useState } from 'react';
 import { useAdmin } from '../../context/AdminContext';
 import { X, UserCheck, Briefcase, Camera } from 'lucide-react';
 import { subirFotoTalentoHumano } from '../../services/driveService';
+import { limpiarIdentificacion } from '../../utils/formatters';
 
 export const RegisterWorkerModal: React.FC = () => {
   const { isRegisterWorkerOpen, setIsRegisterWorkerOpen, registrarTrabajador, activeSede } = useAdmin();
@@ -52,6 +53,7 @@ export const RegisterWorkerModal: React.FC = () => {
     setIsSubmitting(true);
     try {
       let avatarFinalUrl = fotoPreview || `https://images.unsplash.com/photo-1594824813590-7815d9b68c2d?w=150&auto=format&fit=crop&q=80`;
+      let idArchivoFotoPerfilFinal: number | undefined = undefined;
 
       // Si se seleccionó archivo físico, ejecutar flujo Google Drive y PKGLN_ARCHIVOS
       if (selectedFile) {
@@ -59,12 +61,14 @@ export const RegisterWorkerModal: React.FC = () => {
           const uploadRes = await subirFotoTalentoHumano({
             file: selectedFile,
             idUsuario: Math.floor(Math.random() * 9000) + 1000,
-            identificacion: formData.identificacion,
+            identificacion: limpiarIdentificacion(formData.identificacion),
             idCentro: activeSede.id,
+            nombreSede: activeSede?.nombre || 'Sede Central Bogotá',
             nombreCompleto: `${formData.nombres} ${formData.apellidos}`.trim()
           });
           if (uploadRes.avatarUrl) {
             avatarFinalUrl = uploadRes.avatarUrl;
+            idArchivoFotoPerfilFinal = uploadRes.idArchivo;
           }
         } catch (uploadErr) {
           console.warn('Carga a Google Drive / PKGLN_ARCHIVOS en modo local:', uploadErr);
@@ -74,7 +78,7 @@ export const RegisterWorkerModal: React.FC = () => {
       await registrarTrabajador({
         idCentro: activeSede.id,
         tipoIdentificacion: formData.tipoIdentificacion,
-        identificacion: formData.identificacion,
+        identificacion: limpiarIdentificacion(formData.identificacion),
         nombres: formData.nombres,
         apellidos: formData.apellidos,
         cargo: formData.cargo,
@@ -87,7 +91,8 @@ export const RegisterWorkerModal: React.FC = () => {
         arl: formData.arl,
         estado: formData.estado,
         turnoHabitual: formData.turnoHabitual,
-        avatarUrl: avatarFinalUrl
+        avatarUrl: avatarFinalUrl,
+        idArchivoFotoPerfil: idArchivoFotoPerfilFinal
       });
 
       setIsRegisterWorkerOpen(false);
@@ -241,9 +246,9 @@ export const RegisterWorkerModal: React.FC = () => {
               <input
                 type="text"
                 required
-                placeholder="Ej. 1.020.789.456"
+                placeholder="Ej. 1020789456"
                 value={formData.identificacion}
-                onChange={(e) => setFormData({ ...formData, identificacion: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, identificacion: limpiarIdentificacion(e.target.value) })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#DEDBD1] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#B3803F] focus:bg-white"
               />
             </div>

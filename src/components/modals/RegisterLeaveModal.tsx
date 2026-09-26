@@ -123,6 +123,7 @@ export const RegisterLeaveModal: React.FC = () => {
     let finalSoporteUrl = soporteManualUrl.trim() || undefined;
     let finalDriveUrl: string | undefined = undefined;
     let finalRutaDrive: string | undefined = undefined;
+    let finalIdArchivoSoporte: number | undefined = undefined;
 
     try {
       // 1. Si seleccionó un archivo físico, subirlo a Google Drive y registrar en SMY_ARCHIVOS
@@ -134,6 +135,7 @@ export const RegisterLeaveModal: React.FC = () => {
             idEmpleado: trabajador.id,
             identificacion: trabajador.identificacion,
             idCentro: activeSede.id,
+            nombreSede: activeSede?.nombre || 'Sede Central Bogotá',
             nombreCompleto: trabajador.nombreCompleto
           });
 
@@ -141,6 +143,7 @@ export const RegisterLeaveModal: React.FC = () => {
             finalSoporteUrl = uploadRes.nombreArchivo;
             finalDriveUrl = uploadRes.driveUrl;
             finalRutaDrive = `${uploadRes.rutaRelativa}/${uploadRes.nombreAlmacenado}`;
+            finalIdArchivoSoporte = uploadRes.idArchivo;
           }
         } catch (uploadError: any) {
           console.error('Error durante la subida a Drive / SMY_ARCHIVOS:', uploadError);
@@ -172,6 +175,8 @@ export const RegisterLeaveModal: React.FC = () => {
         soporteUrl: finalSoporteUrl,
         driveUrl: finalDriveUrl,
         rutaDrive: finalRutaDrive,
+        idArchivoSoporte: finalIdArchivoSoporte,
+        idArchivo: finalIdArchivoSoporte,
         estado: estadoInicial,
         comentariosAdmin:
           estadoInicial === 'Aprobado'

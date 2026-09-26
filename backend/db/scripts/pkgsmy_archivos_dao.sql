@@ -338,7 +338,7 @@ AS
     IS
     BEGIN
         pro_smy_archivos.id_estado_archivo := NVL(pro_smy_archivos.id_estado_archivo, 1);
-        pro_smy_archivos.fecha_creacion := NVL(pro_smy_archivos.fecha_creacion, CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE));
+        pro_smy_archivos.fecha_creacion := NVL(pro_smy_archivos.fecha_creacion, f_fecha_actual);
     END p_valores_defecto;
 
     -- 17. Verificar existencia y retornar JSON
@@ -362,6 +362,7 @@ AS
                    'id_clase_archivo' VALUE t.id_clase_archivo,
                    'id_centro' VALUE t.id_centro,
                    'id_residente' VALUE t.id_residente,
+                   'id_empleado' VALUE t.id_empleado,
                    'id_estado_archivo' VALUE t.id_estado_archivo,
                    'tabla_origen' VALUE t.tabla_origen,
                    'id_registro_origen' VALUE t.id_registro_origen,
@@ -405,6 +406,7 @@ AS
                    'id_clase_archivo' VALUE t.id_clase_archivo,
                    'id_centro' VALUE t.id_centro,
                    'id_residente' VALUE t.id_residente,
+                   'id_empleado' VALUE t.id_empleado,
                    'id_estado_archivo' VALUE t.id_estado_archivo,
                    'tabla_origen' VALUE t.tabla_origen,
                    'id_registro_origen' VALUE t.id_registro_origen,

@@ -12,10 +12,16 @@ import {
   Plus,
   Trash2,
   Clock,
-  Calendar
+  Calendar,
+  Paperclip,
+  FileText,
+  FilePlus,
+  Upload
 } from 'lucide-react';
-import { MedicamentoPrescrito } from '../../types';
+import { MedicamentoPrescrito, ClaseArchivoResidente, ArchivoAdjuntoResidente } from '../../types';
 import { obtenerIniciales } from '../../utils/avatarUtils';
+import { limpiarIdentificacion } from '../../utils/formatters';
+import { subirArchivoResidente } from '../../services/driveService';
 
 export const RegisterResidentModal: React.FC = () => {
   const {
@@ -28,10 +34,73 @@ export const RegisterResidentModal: React.FC = () => {
     showToast
   } = useAdmin();
 
-  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5>(1);
+  const [step, setStep] = useState<1 | 2 | 3 | 4 | 5 | 6>(1);
   const [isSubmitting, setIsSubmitting] = useState(false);
   const [fotoPreview, setFotoPreview] = useState<string | undefined>(undefined);
   const [errorMensaje, setErrorMensaje] = useState<string | null>(null);
+
+  // Archivos y Documentos del Residente (Opcionales)
+  const CLASES_ARCHIVOS: ClaseArchivoResidente[] = [
+    'Historia Clínica / Epicrisis',
+    'Exámenes / Laboratorios',
+    'Fórmulas y Órdenes Médicas',
+    'Documento de Identidad',
+    'Consentimiento Informado',
+    'Afiliación EPS / Seguro',
+    'Otro / Soporte General'
+  ];
+
+  const [archivos, setArchivos] = useState<
+    Array<{
+      id: string;
+      file: File;
+      nombreArchivo: string;
+      claseArchivo: ClaseArchivoResidente;
+      descripcion?: string;
+      tamanoBytes: number;
+      tipoMime: string;
+    }>
+  >([]);
+  const [nuevoArchivoClase, setNuevoArchivoClase] = useState<ClaseArchivoResidente>('Historia Clínica / Epicrisis');
+  const [nuevoArchivoDescripcion, setNuevoArchivoDescripcion] = useState<string>('');
+  const [archivoSeleccionado, setArchivoSeleccionado] = useState<File | null>(null);
+
+  const handleFileSelected = (e: React.ChangeEvent<HTMLInputElement>) => {
+    const f = e.target.files?.[0];
+    if (f) {
+      setArchivoSeleccionado(f);
+    }
+  };
+
+  const handleAgregarArchivo = () => {
+    if (!archivoSeleccionado) {
+      showAlert('Por favor seleccione un archivo desde su equipo.', 'Archivo no seleccionado', 'warning');
+      return;
+    }
+
+    const idUnico = `doc-${Date.now()}-${Math.floor(Math.random() * 1000)}`;
+    setArchivos((prev) => [
+      ...prev,
+      {
+        id: idUnico,
+        file: archivoSeleccionado,
+        nombreArchivo: archivoSeleccionado.name,
+        claseArchivo: nuevoArchivoClase,
+        descripcion: nuevoArchivoDescripcion.trim(),
+        tamanoBytes: archivoSeleccionado.size,
+        tipoMime: archivoSeleccionado.type
+      }
+    ]);
+
+    setArchivoSeleccionado(null);
+    setNuevoArchivoDescripcion('');
+    const inputElem = document.getElementById('input-archivo-residente') as HTMLInputElement;
+    if (inputElem) inputElem.value = '';
+  };
+
+  const handleEliminarArchivo = (id: string) => {
+    setArchivos((prev) => prev.filter((a) => a.id !== id));
+  };
 
   // Lista de Dotación de Ingreso (Catálogo Sugerido + Personalización)
   const [itemsDotacion, setItemsDotacion] = useState<
@@ -192,7 +261,7 @@ export const RegisterResidentModal: React.FC = () => {
   const handleNextStep = () => {
     if (!validarPaso(step)) return;
     setErrorMensaje(null);
-    setStep((prev) => ((prev < 5 ? prev + 1 : prev) as any));
+    setStep((prev) => ((prev < 6 ? prev + 1 : prev) as any));
   };
 
   const handleGoToStep = (targetStep: number) => {
@@ -205,6 +274,10 @@ export const RegisterResidentModal: React.FC = () => {
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
+    if (step < 6) {
+      handleNextStep();
+      return;
+    }
     if (!formData.nombres?.trim() || !formData.apellidos?.trim() || !formData.identificacion?.trim()) {
       showAlert(
         'Por favor complete los datos obligatorios del residente en el Paso 1 (Nombres, Apellidos y Documento).',
@@ -266,10 +339,74 @@ export const RegisterResidentModal: React.FC = () => {
 
     setIsSubmitting(true);
     try {
+      // Procesar y subir archivos adjuntos (opcionales)
+      const todosLosArchivos = [...archivos];
+      if (archivoSeleccionado) {
+        todosLosArchivos.push({
+          id: `doc-${Date.now()}`,
+          file: archivoSeleccionado,
+          nombreArchivo: archivoSeleccionado.name,
+          claseArchivo: nuevoArchivoClase,
+          descripcion: nuevoArchivoDescripcion.trim(),
+          tamanoBytes: archivoSeleccionado.size,
+          tipoMime: archivoSeleccionado.type
+        });
+      }
+
+      const archivosProcesados: ArchivoAdjuntoResidente[] = [];
+      for (const arch of todosLosArchivos) {
+        try {
+          const resSubida = await subirArchivoResidente({
+            file: arch.file,
+            identificacion: formData.identificacion,
+            claseArchivo: arch.claseArchivo,
+            descripcion: arch.descripcion,
+            nombreCompleto: `${formData.nombres.trim()} ${formData.apellidos.trim()}`.trim(),
+            idCentro: activeSede.id,
+            nombreSede: activeSede?.nombre || 'Sede Central Bogotá'
+          });
+
+          archivosProcesados.push({
+            id: arch.id,
+            idArchivo: resSubida.idArchivo,
+            idArchivoClinico: resSubida.idArchivo,
+            nombreArchivo: arch.nombreArchivo,
+            nombreAlmacenado: resSubida.nombreAlmacenado,
+            claseArchivo: arch.claseArchivo,
+            descripcion: arch.descripcion,
+            tamanoBytes: arch.tamanoBytes,
+            tipoMime: arch.tipoMime,
+            hash: resSubida.hash,
+            rutaRelativa: resSubida.rutaRelativa,
+            rutaDrive: resSubida.rutaRelativa,
+            driveUrl: resSubida.driveUrl,
+            localUrl: resSubida.localUrl,
+            url: resSubida.url || (resSubida.rutaRelativa ? `/${resSubida.rutaRelativa}` : resSubida.localUrl),
+            fechaSubida: new Date().toISOString()
+          });
+        } catch (errSub) {
+          console.warn('Carga de archivo residente en modo local:', errSub);
+          const docIdLimpio = formData.identificacion.trim().replace(/[^a-zA-Z0-9]/g, '') || 'SIN_DOC';
+          const sedeNombre = activeSede?.nombre || 'Sede Central Bogotá';
+          const fallbackRuta = `Samanya/${sedeNombre}/Residentes/${docIdLimpio}/Documentos/${arch.nombreArchivo}`;
+          archivosProcesados.push({
+            id: arch.id,
+            nombreArchivo: arch.nombreArchivo,
+            claseArchivo: arch.claseArchivo,
+            descripcion: arch.descripcion,
+            tamanoBytes: arch.tamanoBytes,
+            tipoMime: arch.tipoMime,
+            rutaRelativa: fallbackRuta,
+            url: URL.createObjectURL(arch.file),
+            fechaSubida: new Date().toISOString()
+          });
+        }
+      }
+
       await registrarResidente({
         idCentro: activeSede.id,
         tipoIdentificacion: formData.tipoIdentificacion,
-        identificacion: formData.identificacion.trim(),
+        identificacion: limpiarIdentificacion(formData.identificacion).trim(),
         nombres: formData.nombres.trim(),
         apellidos: formData.apellidos.trim(),
         nombreCompleto: `${formData.nombres.trim()} ${formData.apellidos.trim()}`.trim(),
@@ -288,6 +425,7 @@ export const RegisterResidentModal: React.FC = () => {
         fotoUrl: fotoPreview,
         medicamentos: medicamentos.length > 0 ? medicamentos : undefined,
         acudientes: [],
+        archivosAdjuntos: archivosProcesados.length > 0 ? archivosProcesados : undefined,
         dotacionInicial: itemsDotacion
           .filter((it) => it.incluido && it.nombreElemento.trim())
           .map((it) => ({
@@ -302,7 +440,7 @@ export const RegisterResidentModal: React.FC = () => {
         familiarContacto: (formData.incluirAcudiente && formData.acudienteNombres.trim() && formData.acudienteEmail.trim()) ? {
           nombres: formData.acudienteNombres.trim(),
           apellidos: formData.acudienteApellidos.trim(),
-          identificacion: formData.acudienteIdentificacion.trim(),
+          identificacion: limpiarIdentificacion(formData.acudienteIdentificacion).trim(),
           parentesco: formData.acudienteParentesco,
           telefono: formData.acudienteTelefono.trim(),
           email: formData.acudienteEmail.trim()
@@ -312,6 +450,10 @@ export const RegisterResidentModal: React.FC = () => {
       setIsRegisterResidentOpen(false);
       setFotoPreview(undefined);
       setMedicamentos([]);
+      setArchivos([]);
+      setArchivoSeleccionado(null);
+      setNuevoArchivoDescripcion('');
+      setNuevoArchivoClase('Historia Clínica / Epicrisis');
       setStep(1);
       setNuevoMed({
         medicamento: '',
@@ -372,7 +514,7 @@ export const RegisterResidentModal: React.FC = () => {
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop animate-in fade-in duration-150">
-      <div className="bg-white rounded-3xl max-w-2xl w-full border border-[#DEDBD1] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
+      <div className="bg-white rounded-3xl max-w-3xl lg:max-w-4xl w-full border border-[#DEDBD1] shadow-2xl overflow-hidden flex flex-col max-h-[90vh]">
         {/* Header Modal */}
         <div className="p-6 bg-[#182F28] text-white flex items-center justify-between">
           <div className="flex items-center gap-3">
@@ -452,6 +594,20 @@ export const RegisterResidentModal: React.FC = () => {
               {itemsDotacion.filter((i) => i.incluido).length}
             </span>
           </button>
+          <button
+            type="button"
+            onClick={() => handleGoToStep(6)}
+            className={`flex items-center gap-1.5 px-3 py-1 rounded-lg cursor-pointer shrink-0 ${
+              step === 6 ? 'bg-[#274A3F] text-white font-bold' : 'hover:text-[#182F28]'
+            }`}
+          >
+            <span>6. Archivos & Documentos</span>
+            {archivos.length > 0 && (
+              <span className="text-[10px] bg-[#DCB87F] text-[#182F28] px-1.5 py-0.2 rounded-full font-bold">
+                {archivos.length}
+              </span>
+            )}
+          </button>
         </div>
 
         {/* Banner de alerta de validación contextual */}
@@ -472,7 +628,16 @@ export const RegisterResidentModal: React.FC = () => {
         )}
 
         {/* Form Body */}
-        <form onSubmit={handleSubmit} className="p-6 overflow-y-auto flex-1 space-y-4">
+        <form
+          onSubmit={handleSubmit}
+          onKeyDown={(e) => {
+            if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT' && step < 6) {
+              e.preventDefault();
+              handleNextStep();
+            }
+          }}
+          className="p-6 overflow-y-auto flex-1 space-y-4"
+        >
           {/* STEP 1: DATOS PERSONALES */}
           {step === 1 && (
             <div className="space-y-4 animate-in fade-in duration-150">
@@ -586,9 +751,9 @@ export const RegisterResidentModal: React.FC = () => {
                   <input
                     type="text"
                     required
-                    placeholder="Ej. 24.312.890"
+                    placeholder="Ej. 24312890"
                     value={formData.identificacion}
-                    onChange={(e) => setFormData({ ...formData, identificacion: e.target.value })}
+                    onChange={(e) => setFormData({ ...formData, identificacion: limpiarIdentificacion(e.target.value) })}
                     className="w-full px-3.5 py-2.5 rounded-xl border border-[#DEDBD1] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#B3803F] focus:bg-white"
                   />
                 </div>
@@ -1015,9 +1180,9 @@ export const RegisterResidentModal: React.FC = () => {
                       </label>
                       <input
                         type="text"
-                        placeholder="Ej. 52.489.120"
+                        placeholder="Ej. 52489120"
                         value={formData.acudienteIdentificacion}
-                        onChange={(e) => setFormData({ ...formData, acudienteIdentificacion: e.target.value })}
+                        onChange={(e) => setFormData({ ...formData, acudienteIdentificacion: limpiarIdentificacion(e.target.value) })}
                         className="w-full px-3.5 py-2.5 rounded-xl border border-[#DEDBD1] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#B3803F]"
                       />
                     </div>
@@ -1274,6 +1439,159 @@ export const RegisterResidentModal: React.FC = () => {
             </div>
           )}
 
+          {/* STEP 6: ARCHIVOS Y DOCUMENTOS (OPCIONAL) */}
+          {step === 6 && (
+            <div className="space-y-4 animate-in fade-in duration-150">
+              <div className="p-4 bg-[#F2F7F4] border border-[#274A3F]/20 rounded-2xl flex items-start gap-3">
+                <div className="p-2 rounded-xl bg-[#274A3F] text-white shrink-0 mt-0.5">
+                  <Paperclip className="w-5 h-5 text-[#DCB87F]" />
+                </div>
+                <div>
+                  <h4 className="text-sm font-bold text-[#182F28]">
+                    Subida de Documentos y Soportes (Opcional)
+                  </h4>
+                  <p className="text-xs text-[#5C6058] mt-0.5 leading-relaxed">
+                    Puede adjuntar historia clínica, exámenes de laboratorio, copias de cédula, consentimientos informados u otros soportes.
+                    <strong className="text-[#274A3F] font-bold"> Ningún archivo es obligatorio</strong> para completar la admisión del residente.
+                  </p>
+                </div>
+              </div>
+
+              {/* Formulario de selección y clasificación */}
+              <div className="p-4 bg-[#F7F6F2] rounded-2xl border border-[#DEDBD1] space-y-3">
+                <h5 className="text-xs font-bold text-[#182F28] flex items-center gap-1.5 uppercase font-mono tracking-wider">
+                  <FilePlus className="w-4 h-4 text-[#B3803F]" />
+                  <span>Adjuntar Nuevo Archivo</span>
+                </h5>
+
+                <div className="grid grid-cols-1 sm:grid-cols-2 gap-3">
+                  {/* Selector de Archivo Físico */}
+                  <div>
+                    <label className="block text-xs font-bold text-[#182F28] mb-1">
+                      Seleccionar Archivo (PDF, JPG, PNG, DOCX)
+                    </label>
+                    <input
+                      id="input-archivo-residente"
+                      type="file"
+                      accept=".pdf,image/*,.doc,.docx"
+                      onChange={handleFileSelected}
+                      className="w-full text-xs text-[#5C6058] file:mr-3 file:py-2 file:px-3 file:rounded-xl file:border file:border-[#DEDBD1] file:text-xs file:font-bold file:bg-white file:text-[#182F28] hover:file:bg-[#ECE7DB] file:cursor-pointer cursor-pointer border border-[#DEDBD1] rounded-xl p-1 bg-white"
+                    />
+                    {archivoSeleccionado && (
+                      <span className="text-[11px] text-[#274A3F] font-semibold mt-1 block">
+                        ✓ Seleccionado: {archivoSeleccionado.name} ({(archivoSeleccionado.size / 1024).toFixed(1)} KB)
+                      </span>
+                    )}
+                  </div>
+
+                  {/* Preguntar obligatoriamente la Clase de Archivo al adjuntar */}
+                  <div>
+                    <label className="block text-xs font-bold text-[#182F28] mb-1">
+                      Clase de Archivo *
+                    </label>
+                    <select
+                      value={nuevoArchivoClase}
+                      onChange={(e) => setNuevoArchivoClase(e.target.value as ClaseArchivoResidente)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#DEDBD1] bg-white text-xs font-semibold text-[#182F28] focus:outline-none focus:border-[#B3803F]"
+                    >
+                      {CLASES_ARCHIVOS.map((c) => (
+                        <option key={c} value={c}>{c}</option>
+                      ))}
+                    </select>
+                  </div>
+                </div>
+
+                {/* Descripción o Título Opcional */}
+                <div>
+                  <label className="block text-xs font-bold text-[#182F28] mb-1">
+                    Título o Descripción del Documento <span className="text-[#7A745F] font-normal">(Opcional)</span>
+                  </label>
+                  <input
+                    type="text"
+                    placeholder="Ej. Epicrisis de egreso hospitalario, Examen de sangre reciente, Cédula escaneada..."
+                    value={nuevoArchivoDescripcion}
+                    onChange={(e) => setNuevoArchivoDescripcion(e.target.value)}
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#DEDBD1] bg-white text-xs text-[#182F28] focus:outline-none focus:border-[#B3803F]"
+                  />
+                </div>
+
+                <div className="flex justify-end pt-1">
+                  <button
+                    type="button"
+                    onClick={handleAgregarArchivo}
+                    disabled={!archivoSeleccionado}
+                    className="flex items-center gap-1.5 px-4 py-2 bg-[#274A3F] hover:bg-[#182F28] text-white font-bold rounded-xl text-xs transition-colors cursor-pointer disabled:opacity-40 disabled:cursor-not-allowed shadow-2xs"
+                  >
+                    <Plus className="w-4 h-4" />
+                    <span>Agregar Documento a la Admisión</span>
+                  </button>
+                </div>
+              </div>
+
+              {/* Lista de archivos adjuntados */}
+              <div className="space-y-2">
+                <div className="flex items-center justify-between text-xs font-bold text-[#182F28]">
+                  <span>Archivos Listos para Guardar ({archivos.length})</span>
+                  {archivos.length === 0 && (
+                    <span className="text-[11px] text-[#7A745F] font-normal">Opcional - Ninguno agregado</span>
+                  )}
+                </div>
+
+                {archivos.length === 0 ? (
+                  <div className="p-6 bg-[#F7F6F2] rounded-2xl border border-dashed border-[#DEDBD1] text-center space-y-1">
+                    <FileText className="w-8 h-8 text-[#9A917A] mx-auto mb-1 opacity-60" />
+                    <p className="text-xs font-bold text-[#5C6058]">No se han adjuntado archivos</p>
+                    <p className="text-[11px] text-[#7A745F]">
+                      Este paso no es obligatorio. Si no dispone de los archivos en este momento, puede hacer clic en "Completar Admisión del Residente".
+                    </p>
+                  </div>
+                ) : (
+                  <div className="space-y-2">
+                    {archivos.map((a) => (
+                      <div
+                        key={a.id}
+                        className="p-3 bg-white rounded-xl border border-[#DEDBD1] flex items-center justify-between gap-3 shadow-2xs hover:border-[#274A3F]/40 transition-colors"
+                      >
+                        <div className="flex items-center gap-3 min-w-0">
+                          <div className="w-9 h-9 rounded-lg bg-[#F7F6F2] border border-[#DEDBD1] flex items-center justify-center shrink-0">
+                            <FileText className="w-5 h-5 text-[#274A3F]" />
+                          </div>
+                          <div className="min-w-0">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              <span className="text-xs font-bold text-[#182F28] truncate">
+                                {a.nombreArchivo}
+                              </span>
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#274A3F]/10 text-[#274A3F] border border-[#274A3F]/20">
+                                {a.claseArchivo}
+                              </span>
+                              <span className="text-[10px] text-[#7A745F]">
+                                ({(a.tamanoBytes / 1024).toFixed(1)} KB)
+                              </span>
+                            </div>
+                            {a.descripcion && (
+                              <p className="text-[11px] text-[#5C6058] truncate mt-0.5">
+                                {a.descripcion}
+                              </p>
+                            )}
+                          </div>
+                        </div>
+
+                        <button
+                          type="button"
+                          onClick={() => handleEliminarArchivo(a.id)}
+                          className="p-1.5 hover:bg-[#FBE8E6] text-[#A4453A] rounded-lg transition-colors cursor-pointer shrink-0"
+                          title="Quitar archivo de la lista"
+                        >
+                          <Trash2 className="w-3.5 h-3.5" />
+                        </button>
+                      </div>
+                    ))}
+                  </div>
+                )}
+              </div>
+            </div>
+          )}
+
           {/* Footer Controls */}
           <div className="pt-4 border-t border-[#DEDBD1] flex items-center justify-between">
             {step > 1 ? (
@@ -1297,7 +1615,7 @@ export const RegisterResidentModal: React.FC = () => {
                 Cancelar
               </button>
 
-              {step < 5 ? (
+              {step < 6 ? (
                 <button
                   type="button"
                   onClick={handleNextStep}
@@ -1311,7 +1629,7 @@ export const RegisterResidentModal: React.FC = () => {
                   disabled={isSubmitting}
                   className="px-5 py-2.5 bg-[#B3803F] hover:bg-[#9a6c32] text-white font-bold rounded-xl text-sm shadow-xs transition-all cursor-pointer disabled:opacity-50"
                 >
-                  {isSubmitting ? 'Guardando en Base de Datos...' : 'Completar Admisión & Dotación'}
+                  {isSubmitting ? 'Guardando en Base de Datos...' : 'Completar Admisión del Residente'}
                 </button>
               )}
             </div>

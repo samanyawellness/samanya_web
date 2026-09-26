@@ -303,7 +303,7 @@ AS
                email_corporativo              = pro_smy_organizaciones.email_corporativo,
                telefono_contacto              = pro_smy_organizaciones.telefono_contacto,
                sitio_web                      = pro_smy_organizaciones.sitio_web,
-               logo_url                       = pro_smy_organizaciones.logo_url,
+               id_archivo_logo                = pro_smy_organizaciones.id_archivo_logo,
                id_estado_organizacion         = pro_smy_organizaciones.id_estado_organizacion,
                id_usuario_ultima_modificacion = pro_smy_organizaciones.id_usuario_ultima_modificacion
          WHERE id = pro_smy_organizaciones.id;
@@ -325,7 +325,7 @@ AS
                email_corporativo              = pro_smy_organizaciones.email_corporativo,
                telefono_contacto              = pro_smy_organizaciones.telefono_contacto,
                sitio_web                      = pro_smy_organizaciones.sitio_web,
-               logo_url                       = pro_smy_organizaciones.logo_url,
+               id_archivo_logo                = pro_smy_organizaciones.id_archivo_logo,
                id_estado_organizacion         = pro_smy_organizaciones.id_estado_organizacion,
                id_usuario_ultima_modificacion = pro_smy_organizaciones.id_usuario_ultima_modificacion
          WHERE id = pty_id;
@@ -347,7 +347,7 @@ AS
                email_corporativo              = pro_smy_organizaciones.email_corporativo,
                telefono_contacto              = pro_smy_organizaciones.telefono_contacto,
                sitio_web                      = pro_smy_organizaciones.sitio_web,
-               logo_url                       = pro_smy_organizaciones.logo_url,
+               id_archivo_logo                = pro_smy_organizaciones.id_archivo_logo,
                id_estado_organizacion         = pro_smy_organizaciones.id_estado_organizacion,
                id_usuario_ultima_modificacion = pro_smy_organizaciones.id_usuario_ultima_modificacion
          WHERE ROWID = CHARTOROWID(p_rowid);
@@ -368,7 +368,7 @@ AS
                email_corporativo              = pro_smy_organizaciones.email_corporativo,
                telefono_contacto              = pro_smy_organizaciones.telefono_contacto,
                sitio_web                      = pro_smy_organizaciones.sitio_web,
-               logo_url                       = pro_smy_organizaciones.logo_url,
+               id_archivo_logo                = pro_smy_organizaciones.id_archivo_logo,
                id_estado_organizacion         = pro_smy_organizaciones.id_estado_organizacion,
                id_usuario_ultima_modificacion = pro_smy_organizaciones.id_usuario_ultima_modificacion;
     END p_actualizar_registros;
@@ -401,7 +401,7 @@ AS
                    'email_corporativo' VALUE t.email_corporativo,
                    'telefono_contacto' VALUE t.telefono_contacto,
                    'sitio_web' VALUE t.sitio_web,
-                   'logo_url' VALUE t.logo_url,
+                   'id_archivo_logo' VALUE t.id_archivo_logo,
                    'id_estado_organizacion' VALUE t.id_estado_organizacion,
                    'fecha_creacion' VALUE TO_CHAR(t.fecha_creacion, 'YYYY-MM-DD"T"HH24:MI:SS'),
                    'id_usuario_ultima_modificacion' VALUE t.id_usuario_ultima_modificacion
@@ -435,7 +435,7 @@ AS
                    'email_corporativo' VALUE t.email_corporativo,
                    'telefono_contacto' VALUE t.telefono_contacto,
                    'sitio_web' VALUE t.sitio_web,
-                   'logo_url' VALUE t.logo_url,
+                   'id_archivo_logo' VALUE t.id_archivo_logo,
                    'id_estado_organizacion' VALUE t.id_estado_organizacion,
                    'fecha_creacion' VALUE TO_CHAR(t.fecha_creacion, 'YYYY-MM-DD"T"HH24:MI:SS'),
                    'id_usuario_ultima_modificacion' VALUE t.id_usuario_ultima_modificacion

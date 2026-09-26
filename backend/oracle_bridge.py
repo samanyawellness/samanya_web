@@ -4,6 +4,14 @@ import json
 import datetime
 import oracledb
 
+# Asegurar codificación UTF-8 estricta en Windows para evitar caracteres corruptos (mojibake)
+if hasattr(sys.stdin, 'reconfigure'):
+    sys.stdin.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stdout, 'reconfigure'):
+    sys.stdout.reconfigure(encoding='utf-8', errors='replace')
+if hasattr(sys.stderr, 'reconfigure'):
+    sys.stderr.reconfigure(encoding='utf-8', errors='replace')
+
 def get_connection():
     script_dir = os.path.dirname(os.path.abspath(__file__))
     wallet_dir = os.path.join(script_dir, "wallet")

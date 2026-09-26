@@ -26,6 +26,7 @@ import {
   SEED_DOTACIONES_RESIDENTES
 } from '../data/seedData';
 import { adminApi } from '../services/api';
+import { limpiarIdentificacion } from '../utils/formatters';
 
 export type AdminTab =
   | 'dashboard'
@@ -195,7 +196,35 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // 1. Sedes
   const [sedes, setSedes] = useState<SedeCentro[]>(() => {
     const saved = localStorage.getItem('samanya_admin_sedes');
-    return saved ? JSON.parse(saved) : SEED_SEDES;
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          // Migrar en caliente nombres antiguos guardados en caché local
+          const migrado = parsed.map((s: SedeCentro) => {
+            if (s.id === 1 && (s.nombre.includes('Santa Bárbara') || s.nombre.includes('Santa Barbara'))) {
+              return { ...s, nombre: 'Sede Central Bogotá', codigo: 'SEDE-CENTRAL' };
+            }
+            if (s.id === 2 && (s.nombre.includes('El Nogal') || s.nombre.includes('Nogal'))) {
+              return {
+                ...s,
+                nombre: 'Sede Campestre La Calera',
+                codigo: 'SEDE-NORTE',
+                ciudad: 'La Calera, Cundinamarca',
+                direccion: 'Km 4 Vía La Calera',
+                capacidadTotal: 45
+              };
+            }
+            return s;
+          });
+          localStorage.setItem('samanya_admin_sedes', JSON.stringify(migrado));
+          return migrado;
+        }
+      } catch (e) {
+        // En caso de error de parseo, usar SEED_SEDES
+      }
+    }
+    return SEED_SEDES;
   });
 
   const [activeSedeId, setActiveSedeIdState] = useState<number>(() => {
@@ -362,7 +391,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             idCentro: Number(r.id_centro) || activeSede.id,
             codigoExpediente: r.codigo_expediente || `RES-${r.id}`,
             tipoIdentificacion: 'CC',
-            identificacion: String(r.identificacion || ''),
+            identificacion: limpiarIdentificacion(String(r.identificacion || '')),
             nombres: r.nombres || '',
             apellidos: r.apellidos || '',
             nombreCompleto: r.nombre_completo || `${r.nombres || ''} ${r.apellidos || ''}`.trim(),
@@ -422,7 +451,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             id: Number(w.id),
             idCentro: Number(w.id_centro) || activeSede.id,
             tipoIdentificacion: w.tipo_identificacion || 'CC',
-            identificacion: String(w.identificacion || ''),
+            identificacion: limpiarIdentificacion(String(w.identificacion || '')),
             nombres: w.nombres || '',
             apellidos: w.apellidos || '',
             nombreCompleto: w.nombre_completo || `${w.nombres || ''} ${w.apellidos || ''}`.trim(),
@@ -478,7 +507,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return {
             id: Number(f.id),
             tipoIdentificacion: f.tipo_identificacion || 'CC',
-            identificacion: String(f.identificacion || ''),
+            identificacion: limpiarIdentificacion(String(f.identificacion || '')),
             nombres: f.nombres || '',
             apellidos: f.apellidos || '',
             nombreCompleto: f.nombre_completo || `${f.nombres || ''} ${f.apellidos || ''}`.trim(),
@@ -576,6 +605,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // Limpiar caché local y forzar lectura limpia desde Oracle
   const limpiarCacheYReconectarOracle = async () => {
+    localStorage.removeItem('samanya_admin_sedes');
     localStorage.removeItem('samanya_admin_residentes');
     localStorage.removeItem('samanya_admin_familiares');
     localStorage.removeItem('samanya_admin_trabajadores');
@@ -585,6 +615,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     localStorage.removeItem('samanya_admin_dotaciones');
     localStorage.removeItem('samanya_admin_catalogo_dotacion');
 
+    setSedes(SEED_SEDES);
     setResidentes([]);
     setFamiliares([]);
     setTrabajadores([]);
@@ -761,7 +792,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       idCentro: data.idCentro || activeSedeId,
       idTipoIdentificacion,
       tipoIdentificacion: data.tipoIdentificacion,
-      identificacion: data.identificacion,
+      identificacion: limpiarIdentificacion(data.identificacion),
       nombres: data.nombres,
       apellidos: data.apellidos,
       fechaNacimiento: data.fechaNacimiento,
@@ -802,7 +833,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         const nuevoFamiliar: FamiliarAcudiente = {
           id: nuevoFamiliarId,
           tipoIdentificacion: 'CC',
-          identificacion: data.familiarContacto.identificacion,
+          identificacion: limpiarIdentificacion(data.familiarContacto.identificacion),
           nombres: data.familiarContacto.nombres,
           apellidos: data.familiarContacto.apellidos,
           nombreCompleto: `${data.familiarContacto.nombres} ${data.familiarContacto.apellidos}`.trim(),
@@ -835,24 +866,30 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         });
       }
 
-      const nuevoResidente: Residente = {
-        ...data,
-        id: newId,
-        codigoExpediente,
-        edad,
-        fechaIngreso,
-        estado: data.estado || 'Activo',
-        acudientes: acudientesAsociados
-      };
+      // Sincronizar censo real desde Oracle para obtener el ID asignado por la secuencia SEQ_SMY_RESIDENTES
+      await sincronizarResidentes(true);
+      const respCenso = await adminApi.residentes.consultarCenso(activeSede.id);
+      const resCreado = respCenso?.data?.find(
+        (r: any) => limpiarIdentificacion(String(r.identificacion)) === limpiarIdentificacion(data.identificacion)
+      );
+      const realId = resCreado ? Number(resCreado.id) : newId;
 
-      setResidentes((prev) => [nuevoResidente, ...prev]);
-
-      // Si incluye dotación inicial acordada al ingreso, registrarla
-      if (data.dotacionInicial && data.dotacionInicial.length > 0) {
-        await registrarDotacionResidente(newId, data.dotacionInicial);
+      if (data.archivosAdjuntos && data.archivosAdjuntos.length > 0) {
+        setResidentes((prev) =>
+          prev.map((r) =>
+            r.id === realId || r.identificacion === limpiarIdentificacion(data.identificacion)
+              ? { ...r, id: realId, archivosAdjuntos: data.archivosAdjuntos, fotoUrl: data.fotoUrl || r.fotoUrl }
+              : r
+          )
+        );
       }
 
-      showToast(`✅ Residente ${nuevoResidente.nombreCompleto} guardado exitosamente en la base de datos Oracle`, 'success');
+      // Si incluye dotación inicial acordada al ingreso, registrarla con el ID real de Oracle
+      if (data.dotacionInicial && data.dotacionInicial.length > 0) {
+        await registrarDotacionResidente(realId, data.dotacionInicial);
+      }
+
+      showToast(`✅ Residente ${data.nombres} ${data.apellidos} guardado exitosamente en la base de datos Oracle`, 'success');
     } catch (err: any) {
       console.error('[Error registrarResidente Oracle]:', err);
       showToast(`❌ Error al guardar en base de datos Oracle: ${err.message || 'No se pudo completar la operación'}`, 'alert');
@@ -1255,7 +1292,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const payload = {
       idTipoIdentificacion,
       tipoIdentificacion: data.tipoIdentificacion,
-      identificacion: data.identificacion,
+      identificacion: limpiarIdentificacion(data.identificacion),
       nombres: data.nombres,
       apellidos: data.apellidos,
       telefonoPrincipal: data.telefonoPrincipal,
@@ -1305,7 +1342,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const payload = {
       idCentro: data.idCentro || activeSedeId,
       tipoIdentificacion: data.tipoIdentificacion,
-      identificacion: data.identificacion,
+      identificacion: limpiarIdentificacion(data.identificacion),
       nombres: data.nombres,
       apellidos: data.apellidos,
       cargo: data.cargo,
@@ -1634,6 +1671,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         fechaFin: nuevoPermiso.fechaFin,
         motivo: nuevoPermiso.motivo,
         urlSoporte: nuevoPermiso.soporteUrl,
+        idArchivoSoporte: nuevoPermiso.idArchivoSoporte || nuevoPermiso.idArchivo,
+        idArchivo: nuevoPermiso.idArchivoSoporte || nuevoPermiso.idArchivo,
         idEstadoPermiso,
         observacionesAdmin: nuevoPermiso.comentariosAdmin
       });
@@ -1654,11 +1693,30 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // 7. Actualizar Residente
   const actualizarResidente = async (idResidente: number, data: Partial<Residente>) => {
+    let idReal = idResidente;
+    // Si el ID proviene de Date.now() (excede los 9-10 dígitos de NUMBER(10) en Oracle)
+    if (idReal > 999999999) {
+      try {
+        const respCenso = await adminApi.residentes.consultarCenso(activeSede.id);
+        if (respCenso && respCenso.data) {
+          const identBuscada = limpiarIdentificacion(String(data.identificacion || ''));
+          const matching = respCenso.data.find(
+            (r: any) => limpiarIdentificacion(String(r.identificacion)) === identBuscada
+          );
+          if (matching && matching.id) {
+            idReal = Number(matching.id);
+          }
+        }
+      } catch (e) {
+        console.warn('Error resolviendo ID real del residente:', e);
+      }
+    }
+
     const payload = {
-      idResidente,
+      idResidente: idReal,
       nombres: data.nombres,
       apellidos: data.apellidos,
-      identificacion: data.identificacion,
+      identificacion: data.identificacion ? limpiarIdentificacion(data.identificacion) : undefined,
       idTipoIdentificacion: data.tipoIdentificacion === 'CC' ? 1 : 2,
       fechaNacimiento: data.fechaNacimiento,
       idGenero: data.genero === 'F' ? 2 : 1,
@@ -1706,7 +1764,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
       setResidentes((prev) =>
         prev.map((r) => {
-          if (r.id !== idResidente) return r;
+          if (r.id !== idResidente && r.id !== idReal) return r;
           const nombreCompleto =
             data.nombres && data.apellidos
               ? `${data.nombres} ${data.apellidos}`.trim()
@@ -1728,6 +1786,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           return {
             ...r,
             ...data,
+            id: idReal,
             nombreCompleto,
             edad,
             fechaIngreso: data.fechaIngreso || r.fechaIngreso,
@@ -1738,12 +1797,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       );
 
       setSelectedResidente((prev) => {
-        if (!prev || prev.id !== idResidente) return prev;
+        if (!prev || (prev.id !== idResidente && prev.id !== idReal)) return prev;
         const nombreCompleto =
           data.nombres && data.apellidos
             ? `${data.nombres} ${data.apellidos}`.trim()
             : prev.nombreCompleto;
-        return { ...prev, ...data, nombreCompleto };
+        return { ...prev, ...data, id: idReal, nombreCompleto };
       });
 
       showToast('✅ Cambios del residente guardados exitosamente en Oracle', 'success');
@@ -1760,7 +1819,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       idTrabajador,
       nombres: data.nombres,
       apellidos: data.apellidos,
-      identificacion: data.identificacion,
+      identificacion: data.identificacion ? limpiarIdentificacion(data.identificacion) : undefined,
       idTipoIdentificacion: data.tipoIdentificacion === 'CC' ? 1 : 2,
       idCargoEmpleado: 1,
       idAreaEmpleado: 1,
@@ -1821,7 +1880,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       idAcudiente: idFamiliar,
       nombres: data.nombres,
       apellidos: data.apellidos,
-      identificacion: data.identificacion,
+      identificacion: data.identificacion ? limpiarIdentificacion(data.identificacion) : undefined,
       idTipoIdentificacion: data.tipoIdentificacion === 'CC' ? 1 : 2,
       telefonoPrincipal: data.telefonoPrincipal,
       telefonoSecundario: data.telefonoSecundario,

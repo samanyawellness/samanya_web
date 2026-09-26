@@ -66,18 +66,21 @@ AS
                 NVL(e.email_corp, u.email) AS email,
                 TO_CHAR(e.fecha_contratacion, 'YYYY-MM-DD') AS fecha_contratacion,
                 NVL(es.nombre_estado_empleado, 'Activo') AS estado,
-                u.avatar_url
+                u.id_archivo_foto_perfil,
+                arc.ruta_completa_almacenamiento AS avatar_url
             FROM smy_empleados e,
                  smy_usuarios u,
                  smy_cargos_empleados c,
                  smy_areas_empleados a,
                  smy_estados_empleados es,
-                 smy_tipos_identificacion t
+                 smy_tipos_identificacion t,
+                 smy_archivos arc
             WHERE e.id_usuario = u.id(+)
               AND e.id_cargo_empleado = c.id(+)
               AND e.id_area_empleado = a.id(+)
               AND e.id_estado_empleado = es.id(+)
               AND e.id_tipo_identificacion = t.id(+)
+              AND u.id_archivo_foto_perfil = arc.id(+)
               AND (v_id_centro IS NULL OR e.id_centro = v_id_centro)
               AND (v_id_estado IS NULL OR e.id_estado_empleado = v_id_estado)
               AND (v_filtro_texto IS NULL OR (

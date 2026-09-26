@@ -2,6 +2,7 @@ import React, { useState, useEffect } from 'react';
 import { useAdmin } from '../../context/AdminContext';
 import { X, Save, HeartHandshake, Phone, Mail, MapPin, Trash2, Camera, Star } from 'lucide-react';
 import { FamiliarAcudiente } from '../../types';
+import { limpiarIdentificacion } from '../../utils/formatters';
 
 export const EditFamilyModal: React.FC = () => {
   const {
@@ -25,7 +26,7 @@ export const EditFamilyModal: React.FC = () => {
         nombres: editingFamiliar.nombres,
         apellidos: editingFamiliar.apellidos,
         tipoIdentificacion: editingFamiliar.tipoIdentificacion,
-        identificacion: editingFamiliar.identificacion,
+        identificacion: limpiarIdentificacion(editingFamiliar.identificacion),
         telefonoPrincipal: editingFamiliar.telefonoPrincipal,
         telefonoSecundario: editingFamiliar.telefonoSecundario || '',
         email: editingFamiliar.email,
@@ -83,7 +84,7 @@ export const EditFamilyModal: React.FC = () => {
         ...formData,
         nombres: formData.nombres.trim(),
         apellidos: formData.apellidos.trim(),
-        identificacion: formData.identificacion.trim(),
+        identificacion: limpiarIdentificacion(formData.identificacion).trim(),
         telefonoPrincipal: formData.telefonoPrincipal.trim(),
         telefonoSecundario: formData.telefonoSecundario?.trim(),
         email: formData.email.trim(),
@@ -271,7 +272,7 @@ export const EditFamilyModal: React.FC = () => {
                   type="text"
                   required
                   value={formData.identificacion || ''}
-                  onChange={(e) => setFormData({ ...formData, identificacion: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, identificacion: limpiarIdentificacion(e.target.value) })}
                   className="w-full px-3 py-2 rounded-xl border border-[#DEDBD1] bg-[#F7F6F2] text-xs font-semibold text-[#182F28] focus:outline-none focus:border-[#B3803F]"
                 />
               </div>

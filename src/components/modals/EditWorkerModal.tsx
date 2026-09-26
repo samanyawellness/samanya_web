@@ -4,6 +4,7 @@ import { X, Save, UserCheck, Briefcase, Phone, Mail, Shield, Camera } from 'luci
 import { TrabajadorEmpleado } from '../../types';
 import { subirFotoTalentoHumano } from '../../services/driveService';
 import { resolverAvatarUrl, DEFAULT_AVATAR } from '../../utils/avatarUtils';
+import { limpiarIdentificacion } from '../../utils/formatters';
 
 export const EditWorkerModal: React.FC = () => {
   const {
@@ -12,6 +13,7 @@ export const EditWorkerModal: React.FC = () => {
     isEditTrabajadorOpen,
     setIsEditTrabajadorOpen,
     actualizarTrabajador,
+    activeSede,
     showToast
   } = useAdmin();
 
@@ -26,7 +28,7 @@ export const EditWorkerModal: React.FC = () => {
         nombres: editingTrabajador.nombres,
         apellidos: editingTrabajador.apellidos,
         tipoIdentificacion: editingTrabajador.tipoIdentificacion,
-        identificacion: editingTrabajador.identificacion,
+        identificacion: limpiarIdentificacion(editingTrabajador.identificacion),
         cargo: editingTrabajador.cargo,
         area: editingTrabajador.area,
         unidadAsignada: editingTrabajador.unidadAsignada || '',
@@ -70,6 +72,8 @@ export const EditWorkerModal: React.FC = () => {
     try {
       let avatarFinalUrl = fotoPreview;
 
+      let idArchivoFotoPerfilFinal: number | undefined = editingTrabajador.idArchivoFotoPerfil;
+
       // Si se cargó un archivo físico, ejecutar el flujo Google Drive + PKGLN_ARCHIVOS
       if (selectedFile) {
         try {
@@ -77,11 +81,14 @@ export const EditWorkerModal: React.FC = () => {
             file: selectedFile,
             idUsuario: editingTrabajador.id,
             idEmpleado: editingTrabajador.id,
-            identificacion: formData.identificacion || editingTrabajador.identificacion,
+            identificacion: limpiarIdentificacion(formData.identificacion || editingTrabajador.identificacion),
+            idCentro: editingTrabajador.idCentro || activeSede.id,
+            nombreSede: activeSede?.nombre || 'Sede Central Bogotá',
             nombreCompleto: `${formData.nombres || editingTrabajador.nombres} ${formData.apellidos || editingTrabajador.apellidos}`.trim()
           });
           if (uploadRes.avatarUrl) {
             avatarFinalUrl = uploadRes.avatarUrl;
+            idArchivoFotoPerfilFinal = uploadRes.idArchivo;
             showToast('Fotografía almacenada en Google Drive y registrada en Oracle exitosamente', 'success');
           }
         } catch (uploadErr: any) {
@@ -93,7 +100,9 @@ export const EditWorkerModal: React.FC = () => {
 
       await actualizarTrabajador(editingTrabajador.id, {
         ...formData,
-        avatarUrl: avatarFinalUrl
+        identificacion: limpiarIdentificacion(formData.identificacion || editingTrabajador.identificacion),
+        avatarUrl: avatarFinalUrl,
+        idArchivoFotoPerfil: idArchivoFotoPerfilFinal
       });
       handleClose();
     } catch (err) {
@@ -240,7 +249,7 @@ export const EditWorkerModal: React.FC = () => {
                   type="text"
                   required
                   value={formData.identificacion || ''}
-                  onChange={(e) => setFormData({ ...formData, identificacion: e.target.value })}
+                  onChange={(e) => setFormData({ ...formData, identificacion: limpiarIdentificacion(e.target.value) })}
                   className="w-full px-3 py-2 rounded-xl border border-[#DEDBD1] bg-[#F7F6F2] text-xs font-semibold text-[#182F28] focus:outline-none focus:border-[#274A3F]"
                 />
               </div>

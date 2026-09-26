@@ -148,9 +148,9 @@ def upload_file_to_drive(access_token, parent_folder_id, file_name, file_bytes, 
         "avatarUrl": f"https://lh3.googleusercontent.com/d/{file_id}"
     }
 
-def register_in_oracle(payload, tipo="foto"):
+def get_oracle_conn():
     try:
-        conn = oracledb.connect(
+        return oracledb.connect(
             user='SAMANYA',
             password='T3k3r_2025_DEV',
             dsn='samanya_high',
@@ -158,23 +158,103 @@ def register_in_oracle(payload, tipo="foto"):
             wallet_location='./wallet',
             wallet_password='Samanya2026*'
         )
-        c = conn.cursor()
-        if tipo == "soporte":
-            c.execute("""
-                BEGIN
-                    PKGLN_ARCHIVOS.PR_REGISTRAR_SOPORTE_TALENTO_HUMANO(:pcl_json);
-                END;
-            """, [json.dumps(payload)])
-        else:
-            c.execute("""
-                BEGIN
-                    PKGLN_ARCHIVOS.PR_REGISTRAR_FOTO_TALENTO_HUMANO(:pcl_json);
-                END;
-            """, [json.dumps(payload)])
-        conn.commit()
-        conn.close()
     except Exception as oe:
-        sys.stderr.write(f"Advertencia al persistir en Oracle ({tipo}): {str(oe)}\n")
+        sys.stderr.write(f"Aviso Oracle Connection: {str(oe)}\n")
+        return None
+
+def get_next_archivo_id(conn):
+    if conn:
+        try:
+            with conn.cursor() as c:
+                c.execute("SELECT SEQ_SMY_ARCHIVOS.NEXTVAL FROM DUAL")
+                row = c.fetchone()
+                if row and row[0]:
+                    return int(row[0])
+        except Exception as e:
+            sys.stderr.write(f"Aviso al obtener SEQ_SMY_ARCHIVOS.NEXTVAL: {e}\n")
+    import time
+    return int(time.time() * 1000) % 2000000000
+
+def get_nombre_sede(conn, id_centro):
+    if conn:
+        try:
+            with conn.cursor() as c:
+                c.execute("SELECT NOMBRE_CENTRO FROM SMY_CENTROS WHERE ID = :1", [id_centro])
+                row = c.fetchone()
+                if row and row[0]:
+                    return str(row[0]).strip()
+        except Exception:
+            pass
+    return "Sede Central Bogotá" if id_centro == 1 else f"Sede {id_centro}"
+
+def register_smy_archivo(conn, id_archivo, id_centro, id_clase, id_residente, id_empleado,
+                         nombre_original, nombre_almacenado, hash_sha256, ext, mime_type,
+                         tamano_bytes, ruta_relativa, ruta_drive, id_drive, descripcion=None):
+    if not conn:
+        return False
+    try:
+        import json
+        metadatos = json.dumps({
+            "id_drive": id_drive,
+            "descripcion": descripcion,
+            "ruta_drive": ruta_drive
+        }, ensure_ascii=False)
+        with conn.cursor() as c:
+            sql = """
+                MERGE INTO SMY_ARCHIVOS dest
+                USING (SELECT :id AS ID FROM DUAL) src
+                ON (dest.ID = src.ID)
+                WHEN MATCHED THEN
+                    UPDATE SET
+                        ID_CENTRO = :id_centro,
+                        ID_CLASE_ARCHIVO = :id_clase,
+                        ID_RESIDENTE = :id_residente,
+                        ID_EMPLEADO = :id_empleado,
+                        NOMBRE_ARCHIVO = :nombre_archivo,
+                        NOMBRE_ARCHIVO_ALMACENADO = :nombre_almacenado,
+                        HASH_ARCHIVO = :hash_archivo,
+                        EXTENSION = :ext,
+                        TIPO_MIME = :tipo_mime,
+                        TAMANO_BYTES = :tamano_bytes,
+                        RUTA_RELATIVA = :ruta_relativa,
+                        RUTA_COMPLETA_ALMACENAMIENTO = :ruta_completa,
+                        ID_ESTADO_ARCHIVO = 1,
+                        METADATOS_JSON = :metadatos,
+                        FECHA_ULTIMA_MODIFICACION = CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)
+                WHEN NOT MATCHED THEN
+                    INSERT (
+                        ID, ID_CENTRO, ID_CLASE_ARCHIVO, ID_RESIDENTE, ID_EMPLEADO,
+                        NOMBRE_ARCHIVO, NOMBRE_ARCHIVO_ALMACENADO, HASH_ARCHIVO, EXTENSION,
+                        TIPO_MIME, TAMANO_BYTES, RUTA_RELATIVA, RUTA_COMPLETA_ALMACENAMIENTO,
+                        ID_ESTADO_ARCHIVO, METADATOS_JSON
+                    ) VALUES (
+                        :id, :id_centro, :id_clase, :id_residente, :id_empleado,
+                        :nombre_archivo, :nombre_almacenado, :hash_archivo, :ext,
+                        :tipo_mime, :tamano_bytes, :ruta_relativa, :ruta_completa,
+                        1, :metadatos
+                    )
+            """
+            c.execute(sql, {
+                "id": id_archivo,
+                "id_centro": id_centro,
+                "id_clase": id_clase,
+                "id_residente": id_residente,
+                "id_empleado": id_empleado,
+                "nombre_archivo": nombre_original,
+                "nombre_almacenado": nombre_almacenado,
+                "hash_archivo": hash_sha256,
+                "ext": ext.replace(".", "")[:20],
+                "tipo_mime": mime_type[:100],
+                "tamano_bytes": tamano_bytes,
+                "ruta_relativa": ruta_relativa[:1000],
+                "ruta_completa": (ruta_drive or ruta_relativa)[:1500],
+                "metadatos": metadatos
+            })
+        conn.commit()
+        return True
+    except Exception as e:
+        sys.stderr.write(f"Error al registrar en SMY_ARCHIVOS: {str(e)}\n")
+        return False
 
 def main():
     try:
@@ -194,14 +274,46 @@ def main():
         file_bytes = base64.b64decode(file_base64)
         
         tipo_documento = data.get("tipoDocumento", "foto")
-        id_usuario = int(data.get("idUsuario") or data.get("idEmpleado") or 202)
-        id_empleado = int(data.get("idEmpleado") or id_usuario)
-        identificacion = str(data.get("identificacion", "SIN_DOC")).strip().replace(".", "").replace("-", "")
-        nombre_original = data.get("nombreOriginal", "archivo.pdf" if tipo_documento == "soporte" else "foto.jpg")
-        nombre_completo = data.get("nombreCompleto", f"Colaborador {id_empleado}")
         id_centro = int(data.get("idCentro", 1))
         
-        # Extension
+        # Conexión Oracle para consultas y persistencia
+        conn = get_oracle_conn()
+        
+        # 1. Obtener o generar id_archivo
+        id_archivo = int(data.get("idArchivo") or 0)
+        if not id_archivo:
+            id_archivo = get_next_archivo_id(conn)
+            
+        # Identificación del sujeto (sin puntos ni guiones)
+        identificacion = str(data.get("identificacion", "SIN_DOC")).strip().replace(".", "").replace("-", "").replace(",", "")
+        
+        # Tipo de entidad: Residente o Talento Humano
+        es_residente = (tipo_documento == "residente" or data.get("tipoEntidad") == "residente" or "idResidente" in data)
+        id_residente = int(data.get("idResidente") or 0) if es_residente else None
+        id_empleado = int(data.get("idEmpleado") or data.get("idUsuario") or 0) if not es_residente else None
+        
+        # Resolver clase de archivo
+        id_clase = int(data.get("idClaseArchivo") or 0)
+        if not id_clase:
+            if es_residente:
+                clase_str = str(data.get("claseArchivo", "")).upper()
+                if "IDENTIFICACION" in clase_str:
+                    id_clase = 3
+                elif "EPS" in clase_str or "AFILIACION" in clase_str:
+                    id_clase = 4
+                elif "FOTO" in clase_str:
+                    id_clase = 7
+                else:
+                    id_clase = 1  # HISTORIA_CLINICA general
+            else:
+                if tipo_documento == "soporte":
+                    id_clase = 9  # SOPORTE_LABORAL
+                elif tipo_documento == "firma":
+                    id_clase = 8  # FIRMA_DIGITAL
+                else:
+                    id_clase = 7  # FOTO_PERFIL
+                    
+        nombre_original = data.get("nombreOriginal", "archivo.pdf" if tipo_documento == "soporte" else "archivo.jpg")
         ext = os.path.splitext(nombre_original)[1].lower()
         if not ext:
             ext = ".pdf" if tipo_documento == "soporte" else ".jpg"
@@ -215,66 +327,99 @@ def main():
             else:
                 tipo_mime = "application/octet-stream"
 
-        # 1. Calculate real SHA-256 hash
+        # 2. Calcular HASH SHA-256 criptográfico real del contenido
         hash_sha256 = hashlib.sha256(file_bytes).hexdigest()
         nombre_almacenado = f"{hash_sha256}{ext}"
-        nombre_archivo_drive = nombre_original if tipo_documento == "soporte" else nombre_almacenado
         
-        # 2. Upload to Google Drive inside "Samanya/Talento_humano/{id_empleado}_{identificacion}"
-        token = get_access_token()
-        samanya_folder_id = find_or_create_folder(token, "Samanya")
-        talento_folder_id = find_or_create_folder(token, "Talento_humano", parent_id=samanya_folder_id)
-        user_folder_name = f"{id_empleado}_{identificacion}"
-        user_folder_id = find_or_create_folder(token, user_folder_name, parent_id=talento_folder_id)
+        # 3. Estructura estricta de rutas:
+        # Samanya / {Nombre_Sede} / {Residentes | Talento Humano} / {id_archivo}_{identificacion} / Documentos / {hash}.{extension}
+        nombre_sede = data.get("nombreSede") or get_nombre_sede(conn, id_centro)
+        carpeta_modulo = "Residentes" if es_residente else "Talento Humano"
+        sujeto_folder = f"{id_archivo}_{identificacion}"
         
-        upload_result = upload_file_to_drive(token, user_folder_id, nombre_archivo_drive, file_bytes, mime_type=tipo_mime)
-        file_id = upload_result["fileId"]
-        drive_url = f"https://drive.google.com/uc?export=view&id={file_id}"
-        ruta_relativa = f"Samanya/Talento_humano/{user_folder_name}"
+        ruta_relativa = f"Samanya/{nombre_sede}/{carpeta_modulo}/{sujeto_folder}/Documentos/{nombre_almacenado}"
         
-        # Save local copy in public/uploads/talento_humano
-        local_dir = os.path.join("public", "uploads", "talento_humano")
+        # 4. Cargar a Google Drive siguiendo los 5 niveles exactos
+        token = None
+        file_id = None
+        drive_url = ""
+        try:
+            token = get_access_token()
+            folder_samanya = find_or_create_folder(token, "Samanya")
+            folder_sede = find_or_create_folder(token, nombre_sede, parent_id=folder_samanya)
+            folder_modulo = find_or_create_folder(token, carpeta_modulo, parent_id=folder_sede)
+            folder_sujeto = find_or_create_folder(token, sujeto_folder, parent_id=folder_modulo)
+            folder_documentos = find_or_create_folder(token, "Documentos", parent_id=folder_sujeto)
+            
+            upload_result = upload_file_to_drive(token, folder_documentos, nombre_almacenado, file_bytes, mime_type=tipo_mime)
+            file_id = upload_result.get("fileId")
+            if file_id:
+                drive_url = f"https://drive.google.com/uc?export=view&id={file_id}"
+        except Exception as e_drive:
+            sys.stderr.write(f"Aviso Google Drive: {e_drive}\n")
+            
+        # 5. Guardar copia física con la estructura jerárquica exacta:
+        # Samanya / {Nombre_Sede} / {Residentes | Talento Humano} / {id_archivo}_{identificacion} / Documentos / {hash}.{ext}
+        samanya_dir = os.path.join("public", "Samanya", nombre_sede, carpeta_modulo, sujeto_folder, "Documentos")
+        os.makedirs(samanya_dir, exist_ok=True)
+        samanya_file_path = os.path.join(samanya_dir, nombre_almacenado)
+        with open(samanya_file_path, "wb") as f:
+            f.write(file_bytes)
+
+        samanya_local_url = f"/Samanya/{nombre_sede}/{carpeta_modulo}/{sujeto_folder}/Documentos/{nombre_almacenado}"
+
+        # Copia secundaria en uploads para compatibilidad histórica
+        subcarpeta_local = "residentes" if es_residente else "talento_humano"
+        local_dir = os.path.join("public", "uploads", subcarpeta_local, sujeto_folder, "Documentos")
         os.makedirs(local_dir, exist_ok=True)
-        local_file_path = os.path.join(local_dir, nombre_archivo_drive)
+        local_file_path = os.path.join(local_dir, nombre_almacenado)
         with open(local_file_path, "wb") as f:
             f.write(file_bytes)
             
-        avatar_url = f"/uploads/talento_humano/{nombre_archivo_drive}"
+        local_url = f"/uploads/{subcarpeta_local}/{sujeto_folder}/Documentos/{nombre_almacenado}"
         
-        # 3. Register in Oracle Database via PKGLN_ARCHIVOS
-        oracle_payload = {
-            "idUsuario": id_usuario,
-            "idEmpleado": id_empleado,
-            "identificacion": identificacion,
-            "nombreArchivo": nombre_original,
-            "nombreArchivoAlmacenado": nombre_archivo_drive,
-            "hashArchivo": hash_sha256,
-            "rutaRelativa": ruta_relativa,
-            "rutaCompletaAlmacenamiento": drive_url,
-            "avatarUrl": avatar_url,
-            "tamanoBytes": len(file_bytes),
-            "extension": ext,
-            "tipoMime": tipo_mime,
-            "idCentro": id_centro,
-            "idUsuarioCreacion": id_usuario,
-            "idSolicitudPermiso": data.get("idSolicitudPermiso"),
-            "nombreCompleto": nombre_completo
-        }
+        # 6. Persistencia centralizada en la tabla SMY_ARCHIVOS
+        descripcion = data.get("descripcion") or f"{nombre_original} - {carpeta_modulo} {identificacion}"
+        register_smy_archivo(
+            conn=conn,
+            id_archivo=id_archivo,
+            id_centro=id_centro,
+            id_clase=id_clase,
+            id_residente=id_residente,
+            id_empleado=id_empleado,
+            nombre_original=nombre_original,
+            nombre_almacenado=nombre_almacenado,
+            hash_sha256=hash_sha256,
+            ext=ext,
+            mime_type=tipo_mime,
+            tamano_bytes=len(file_bytes),
+            ruta_relativa=ruta_relativa,
+            ruta_drive=drive_url or ruta_relativa,
+            id_drive=file_id,
+            descripcion=descripcion
+        )
         
-        register_in_oracle(oracle_payload, tipo=tipo_documento)
+        if conn:
+            try:
+                conn.close()
+            except Exception:
+                pass
         
+        canonical_drive_url = f"https://drive.google.com/file/d/{file_id}/view?usp=sharing" if file_id else ""
+
         response = {
             "success": True,
-            "avatarUrl": avatar_url,
-            "driveUrl": drive_url,
-            "fileId": file_id,
+            "idArchivo": id_archivo,
             "hash": hash_sha256,
             "nombreOriginal": nombre_original,
-            "nombreAlmacenado": nombre_archivo_drive,
+            "nombreAlmacenado": nombre_almacenado,
             "rutaRelativa": ruta_relativa,
-            "directorioRaiz": "Samanya/Talento_humano",
-            "directorioUsuario": user_folder_name,
-            "mensaje": f"Archivo cargado a Google Drive ({ruta_relativa}/{nombre_archivo_drive}) y registrado en Oracle SMY_ARCHIVOS exitosamente."
+            "driveUrl": canonical_drive_url or drive_url or samanya_local_url,
+            "fileId": file_id,
+            "avatarUrl": samanya_local_url,
+            "localUrl": samanya_local_url,
+            "url": samanya_local_url,
+            "mensaje": f"Archivo guardado exitosamente en {ruta_relativa}"
         }
         print(json.dumps(response))
         

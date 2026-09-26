@@ -1,6 +1,7 @@
 import React, { useState } from 'react';
 import { useAdmin } from '../../context/AdminContext';
 import { X, HeartHandshake, MapPin, Camera, Star } from 'lucide-react';
+import { limpiarIdentificacion } from '../../utils/formatters';
 
 export const RegisterFamilyModal: React.FC = () => {
   const { isRegisterFamilyOpen, setIsRegisterFamilyOpen, registrarFamiliar, residentes, activeSede } = useAdmin();
@@ -61,7 +62,7 @@ export const RegisterFamilyModal: React.FC = () => {
     try {
       await registrarFamiliar({
         tipoIdentificacion: formData.tipoIdentificacion,
-        identificacion: formData.identificacion.trim(),
+        identificacion: limpiarIdentificacion(formData.identificacion).trim(),
         nombres: formData.nombres.trim(),
         apellidos: formData.apellidos.trim(),
         telefonoPrincipal: formData.telefonoPrincipal.trim(),
@@ -236,9 +237,9 @@ export const RegisterFamilyModal: React.FC = () => {
               </label>
               <input
                 type="text"
-                placeholder="Ej. 79.345.889"
+                placeholder="Ej. 79345889"
                 value={formData.identificacion}
-                onChange={(e) => setFormData({ ...formData, identificacion: e.target.value })}
+                onChange={(e) => setFormData({ ...formData, identificacion: limpiarIdentificacion(e.target.value) })}
                 className="w-full px-3.5 py-2.5 rounded-xl border border-[#DEDBD1] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#B3803F] focus:bg-white"
               />
             </div>
