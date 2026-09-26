@@ -190,16 +190,25 @@ AS
     PROCEDURE pr_vincular_familiar_residente (
         pcl_json IN CLOB
     ) IS
-        v_id_acudiente smy_acudientes.id%TYPE;
-        v_id_residente smy_residentes.id%TYPE;
-        vro_res_acu    smy_residente_acudiente%ROWTYPE;
+        v_id_acudiente_in NUMBER;
+        v_id_residente_in NUMBER;
+        v_id_acudiente    smy_acudientes.id%TYPE;
+        v_id_residente    smy_residentes.id%TYPE;
+        vro_res_acu       smy_residente_acudiente%ROWTYPE;
     BEGIN
-        v_id_acudiente := TO_NUMBER(JSON_VALUE(pcl_json, '$.idAcudiente'));
-        v_id_residente := TO_NUMBER(JSON_VALUE(pcl_json, '$.idResidente'));
+        v_id_acudiente_in := TO_NUMBER(JSON_VALUE(pcl_json, '$.idAcudiente'));
+        v_id_residente_in := TO_NUMBER(JSON_VALUE(pcl_json, '$.idResidente'));
 
-        IF v_id_acudiente IS NULL OR v_id_residente IS NULL THEN
+        IF v_id_acudiente_in IS NULL OR v_id_residente_in IS NULL THEN
             RAISE_APPLICATION_ERROR(-20003, 'Identificadores de acudiente y residente son obligatorios.');
         END IF;
+
+        IF v_id_acudiente_in > 999999999 OR v_id_residente_in > 999999999 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Identificador inválido (excede la precisión de base de datos).');
+        END IF;
+
+        v_id_acudiente := v_id_acudiente_in;
+        v_id_residente := v_id_residente_in;
 
         IF PKGSMY_ACUDIENTES_DAO.f_existe(v_id_acudiente) = FALSE THEN
             RAISE_APPLICATION_ERROR(-20004, 'El familiar especificado no existe.');
@@ -254,14 +263,21 @@ AS
     PROCEDURE pr_actualizar_familiar (
         pcl_json IN CLOB
     ) IS
-        v_id_acudiente   smy_acudientes.id%TYPE;
-        vro_acudiente    smy_acudientes%ROWTYPE;
+        v_id_acudiente_in NUMBER;
+        v_id_acudiente    smy_acudientes.id%TYPE;
+        vro_acudiente     smy_acudientes%ROWTYPE;
     BEGIN
-        v_id_acudiente := TO_NUMBER(JSON_VALUE(pcl_json, '$.idAcudiente'));
+        v_id_acudiente_in := TO_NUMBER(JSON_VALUE(pcl_json, '$.idAcudiente'));
 
-        IF v_id_acudiente IS NULL THEN
+        IF v_id_acudiente_in IS NULL THEN
             RAISE_APPLICATION_ERROR(-20006, 'El identificador del familiar/acudiente es obligatorio.');
         END IF;
+
+        IF v_id_acudiente_in > 999999999 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Identificador de familiar inválido (excede la precisión de base de datos).');
+        END IF;
+
+        v_id_acudiente := v_id_acudiente_in;
 
         IF PKGSMY_ACUDIENTES_DAO.f_existe(v_id_acudiente, vro_acudiente) = FALSE THEN
             RAISE_APPLICATION_ERROR(-20007, 'El familiar/acudiente indicado no existe.');
@@ -318,13 +334,20 @@ AS
     PROCEDURE pr_eliminar_familiar (
         pcl_json IN CLOB
     ) IS
-        v_id_acudiente smy_acudientes.id%TYPE;
+        v_id_acudiente_in NUMBER;
+        v_id_acudiente    smy_acudientes.id%TYPE;
     BEGIN
-        v_id_acudiente := TO_NUMBER(JSON_VALUE(pcl_json, '$.idAcudiente'));
+        v_id_acudiente_in := TO_NUMBER(JSON_VALUE(pcl_json, '$.idAcudiente'));
 
-        IF v_id_acudiente IS NULL THEN
+        IF v_id_acudiente_in IS NULL THEN
             RAISE_APPLICATION_ERROR(-20008, 'El identificador del familiar/acudiente es obligatorio.');
         END IF;
+
+        IF v_id_acudiente_in > 999999999 THEN
+            RAISE_APPLICATION_ERROR(-20010, 'Identificador de familiar inválido (excede la precisión de base de datos).');
+        END IF;
+
+        v_id_acudiente := v_id_acudiente_in;
 
         IF PKGSMY_ACUDIENTES_DAO.f_existe(v_id_acudiente) = FALSE THEN
             RAISE_APPLICATION_ERROR(-20009, 'El familiar/acudiente indicado no existe.');

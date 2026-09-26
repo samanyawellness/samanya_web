@@ -1313,15 +1313,49 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     try {
       await adminApi.familiares.registrarFamiliar(payload);
 
+      // Obtener el ID numérico real generado por la secuencia Oracle en lugar de Date.now()
+      let realId = newId;
+      try {
+        const respFam = await adminApi.familiares.consultarFamiliares(activeSede.id);
+        if (respFam && respFam.data) {
+          const identBuscada = limpiarIdentificacion(data.identificacion);
+          const matching = respFam.data.find(
+            (f: any) =>
+              (identBuscada && limpiarIdentificacion(String(f.identificacion)) === identBuscada) ||
+              (f.email && data.email && f.email.toLowerCase() === data.email.toLowerCase())
+          );
+          if (matching && matching.id) {
+            realId = Number(matching.id);
+          }
+        }
+      } catch (e) {
+        console.warn('Error resolviendo ID real del familiar registrado:', e);
+      }
+
       const nuevoFamiliar: FamiliarAcudiente = {
         ...data,
-        id: newId,
+        id: realId,
         nombreCompleto,
         residentesAsociados,
         fotoUrl: data.fotoUrl
       };
 
       setFamiliares((prev) => [nuevoFamiliar, ...prev]);
+
+      // Si se vinculó a un residente, actualizar el ID del acudiente en el residente
+      if (data.idResidenteVinculado && realId !== newId) {
+        setResidentes((prev) =>
+          prev.map((r) =>
+            r.id === data.idResidenteVinculado
+              ? {
+                  ...r,
+                  acudientes: r.acudientes.map((a) => (a.id === newId ? { ...a, id: realId } : a))
+                }
+              : r
+          )
+        );
+      }
+
       showToast(`✅ Familiar ${nombreCompleto} registrado exitosamente en la base de datos Oracle`, 'success');
     } catch (err: any) {
       console.error('[Error registrarFamiliar Oracle]:', err);
@@ -1876,8 +1910,31 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     idFamiliar: number,
     data: Partial<FamiliarAcudiente> & { esPrincipal?: boolean }
   ) => {
+    let idReal = idFamiliar;
+    // Si el ID proviene de Date.now() (excede los 9-10 dígitos de NUMBER(10) en Oracle)
+    if (idReal > 999999999) {
+      try {
+        const respFam = await adminApi.familiares.consultarFamiliares(activeSede.id);
+        if (respFam && respFam.data) {
+          const famActual = familiares.find((f) => f.id === idFamiliar);
+          const identBuscada = limpiarIdentificacion(String(data.identificacion || famActual?.identificacion || ''));
+          const emailBuscado = (data.email || famActual?.email || '').toLowerCase();
+          const matching = respFam.data.find(
+            (f: any) =>
+              (identBuscada && limpiarIdentificacion(String(f.identificacion)) === identBuscada) ||
+              (f.email && emailBuscado && f.email.toLowerCase() === emailBuscado)
+          );
+          if (matching && matching.id) {
+            idReal = Number(matching.id);
+          }
+        }
+      } catch (e) {
+        console.warn('Error resolviendo ID real del familiar:', e);
+      }
+    }
+
     const payload = {
-      idAcudiente: idFamiliar,
+      idAcudiente: idReal,
       nombres: data.nombres,
       apellidos: data.apellidos,
       identificacion: data.identificacion ? limpiarIdentificacion(data.identificacion) : undefined,
@@ -1908,7 +1965,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     setFamiliares((prev) =>
       prev.map((f) => {
-        if (f.id !== idFamiliar) return f;
+        if (f.id !== idFamiliar && f.id !== idReal) return f;
         const updatedResidentesAsociados =
           data.esPrincipal !== undefined
             ? f.residentesAsociados.map((ra) => ({ ...ra, esPrincipal: data.esPrincipal! }))
@@ -1917,6 +1974,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         return {
           ...f,
           ...data,
+          id: idReal,
           residentesAsociados: updatedResidentesAsociados,
           nombreCompleto:
             nombreCompleto ||
@@ -1931,9 +1989,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       prev.map((r) => ({
         ...r,
         acudientes: r.acudientes.map((a) => {
-          if (a.id !== idFamiliar) return a;
+          if (a.id !== idFamiliar && a.id !== idReal) return a;
           return {
             ...a,
+            id: idReal,
             nombreCompleto: nombreCompleto || a.nombreCompleto,
             telefono: data.telefonoPrincipal || a.telefono,
             email: data.email || a.email,
@@ -1943,20 +2002,69 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       }))
     );
 
+    setSelectedResidente((curr) => {
+      if (!curr) return null;
+      return {
+        ...curr,
+        acudientes: curr.acudientes.map((a) => {
+          if (a.id !== idFamiliar && a.id !== idReal) return a;
+          return {
+            ...a,
+            id: idReal,
+            nombreCompleto: nombreCompleto || a.nombreCompleto,
+            telefono: data.telefonoPrincipal || a.telefono,
+            email: data.email || a.email,
+            esPrincipal: data.esPrincipal !== undefined ? data.esPrincipal : a.esPrincipal
+          };
+        })
+      };
+    });
+
     showToast('Información del familiar/acudiente actualizada exitosamente', 'success');
   };
 
   // 10. Eliminar Familiar
   const eliminarFamiliar = async (idFamiliar: number) => {
-    await adminApi.familiares.eliminarFamiliar({ idAcudiente: idFamiliar });
+    let idReal = idFamiliar;
+    if (idReal > 999999999) {
+      const fam = familiares.find((f) => f.id === idFamiliar);
+      if (fam) {
+        try {
+          const respFam = await adminApi.familiares.consultarFamiliares(activeSede.id);
+          if (respFam && respFam.data) {
+            const identBuscada = limpiarIdentificacion(fam.identificacion);
+            const matching = respFam.data.find(
+              (f: any) =>
+                (identBuscada && limpiarIdentificacion(String(f.identificacion)) === identBuscada) ||
+                (f.email && fam.email && f.email.toLowerCase() === fam.email.toLowerCase())
+            );
+            if (matching && matching.id) {
+              idReal = Number(matching.id);
+            }
+          }
+        } catch (e) {
+          console.warn('Error resolviendo ID real para eliminar:', e);
+        }
+      }
+    }
 
-    setFamiliares((prev) => prev.filter((f) => f.id !== idFamiliar));
+    await adminApi.familiares.eliminarFamiliar({ idAcudiente: idReal });
+
+    setFamiliares((prev) => prev.filter((f) => f.id !== idFamiliar && f.id !== idReal));
     setResidentes((prev) =>
       prev.map((r) => ({
         ...r,
-        acudientes: r.acudientes.filter((a) => a.id !== idFamiliar)
+        acudientes: r.acudientes.filter((a) => a.id !== idFamiliar && a.id !== idReal)
       }))
     );
+
+    setSelectedResidente((curr) => {
+      if (!curr) return null;
+      return {
+        ...curr,
+        acudientes: curr.acudientes.filter((a) => a.id !== idFamiliar && a.id !== idReal)
+      };
+    });
 
     showToast('Familiar / Acudiente eliminado exitosamente', 'info');
   };

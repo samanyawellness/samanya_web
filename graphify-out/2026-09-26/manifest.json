@@ -1182,15 +1182,15 @@
     "semantic_hash": "b03454a5e38fe63cb9689f922148ae21"
   },
   "backend/db/scripts/build_all.sql": {
-    "mtime": 1790393066.724935,
-    "seen": 1790394885.7207854,
-    "ast_hash": "d4a17b55485bcce3469f4add150f8433",
+    "mtime": 1790462985.1966326,
+    "seen": 1790463061.6236205,
+    "ast_hash": "e7ccd1459a5675af2eae0aa90a86767a",
     "semantic_hash": ""
   },
   "backend/db/scripts/datos_prueba_dummy.sql": {
-    "mtime": 1790460801.5430398,
-    "seen": 1790461370.881807,
-    "ast_hash": "5083f92b6587418989095e03c05dc258",
+    "mtime": 1790465049.831466,
+    "seen": 1790465122.1779797,
+    "ast_hash": "ded54e063266b02b464e240821f47824",
     "semantic_hash": ""
   },
   "backend/db/scripts/f_fecha_actual.sql": {
@@ -2220,9 +2220,9 @@
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_gestion_familiares.sql": {
-    "mtime": 1790306744.6538365,
-    "seen": 1790306999.3882284,
-    "ast_hash": "e64c2fcab310556f2f35223afb39bdf6",
+    "mtime": 1790465703.8047152,
+    "seen": 1790465769.7344117,
+    "ast_hash": "c2a19aa37836a3165f429afe46d00646",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_permisos_ausencias.sql": {
@@ -2280,9 +2280,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/ResidentDetailModal.tsx": {
-    "mtime": 1790400284.9952967,
-    "seen": 1790400450.7946112,
-    "ast_hash": "6347a85cf808140f1680ca01377c1cec",
+    "mtime": 1790464097.5276296,
+    "seen": 1790464384.4920719,
+    "ast_hash": "d2a3e835e4573f1a3b52e2615e2066d2",
     "semantic_hash": ""
   },
   "src/components/views/ClinicalSupervisionView.tsx": {
@@ -2328,9 +2328,9 @@
     "semantic_hash": ""
   },
   "src/context/AdminContext.tsx": {
-    "mtime": 1790461098.990682,
-    "seen": 1790461370.8821719,
-    "ast_hash": "4067e47678343e75f1f2c6bd85b9743a",
+    "mtime": 1790465681.266153,
+    "seen": 1790465769.734687,
+    "ast_hash": "bc70b2c1dba63070f92ed0db3117cdc0",
     "semantic_hash": ""
   },
   "src/data/seedData.ts": {
@@ -2370,9 +2370,9 @@
     "semantic_hash": ""
   },
   "vite.config.ts": {
-    "mtime": 1790387170.4176123,
-    "seen": 1790388010.7800941,
-    "ast_hash": "8a08bb51a11abb7259f8cb110f175321",
+    "mtime": 1790462563.5721228,
+    "seen": 1790463061.6240664,
+    "ast_hash": "25c4e5399e4d6294ba13250adcbcef6c",
     "semantic_hash": ""
   },
   "index.html": {
@@ -2466,9 +2466,9 @@
     "semantic_hash": ""
   },
   "backend/oracle_bridge.py": {
-    "mtime": 1790132444.343102,
-    "seen": 1790132716.5107243,
-    "ast_hash": "1180d1387c9a7e966a0e8d3c6e3ce33a",
+    "mtime": 1790462557.9745479,
+    "seen": 1790463061.6239367,
+    "ast_hash": "999df8ffd362b62b1a37ce0f43efb019",
     "semantic_hash": ""
   },
   "src/components/modals/RegisterLeaveModal.tsx": {
@@ -2591,70 +2591,16 @@
     "ast_hash": "9622e392dddfac051714d2fe2053920c",
     "semantic_hash": ""
   },
-  "public/uploads/residentes/Scarborough_Fair.jpg": {
-    "mtime": 1790388813.9554894,
-    "seen": 1790392080.395314,
-    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
+  "build_all.sql": {
+    "mtime": 1790462985.1966326,
+    "seen": 1790463061.6239395,
+    "ast_hash": "e7ccd1459a5675af2eae0aa90a86767a",
     "semantic_hash": ""
   },
-  "public/uploads/residentes/2_19234567/Documentos/f52ee9a2b44978ac5f3e244e2a4ccbb46e6d506f8427745c9093213a1f55003e.txt": {
-    "mtime": 1790397359.5965893,
-    "seen": 1790397572.943906,
-    "ast_hash": "17603a7adfa88737d21c1aded1753fd3",
-    "semantic_hash": ""
-  },
-  "public/uploads/residentes/3_19234567/Documentos/0d5186171dcf475a0371d3283a311a35a9f399e47a0d1366de103a85c69a648d.txt": {
-    "mtime": 1790397382.5378792,
-    "seen": 1790397572.943913,
-    "ast_hash": "09d92c3c53d8e30e4f0751f93728bacf",
-    "semantic_hash": ""
-  },
-  "backend/check_archivo.py": {
-    "mtime": 1790398252.9158654,
-    "seen": 1790400450.7938106,
-    "ast_hash": "073c7002aa77903c762ace600885c174",
-    "semantic_hash": ""
-  },
-  "public/Samanya/Sede Campestre El Nogal/Residentes/4_19876543/Documentos/1dc22a27e15ef76ba6f616f1542ed250c84b430f81c088f1905f320d5c772350.jpg": {
-    "mtime": 1790397738.4419293,
-    "seen": 1790400450.794987,
-    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
-    "semantic_hash": ""
-  },
-  "public/Samanya/Sede Campestre El Nogal/Residentes/4_19876543/Documentos/Scarborough_Fair.jpg": {
-    "mtime": 1790397738.4419293,
-    "seen": 1790400450.7949917,
-    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
-    "semantic_hash": ""
-  },
-  "public/Samanya/Sede Campestre La Calera/Residentes/4_19876543/Documentos/1dc22a27e15ef76ba6f616f1542ed250c84b430f81c088f1905f320d5c772350.jpg": {
-    "mtime": 1790397738.4419293,
-    "seen": 1790400450.7949955,
-    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
-    "semantic_hash": ""
-  },
-  "public/Samanya/Sede Campestre La Calera/Residentes/4_19876543/Documentos/Scarborough_Fair.jpg": {
-    "mtime": 1790397738.4419293,
-    "seen": 1790400450.7949991,
-    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
-    "semantic_hash": ""
-  },
-  "public/Samanya/Sede Central Bogot\u00e1/Residentes/4_19876543/Documentos/1dc22a27e15ef76ba6f616f1542ed250c84b430f81c088f1905f320d5c772350.jpg": {
-    "mtime": 1790397738.4419293,
-    "seen": 1790400450.7950058,
-    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
-    "semantic_hash": ""
-  },
-  "public/Samanya/Sede Central Bogot\u00e1/Residentes/4_19876543/Documentos/Scarborough_Fair.jpg": {
-    "mtime": 1790397738.4419293,
-    "seen": 1790400450.795011,
-    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
-    "semantic_hash": ""
-  },
-  "public/uploads/residentes/4_19876543/Documentos/1dc22a27e15ef76ba6f616f1542ed250c84b430f81c088f1905f320d5c772350.jpg": {
-    "mtime": 1790397738.4419293,
-    "seen": 1790400450.795015,
-    "ast_hash": "4af3502b54600d66fd2981e710103a7b",
+  "backend/db/scripts/sincronizar_secuencias.sql": {
+    "mtime": 1790465058.0754747,
+    "seen": 1790465122.1782296,
+    "ast_hash": "cb3c87de60a9aa97f37ce4b56952aa62",
     "semantic_hash": ""
   }
 }

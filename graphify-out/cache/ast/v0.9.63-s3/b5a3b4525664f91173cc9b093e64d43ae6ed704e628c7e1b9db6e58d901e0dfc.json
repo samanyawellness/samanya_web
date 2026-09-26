@@ -1,0 +1,1 @@
+{"nodes": [{"id": "$graphify-root$_backend_db_scripts_sincronizar_secuencias_sql", "label": "sincronizar_secuencias.sql", "file_type": "code", "source_file": "backend/db/scripts/sincronizar_secuencias.sql", "source_location": null}], "edges": []}

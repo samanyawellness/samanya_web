@@ -2019,67 +2019,40 @@ COMMIT;
 -- insertado manualmente para que nuevos INSERTs automáticos desde la app no fallen.
 -- Compatible con Oracle 11g / 12c / 19c / 21c / 23c.
 -- =============================================================================
-PROMPT 19. Sincronizando Secuencias Oracle...
+PROMPT 19. Sincronizando Secuencias Oracle dinámicamente (Todas las tablas)...
 
 DECLARE
-    TYPE t_seq_map IS RECORD (
-        v_table VARCHAR2(40),
-        v_seq   VARCHAR2(40)
-    );
-    TYPE t_seq_arr IS TABLE OF t_seq_map INDEX BY PLS_INTEGER;
-    v_arr t_seq_arr;
-
     v_max_id NUMBER;
     v_curr   NUMBER;
-    v_sql    VARCHAR2(200);
+    v_sql    VARCHAR2(500);
+    v_count  NUMBER := 0;
 BEGIN
-    v_arr(1).v_table := 'SMY_ORGANIZACIONES';               v_arr(1).v_seq := 'SEQ_SMY_ORGANIZACIONES';
-    v_arr(2).v_table := 'SMY_CENTROS';                      v_arr(2).v_seq := 'SEQ_SMY_CENTROS';
-    v_arr(3).v_table := 'SMY_ORGANIZACION_DUENOS';          v_arr(3).v_seq := 'SEQ_SMY_ORGANIZACION_DUENOS';
-    v_arr(4).v_table := 'SMY_CENTRO_USUARIOS';              v_arr(4).v_seq := 'SEQ_SMY_CENTRO_USUARIOS';
-    v_arr(5).v_table := 'SMY_USUARIOS';                     v_arr(5).v_seq := 'SEQ_SMY_USUARIOS';
-    v_arr(6).v_table := 'SMY_EMPLEADOS';                    v_arr(6).v_seq := 'SEQ_SMY_EMPLEADOS';
-    v_arr(7).v_table := 'SMY_RESIDENTES';                   v_arr(7).v_seq := 'SEQ_SMY_RESIDENTES';
-    v_arr(8).v_table := 'SMY_HISTORIAS_CLINICAS';           v_arr(8).v_seq := 'SEQ_SMY_HISTORIAS_CLINICAS';
-    v_arr(9).v_table := 'SMY_ACUDIENTES';                   v_arr(9).v_seq := 'SEQ_SMY_ACUDIENTES';
-    v_arr(10).v_table := 'SMY_RESIDENTE_ACUDIENTE';         v_arr(10).v_seq := 'SEQ_SMY_RESIDENTE_ACUDIENTE';
-    v_arr(11).v_table := 'SMY_TURNOS_ASIGNADOS';            v_arr(11).v_seq := 'SEQ_SMY_TURNOS_ASIGNADOS';
-    v_arr(12).v_table := 'SMY_MEDICAMENTOS_PRESCRITOS';     v_arr(12).v_seq := 'SEQ_SMY_MEDICAMENTOS_PRESCRITOS';
-    v_arr(13).v_table := 'SMY_REGISTROS_ADMIN_MED';         v_arr(13).v_seq := 'SEQ_SMY_REGISTROS_ADMIN_MED';
-    v_arr(14).v_table := 'SMY_SIGNOS_VITALES';              v_arr(14).v_seq := 'SEQ_SMY_SIGNOS_VITALES';
-    v_arr(15).v_table := 'SMY_BITACORA_RESIDENTE';         v_arr(15).v_seq := 'SEQ_SMY_BITACORA_RESIDENTE';
-    v_arr(16).v_table := 'SMY_CONSENTIMIENTOS';            v_arr(16).v_seq := 'SEQ_SMY_CONSENTIMIENTOS';
-    v_arr(17).v_table := 'SMY_CONSENTIMIENTO_DESTINATARIOS';v_arr(17).v_seq := 'SEQ_SMY_CONSENTIMIENTO_DESTINATARIOS';
-    v_arr(18).v_table := 'SMY_TAREAS_OPERATIVAS';          v_arr(18).v_seq := 'SEQ_SMY_TAREAS_OPERATIVAS';
-    v_arr(19).v_table := 'SMY_TAREA_RESIDENTES';           v_arr(19).v_seq := 'SEQ_SMY_TAREA_RESIDENTES';
-    v_arr(20).v_table := 'SMY_INCIDENTES';                 v_arr(20).v_seq := 'SEQ_SMY_INCIDENTES';
-    v_arr(21).v_table := 'SMY_INCIDENTE_RESIDENTES';       v_arr(21).v_seq := 'SEQ_SMY_INCIDENTE_RESIDENTES';
-    v_arr(22).v_table := 'SMY_EVENTOS_CALENDARIO';         v_arr(22).v_seq := 'SEQ_SMY_EVENTOS_CALENDARIO';
-    v_arr(23).v_table := 'SMY_CONVERSACIONES_CHAT';        v_arr(23).v_seq := 'SEQ_SMY_CONVERSACIONES_CHAT';
-    v_arr(24).v_table := 'SMY_CHAT_PARTICIPANTES';         v_arr(24).v_seq := 'SEQ_SMY_CHAT_PARTICIPANTES';
-    v_arr(25).v_table := 'SMY_MENSAJES_CHAT';              v_arr(25).v_seq := 'SEQ_SMY_MENSAJES_CHAT';
-    v_arr(26).v_table := 'SMY_NOTIFICACIONES_SISTEMA';     v_arr(26).v_seq := 'SEQ_SMY_NOTIFICACIONES_SISTEMA';
-    v_arr(27).v_table := 'SMY_SOLICITUDES_ADMISION';       v_arr(27).v_seq := 'SEQ_SMY_SOLICITUDES_ADMISION';
-    v_arr(28).v_table := 'SMY_SOLICITUD_ADM_CONTACTOS';    v_arr(28).v_seq := 'SEQ_SMY_SOL_ADM_CONTACTOS';
-    v_arr(29).v_table := 'SMY_PARAMETROS';                 v_arr(29).v_seq := 'SEQ_SMY_PARAMETROS';
-    v_arr(30).v_table := 'SMY_DOTACION_CATALOGO';          v_arr(30).v_seq := 'SEQ_SMY_DOTACION_CATALOGO';
-    v_arr(31).v_table := 'SMY_DOTACION_RESIDENTES';         v_arr(31).v_seq := 'SEQ_SMY_DOTACION_RESIDENTES';
-    v_arr(32).v_table := 'SMY_DOTACION_HISTORIAL';          v_arr(32).v_seq := 'SEQ_SMY_DOTACION_HISTORIAL';
-    v_arr(33).v_table := 'SMY_ARCHIVOS';                    v_arr(33).v_seq := 'SEQ_SMY_ARCHIVOS';
-
-    FOR i IN 1..v_arr.COUNT LOOP
+    -- Recorre dinámicamente todas las tablas con secuencias asociadas a sus triggers
+    -- Cumpliendo con el estándar: sintaxis tradicional de Oracle (sin ANSI JOIN)
+    FOR r IN (
+        SELECT t.table_name, d.referenced_name AS sequence_name
+          FROM user_triggers t,
+               user_dependencies d
+         WHERE t.trigger_name = d.name
+           AND d.type = 'TRIGGER'
+           AND d.referenced_type = 'SEQUENCE'
+         ORDER BY t.table_name
+    ) LOOP
         BEGIN
-            v_sql := 'SELECT NVL(MAX(ID), 0) FROM ' || v_arr(i).v_table;
+            v_sql := 'SELECT NVL(MAX(ID), 0) FROM "' || r.table_name || '"';
             EXECUTE IMMEDIATE v_sql INTO v_max_id;
 
-            LOOP
-                v_sql := 'SELECT ' || v_arr(i).v_seq || '.NEXTVAL FROM DUAL';
-                EXECUTE IMMEDIATE v_sql INTO v_curr;
-                EXIT WHEN v_curr >= v_max_id;
-            END LOOP;
+            IF v_max_id > 0 THEN
+                LOOP
+                    v_sql := 'SELECT "' || r.sequence_name || '".NEXTVAL FROM DUAL';
+                    EXECUTE IMMEDIATE v_sql INTO v_curr;
+                    EXIT WHEN v_curr >= v_max_id;
+                END LOOP;
+                v_count := v_count + 1;
+            END IF;
         EXCEPTION
             WHEN OTHERS THEN
-                NULL; -- Continuar si la secuencia o tabla difiere
+                NULL;
         END;
     END LOOP;
 END;
