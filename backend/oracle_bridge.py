@@ -21,7 +21,7 @@ def get_connection():
     return oracledb.connect(
         user=os.environ.get('ORACLE_USER', 'SAMANYA'),
         password=os.environ.get('ORACLE_PASSWORD', 'T3k3r_2025_DEV'),
-        dsn=os.environ.get('ORACLE_DSN', 'samanya_high'),
+        dsn=os.environ.get('ORACLE_DSN', 'samanya_tp'),
         config_dir=wallet_dir,
         wallet_location=wallet_dir,
         wallet_password=os.environ.get('ORACLE_WALLET_PASSWORD', 'Samanya2026*')
@@ -55,6 +55,10 @@ def main():
 
         conn = get_connection()
         c = conn.cursor()
+        try:
+            c.execute("ALTER SESSION DISABLE PARALLEL DML")
+        except Exception:
+            pass
 
         # 1. Si es una función que retorna CLOB JSON nativo (F_*)
         if proc.startswith("F_") or proc.startswith("FN_"):

@@ -167,18 +167,28 @@ interface AdminContextType {
     isOpen: boolean;
     title?: string;
     message: string;
-    type?: 'alert' | 'warning' | 'info' | 'success';
+    type?: 'alert' | 'warning' | 'info' | 'success' | 'danger';
     confirmText?: string;
+    cancelText?: string;
+    isConfirm?: boolean;
     onConfirm?: () => void;
+    onCancel?: () => void;
   } | null;
   showAlert: (
     message: string,
     title?: string,
-    type?: 'alert' | 'warning' | 'info' | 'success',
+    type?: 'alert' | 'warning' | 'info' | 'success' | 'danger',
     confirmText?: string,
     onConfirm?: () => void
   ) => void;
-  closeAlert: () => void;
+  showConfirm: (options: {
+    message: string;
+    title?: string;
+    type?: 'alert' | 'warning' | 'info' | 'success' | 'danger';
+    confirmText?: string;
+    cancelText?: string;
+  }) => Promise<boolean>;
+  closeAlert: (wasConfirmed?: boolean) => void;
 
   // Conexión y sincronización en vivo con Oracle
   isSyncingGlobal: boolean;
@@ -666,20 +676,23 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     setTimeout(() => setToast(null), 3800);
   };
 
-  // Diálogo / Alerta con estilo institucional Samanya
+  // Diálogo / Alerta y Confirmación con estilo institucional Samanya
   const [alertModal, setAlertModal] = useState<{
     isOpen: boolean;
     title?: string;
     message: string;
-    type?: 'alert' | 'warning' | 'info' | 'success';
+    type?: 'alert' | 'warning' | 'info' | 'success' | 'danger';
     confirmText?: string;
+    cancelText?: string;
+    isConfirm?: boolean;
     onConfirm?: () => void;
+    onCancel?: () => void;
   } | null>(null);
 
   const showAlert = (
     message: string,
     title?: string,
-    type: 'alert' | 'warning' | 'info' | 'success' = 'alert',
+    type: 'alert' | 'warning' | 'info' | 'success' | 'danger' = 'alert',
     confirmText?: string,
     onConfirm?: () => void
   ) => {
@@ -688,12 +701,48 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       title,
       message,
       type,
-      confirmText,
+      confirmText: confirmText || 'Aceptar',
+      isConfirm: false,
       onConfirm
     });
   };
 
-  const closeAlert = () => {
+  const showConfirm = (options: {
+    message: string;
+    title?: string;
+    type?: 'alert' | 'warning' | 'info' | 'success' | 'danger';
+    confirmText?: string;
+    cancelText?: string;
+  }): Promise<boolean> => {
+    return new Promise((resolve) => {
+      setAlertModal({
+        isOpen: true,
+        title: options.title || 'Confirmación requerida',
+        message: options.message,
+        type: options.type || 'warning',
+        confirmText: options.confirmText || 'Aceptar',
+        cancelText: options.cancelText || 'Cancelar',
+        isConfirm: true,
+        onConfirm: () => {
+          setAlertModal(null);
+          resolve(true);
+        },
+        onCancel: () => {
+          setAlertModal(null);
+          resolve(false);
+        }
+      });
+    });
+  };
+
+  const closeAlert = (wasConfirmed: boolean = false) => {
+    if (alertModal) {
+      if (wasConfirmed && alertModal.onConfirm) {
+        alertModal.onConfirm();
+      } else if (!wasConfirmed && alertModal.onCancel) {
+        alertModal.onCancel();
+      }
+    }
     setAlertModal(null);
   };
 
@@ -2026,13 +2075,15 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   // 10. Eliminar Familiar
   const eliminarFamiliar = async (idFamiliar: number) => {
     let idReal = idFamiliar;
+    const fam = familiares.find((f) => f.id === idFamiliar);
+    const nombreBuscado = fam?.nombreCompleto;
+    const identBuscada = fam ? limpiarIdentificacion(fam.identificacion) : '';
+
     if (idReal > 999999999) {
-      const fam = familiares.find((f) => f.id === idFamiliar);
       if (fam) {
         try {
           const respFam = await adminApi.familiares.consultarFamiliares(activeSede.id);
           if (respFam && respFam.data) {
-            const identBuscada = limpiarIdentificacion(fam.identificacion);
             const matching = respFam.data.find(
               (f: any) =>
                 (identBuscada && limpiarIdentificacion(String(f.identificacion)) === identBuscada) ||
@@ -2050,11 +2101,23 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
     await adminApi.familiares.eliminarFamiliar({ idAcudiente: idReal });
 
-    setFamiliares((prev) => prev.filter((f) => f.id !== idFamiliar && f.id !== idReal));
+    setFamiliares((prev) =>
+      prev.filter(
+        (f) =>
+          f.id !== idFamiliar &&
+          f.id !== idReal &&
+          (!identBuscada || limpiarIdentificacion(f.identificacion) !== identBuscada)
+      )
+    );
     setResidentes((prev) =>
       prev.map((r) => ({
         ...r,
-        acudientes: r.acudientes.filter((a) => a.id !== idFamiliar && a.id !== idReal)
+        acudientes: r.acudientes.filter(
+          (a) =>
+            a.id !== idFamiliar &&
+            a.id !== idReal &&
+            (!nombreBuscado || a.nombreCompleto !== nombreBuscado)
+        )
       }))
     );
 
@@ -2062,7 +2125,12 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       if (!curr) return null;
       return {
         ...curr,
-        acudientes: curr.acudientes.filter((a) => a.id !== idFamiliar && a.id !== idReal)
+        acudientes: curr.acudientes.filter(
+          (a) =>
+            a.id !== idFamiliar &&
+            a.id !== idReal &&
+            (!nombreBuscado || a.nombreCompleto !== nombreBuscado)
+        )
       };
     });
 
@@ -2157,6 +2225,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         alertModal,
         showAlert,
         closeAlert,
+        showConfirm,
         catalogoDotacion,
         dotaciones,
         isGestionDotacionOpen,

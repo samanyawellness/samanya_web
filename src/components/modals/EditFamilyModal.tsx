@@ -11,7 +11,9 @@ export const EditFamilyModal: React.FC = () => {
     isEditFamiliarOpen,
     setIsEditFamiliarOpen,
     actualizarFamiliar,
-    eliminarFamiliar
+    eliminarFamiliar,
+    showConfirm,
+    showAlert
   } = useAdmin();
 
   const [formData, setFormData] = useState<Partial<FamiliarAcudiente>>({});
@@ -69,12 +71,12 @@ export const EditFamilyModal: React.FC = () => {
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!formData.nombres?.trim() || !formData.apellidos?.trim() || !formData.identificacion?.trim() || !formData.telefonoPrincipal?.trim() || !formData.email?.trim()) {
-      alert('Por favor complete los campos obligatorios: nombres, apellidos, identificación, teléfono y correo electrónico.');
+      showAlert('Por favor complete los campos obligatorios: nombres, apellidos, identificación, teléfono y correo electrónico.', 'Campos Requeridos', 'warning');
       return;
     }
     const emailRegex = /^[^\s@]+@[^\s@]+\.[^\s@]+$/;
     if (!emailRegex.test(formData.email.trim())) {
-      alert('Por favor ingrese un correo electrónico válido (ej. nombre@dominio.com).');
+      showAlert('Por favor ingrese un correo electrónico válido (ej. nombre@dominio.com).', 'Correo Inválido', 'warning');
       return;
     }
 
@@ -94,24 +96,29 @@ export const EditFamilyModal: React.FC = () => {
       handleClose();
     } catch (err: any) {
       console.error(err);
-      alert(`Error al actualizar el familiar:\n${err.message || 'Error en la base de datos'}`);
+      showAlert(`Error al actualizar el familiar:\n${err.message || 'Error en la base de datos'}`, 'Error en Base de Datos', 'alert');
     } finally {
       setLoading(false);
     }
   };
 
   const handleDelete = async () => {
-    const confirmDelete = window.confirm(
-      `¿Está seguro de eliminar al familiar/acudiente ${editingFamiliar.nombreCompleto}?\n\nEsta acción lo desvinculará de los residentes asociados y lo removerá del directorio institucional.`
-    );
+    const confirmDelete = await showConfirm({
+      title: 'Eliminar Familiar / Acudiente',
+      message: `¿Está seguro de eliminar al familiar/acudiente ${editingFamiliar.nombreCompleto}?\n\nEsta acción lo desvinculará de los residentes asociados y lo removerá del directorio institucional.`,
+      type: 'danger',
+      confirmText: 'Sí, Eliminar',
+      cancelText: 'Cancelar'
+    });
     if (!confirmDelete) return;
 
     setDeleting(true);
     try {
       await eliminarFamiliar(editingFamiliar.id);
       handleClose();
-    } catch (err) {
+    } catch (err: any) {
       console.error(err);
+      showAlert(`Error al eliminar el familiar:\n${err?.message || 'Error en el servidor'}`, 'Error al Eliminar', 'alert');
     } finally {
       setDeleting(false);
     }

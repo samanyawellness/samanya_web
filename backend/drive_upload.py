@@ -153,7 +153,7 @@ def get_oracle_conn():
         return oracledb.connect(
             user='SAMANYA',
             password='T3k3r_2025_DEV',
-            dsn='samanya_high',
+            dsn=os.environ.get('ORACLE_DSN', 'samanya_tp'),
             config_dir='./wallet',
             wallet_location='./wallet',
             wallet_password='Samanya2026*'

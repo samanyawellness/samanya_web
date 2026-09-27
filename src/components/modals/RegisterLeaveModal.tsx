@@ -23,7 +23,9 @@ export const RegisterLeaveModal: React.FC = () => {
     setIsRegisterLeaveOpen,
     trabajadores,
     activeSede,
-    registrarPermiso
+    registrarPermiso,
+    showConfirm,
+    showAlert
   } = useAdmin();
 
   // Filtrar trabajadores de la sede activa
@@ -81,7 +83,7 @@ export const RegisterLeaveModal: React.FC = () => {
     if (file) {
       // Validar tamaño máximo 25MB
       if (file.size > 25 * 1024 * 1024) {
-        alert('El archivo supera el tamaño máximo permitido de 25MB.');
+        showAlert('El archivo supera el tamaño máximo permitido de 25MB.', 'Archivo muy pesado', 'warning');
         return;
       }
       setSelectedFile(file);
@@ -99,23 +101,23 @@ export const RegisterLeaveModal: React.FC = () => {
     e.preventDefault();
 
     if (!selectedTrabajadorId) {
-      alert('Por favor seleccione un colaborador de Talento Humano.');
+      showAlert('Por favor seleccione un colaborador de Talento Humano.', 'Selección Requerida', 'warning');
       return;
     }
 
     if (!motivo.trim()) {
-      alert('Por favor ingrese el motivo o justificación de la novedad.');
+      showAlert('Por favor ingrese el motivo o justificación de la novedad.', 'Campo Requerido', 'warning');
       return;
     }
 
     if (new Date(fechaFin) < new Date(fechaInicio)) {
-      alert('La fecha de fin no puede ser anterior a la fecha de inicio.');
+      showAlert('La fecha de fin no puede ser anterior a la fecha de inicio.', 'Rango Inválido', 'warning');
       return;
     }
 
     const trabajador = trabajadores.find((t) => t.id === Number(selectedTrabajadorId));
     if (!trabajador) {
-      alert('El colaborador seleccionado no es válido.');
+      showAlert('El colaborador seleccionado no es válido.', 'Colaborador no encontrado', 'alert');
       return;
     }
 
@@ -148,9 +150,13 @@ export const RegisterLeaveModal: React.FC = () => {
         } catch (uploadError: any) {
           console.error('Error durante la subida a Drive / SMY_ARCHIVOS:', uploadError);
           const errDetail = uploadError?.message || String(uploadError);
-          const confirmProceed = window.confirm(
-            `Aviso sobre Google Drive:\n\n${errDetail}\n\n¿Desea registrar el permiso de todos modos en modo local (sin respaldo en Google Drive) o prefiere Cancelar para renovar las credenciales?`
-          );
+          const confirmProceed = await showConfirm({
+            title: 'Aviso sobre Google Drive',
+            message: `${errDetail}\n\n¿Desea registrar el permiso de todos modos en modo local (sin respaldo en Google Drive) o prefiere Cancelar para renovar las credenciales?`,
+            type: 'warning',
+            confirmText: 'Registrar en modo local',
+            cancelText: 'Cancelar'
+          });
           if (!confirmProceed) {
             setIsSubmitting(false);
             return;
@@ -197,7 +203,7 @@ export const RegisterLeaveModal: React.FC = () => {
       setIsRegisterLeaveOpen(false);
     } catch (error) {
       console.error('Error al registrar permiso:', error);
-      alert('Ocurrió un error al registrar la novedad de personal.');
+      showAlert('Ocurrió un error al registrar la novedad de personal.', 'Error', 'alert');
     } finally {
       setIsSubmitting(false);
       setSubmitStepText('');

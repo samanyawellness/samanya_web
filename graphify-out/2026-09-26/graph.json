@@ -13082,7 +13082,7 @@
       "file_type": "code",
       "norm_label": "adminprovider()",
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L195"
+      "source_location": "L205"
     },
     {
       "id": "src_context_admincontext_useadmin",
@@ -13094,7 +13094,7 @@
       "file_type": "code",
       "norm_label": "useadmin()",
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L2164"
+      "source_location": "L2259"
     },
     {
       "id": "src_services_aiservice_buildsystemprompt",
@@ -35686,7 +35686,7 @@
       "file_type": "code",
       "norm_label": "admincontext",
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L193"
+      "source_location": "L203"
     },
     {
       "id": "src_data_seeddata",
@@ -63298,7 +63298,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/modals/EditFamilyModal.tsx",
-      "source_location": "L15",
+      "source_location": "L17",
       "weight": 1.0
     },
     {
@@ -63310,7 +63310,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/modals/EditFamilyModal.tsx",
-      "source_location": "L29",
+      "source_location": "L31",
       "weight": 1.0
     },
     {
@@ -63430,7 +63430,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/modals/GestionDotacionModal.tsx",
-      "source_location": "L24",
+      "source_location": "L26",
       "weight": 1.0
     },
     {
@@ -63490,7 +63490,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/modals/RegisterLeaveModal.tsx",
-      "source_location": "L133",
+      "source_location": "L135",
       "weight": 1.0
     },
     {
@@ -63502,7 +63502,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/modals/RegisterLeaveModal.tsx",
-      "source_location": "L263",
+      "source_location": "L269",
       "weight": 1.0
     },
     {
@@ -63514,7 +63514,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/modals/RegisterLeaveModal.tsx",
-      "source_location": "L27",
+      "source_location": "L29",
       "weight": 1.0
     },
     {
@@ -63610,7 +63610,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/modals/ResidentDetailModal.tsx",
-      "source_location": "L49",
+      "source_location": "L50",
       "weight": 1.0
     },
     {
@@ -63754,7 +63754,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L394",
+      "source_location": "L404",
       "weight": 1.0
     },
     {
@@ -120460,7 +120460,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L193",
+      "source_location": "L203",
       "weight": 1.0
     },
     {
@@ -120471,7 +120471,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L195",
+      "source_location": "L205",
       "weight": 1.0
     },
     {
@@ -120482,7 +120482,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L2164",
+      "source_location": "L2259",
       "weight": 1.0
     },
     {
@@ -124016,5 +124016,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "c1007e93f25294bf88f8a20847d3f8b2532600ff"
+  "built_at_commit": "1d57540748f96ddf9cc5aecd582d82ce4c022246"
 }

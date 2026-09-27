@@ -2280,9 +2280,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/ResidentDetailModal.tsx": {
-    "mtime": 1790464097.5276296,
-    "seen": 1790464384.4920719,
-    "ast_hash": "d2a3e835e4573f1a3b52e2615e2066d2",
+    "mtime": 1790466281.100587,
+    "seen": 1790466361.7518585,
+    "ast_hash": "6e4daa492c2d9dade4b1f25ee50551a8",
     "semantic_hash": ""
   },
   "src/components/views/ClinicalSupervisionView.tsx": {
@@ -2328,9 +2328,9 @@
     "semantic_hash": ""
   },
   "src/context/AdminContext.tsx": {
-    "mtime": 1790465681.266153,
-    "seen": 1790465769.734687,
-    "ast_hash": "bc70b2c1dba63070f92ed0db3117cdc0",
+    "mtime": 1790468174.2384045,
+    "seen": 1790468223.2472072,
+    "ast_hash": "7fd00d7fad54ffd2a64c99d00e25a919",
     "semantic_hash": ""
   },
   "src/data/seedData.ts": {
@@ -2394,9 +2394,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/EditFamilyModal.tsx": {
-    "mtime": 1790385287.2818234,
-    "seen": 1790385614.5079699,
-    "ast_hash": "7b4303bd45ba1f0da1e3c7eb16bb4cb1",
+    "mtime": 1790468152.075536,
+    "seen": 1790468223.2471592,
+    "ast_hash": "0450f37c8c86da05113e630bff8a122c",
     "semantic_hash": ""
   },
   "src/components/modals/EditResidentModal.tsx": {
@@ -2472,9 +2472,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/RegisterLeaveModal.tsx": {
-    "mtime": 1790461111.1569035,
-    "seen": 1790461370.8821468,
-    "ast_hash": "cd0e1883966904621993db1c4ff202f4",
+    "mtime": 1790467558.7238784,
+    "seen": 1790467619.2688527,
+    "ast_hash": "5c848436f5af67857e6434722f1a3653",
     "semantic_hash": ""
   },
   "src/components/modals/LeaveAttachmentModal.tsx": {
@@ -2532,9 +2532,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/GestionDotacionModal.tsx": {
-    "mtime": 1790127222.8332262,
-    "seen": 1790127533.6959844,
-    "ast_hash": "6b5eea44191dbf9192e6de4835d91980",
+    "mtime": 1790467517.5252578,
+    "seen": 1790467619.268843,
+    "ast_hash": "cd5b4c6ce4905225ee7227622058183c",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgca_smy_acudientes.sql": {
@@ -2568,9 +2568,9 @@
     "semantic_hash": ""
   },
   "src/components/common/SamanyaAlertModal.tsx": {
-    "mtime": 1790305132.968686,
-    "seen": 1790305502.4649026,
-    "ast_hash": "4266cdeed7d1337423440a1c00df15ff",
+    "mtime": 1790467400.104923,
+    "seen": 1790467619.268825,
+    "ast_hash": "d7f54d95771ad2e920919b21e5e35d01",
     "semantic_hash": ""
   },
   "src/components/modals/SolicitarDotacionModal.tsx": {

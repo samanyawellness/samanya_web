@@ -20,7 +20,9 @@ export const GestionDotacionModal: React.FC = () => {
     setIsGestionDotacionOpen,
     catalogoDotacion,
     guardarElementoCatalogo,
-    eliminarElementoCatalogo
+    eliminarElementoCatalogo,
+    showConfirm,
+    showAlert
   } = useAdmin();
 
   const [categoriaFiltro, setCategoriaFiltro] = useState<string>('TODAS');
@@ -67,7 +69,7 @@ export const GestionDotacionModal: React.FC = () => {
   const handleGuardar = async (e: React.FormEvent) => {
     e.preventDefault();
     if (!elementoEditando.nombreElemento?.trim()) {
-      alert('Por favor ingrese el nombre del artículo.');
+      showAlert('Por favor ingrese el nombre del artículo.', 'Campo Requerido', 'warning');
       return;
     }
 
@@ -322,8 +324,15 @@ export const GestionDotacionModal: React.FC = () => {
                           </button>
                           <button
                             type="button"
-                            onClick={() => {
-                              if (confirm(`¿Desea eliminar "${item.nombreElemento}" de la plantilla?`)) {
+                            onClick={async () => {
+                              const confirmed = await showConfirm({
+                                title: 'Eliminar de Plantilla',
+                                message: `¿Desea eliminar "${item.nombreElemento}" de la plantilla del catálogo?`,
+                                type: 'danger',
+                                confirmText: 'Sí, Eliminar',
+                                cancelText: 'Cancelar'
+                              });
+                              if (confirmed) {
                                 eliminarElementoCatalogo(item.id);
                               }
                             }}
