@@ -39,6 +39,11 @@ export const UserProfileModal: React.FC = () => {
   const [telefono, setTelefono] = useState('');
   const [avatarUrl, setAvatarUrl] = useState('');
   const [isSavingProfile, setIsSavingProfile] = useState(false);
+  const [imgError, setImgError] = useState(false);
+
+  useEffect(() => {
+    setImgError(false);
+  }, [avatarUrl]);
 
   // Estado del formulario de cambio de clave
   const [claveActual, setClaveActual] = useState('');
@@ -230,10 +235,11 @@ export const UserProfileModal: React.FC = () => {
                 <div className="flex items-center gap-4">
                   {/* Avatar Circular o Iniciales */}
                   <div className="relative shrink-0">
-                    {avatarUrl && avatarUrl.trim() !== '' ? (
+                    {avatarUrl && avatarUrl.trim() !== '' && !imgError ? (
                       <img
                         src={resolverAvatarUrl(avatarUrl)}
-                        alt={nombreCompleto || 'Usuario'}
+                        alt=""
+                        onError={() => setImgError(true)}
                         className="w-18 h-18 rounded-full object-cover border-2 border-[#DCB87F] shadow-sm bg-white"
                       />
                     ) : (

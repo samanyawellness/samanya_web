@@ -81,7 +81,10 @@ export function resolverAvatarUrl(avatarUrl?: string, fallbackInitials?: string)
   }
 
   // Si ya es un asset local servido por la app
-  if (url.startsWith('/uploads/') || url.startsWith('/') || url.startsWith('data:')) {
+  if (url.startsWith('/uploads/')) {
+    return url.includes('?') ? url : `${url}?v=1`;
+  }
+  if (url.startsWith('/') || url.startsWith('data:')) {
     return url;
   }
 

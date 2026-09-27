@@ -1,4 +1,4 @@
-import React, { useState } from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAdmin } from '../../context/AdminContext';
 import {
   Building2,
@@ -57,6 +57,11 @@ export const AdminHeader: React.FC = () => {
   const [isQuickActionOpen, setIsQuickActionOpen] = useState(false);
   const [isNotificationOpen, setIsNotificationOpen] = useState(false);
   const [isSearchFocused, setIsSearchFocused] = useState(false);
+  const [avatarError, setAvatarError] = useState(false);
+
+  useEffect(() => {
+    setAvatarError(false);
+  }, [currentUser?.avatarUrl]);
 
   const query = searchQuery.trim().toLowerCase();
 
@@ -488,10 +493,11 @@ export const AdminHeader: React.FC = () => {
             title="Editar mi perfil y contraseña"
           >
             <div className="relative shrink-0">
-              {currentUser?.avatarUrl && currentUser.avatarUrl.trim() !== '' ? (
+              {currentUser?.avatarUrl && currentUser.avatarUrl.trim() !== '' && !avatarError ? (
                 <img
                   src={resolverAvatarUrl(currentUser.avatarUrl)}
-                  alt={currentUser?.nombreCompleto || 'Admin'}
+                  alt=""
+                  onError={() => setAvatarError(true)}
                   className="w-9 h-9 rounded-full object-cover border border-[#B3803F]/40 shadow-2xs group-hover:border-[#182F28] transition-colors"
                 />
               ) : (

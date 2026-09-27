@@ -767,7 +767,11 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         avatarUrl: datos.avatarUrl
       });
       if (resp && resp.success) {
-        const finalAvatar = resp.user?.avatarUrl !== undefined ? resp.user.avatarUrl : datos.avatarUrl;
+        const rawAvatar = resp.user?.avatarUrl !== undefined ? resp.user.avatarUrl : datos.avatarUrl;
+        const finalAvatar = rawAvatar && rawAvatar.startsWith('/uploads/')
+          ? `${rawAvatar.split('?')[0]}?t=${Date.now()}`
+          : rawAvatar;
+
         const updatedUser: AuthUser = {
           ...currentUser,
           nombreCompleto: datos.nombreCompleto,

@@ -1,4 +1,4 @@
-import React from 'react';
+import React, { useState, useEffect } from 'react';
 import { useAdmin, AdminTab } from '../../context/AdminContext';
 import {
   LayoutDashboard,
@@ -29,6 +29,11 @@ export const AdminSidebar: React.FC = () => {
     showConfirm,
     setIsUserProfileOpen
   } = useAdmin();
+
+  const [avatarError, setAvatarError] = useState(false);
+  useEffect(() => {
+    setAvatarError(false);
+  }, [currentUser?.avatarUrl]);
 
   const sedeResidentesCount = residentes.filter(r => r.idCentro === activeSede.id).length;
   const permisosPendientesCount = permisos.filter(p => p.estado === 'Pendiente').length;
@@ -154,10 +159,11 @@ export const AdminSidebar: React.FC = () => {
               title="Click para editar mi perfil o cambiar contraseña"
             >
               <div className="relative shrink-0">
-                {currentUser.avatarUrl && currentUser.avatarUrl.trim() !== '' ? (
+                {currentUser.avatarUrl && currentUser.avatarUrl.trim() !== '' && !avatarError ? (
                   <img
                     src={resolverAvatarUrl(currentUser.avatarUrl)}
-                    alt={currentUser.nombreCompleto}
+                    alt=""
+                    onError={() => setAvatarError(true)}
                     className="w-8 h-8 rounded-full object-cover border border-[#DCB87F]/40 group-hover:border-[#DCB87F] transition-colors"
                   />
                 ) : (

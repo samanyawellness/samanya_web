@@ -2,6 +2,8 @@ import { defineConfig, loadEnv, Plugin } from 'vite';
 import react from '@vitejs/plugin-react';
 import tailwindcss from '@tailwindcss/vite';
 import { spawn } from 'child_process';
+import fs from 'fs';
+import path from 'path';
 
 function samanyaApiPlugin(): Plugin {
   return {
@@ -67,6 +69,27 @@ function samanyaApiPlugin(): Plugin {
           res.setHeader('Cache-Control', 'public, max-age=86400');
           py.stdout.pipe(res);
           return;
+        }
+
+        if (req.url?.startsWith('/uploads/')) {
+          const cleanUrl = req.url.split('?')[0];
+          const filePath = path.join(process.cwd(), 'public', cleanUrl);
+          if (fs.existsSync(filePath)) {
+            const ext = path.extname(filePath).toLowerCase();
+            const mimeMap: Record<string, string> = {
+              '.jpg': 'image/jpeg',
+              '.jpeg': 'image/jpeg',
+              '.png': 'image/png',
+              '.webp': 'image/webp',
+              '.gif': 'image/gif',
+              '.svg': 'image/svg+xml'
+            };
+            res.setHeader('Content-Type', mimeMap[ext] || 'application/octet-stream');
+            res.setHeader('Access-Control-Allow-Origin', '*');
+            res.setHeader('Cache-Control', 'public, max-age=86400');
+            fs.createReadStream(filePath).pipe(res);
+            return;
+          }
         }
 
         if (req.url === '/api/health') {
