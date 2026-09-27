@@ -209,17 +209,43 @@ def main():
                         ext = "png" if "png" in header else ("webp" if "webp" in header else "jpg")
                         img_bytes = base64.b64decode(b64data)
                         img_hash = hashlib.sha256(img_bytes).hexdigest()
-
-                        uploads_user_dir = os.path.abspath("public/uploads/usuarios")
-                        os.makedirs(uploads_user_dir, exist_ok=True)
                         file_name = f"usuario_{id_usuario}.{ext}"
-                        abs_file_path = os.path.join(uploads_user_dir, file_name)
-                        with open(abs_file_path, "wb") as f_img:
-                            f_img.write(img_bytes)
 
-                        final_avatar_url = f"/uploads/usuarios/{file_name}"
+                        # 1. Intentar subir prioritariamente a Google Drive
+                        gdrive_file_id = None
+                        gdrive_url = None
+                        try:
+                            from backend.drive_upload import get_access_token, find_or_create_folder, upload_file_to_drive
+                            token = get_access_token()
+                            if token:
+                                f_samanya = find_or_create_folder(token, 'Samanya')
+                                f_sede = find_or_create_folder(token, 'Sede Central Bogotá', parent_id=f_samanya)
+                                f_mod = find_or_create_folder(token, 'Usuarios', parent_id=f_sede)
+                                f_user = find_or_create_folder(token, f"{id_usuario}_usuario", parent_id=f_mod)
+                                f_docs = find_or_create_folder(token, 'Documentos', parent_id=f_user)
+                                upload_res = upload_file_to_drive(token, f_docs, file_name, img_bytes, mime_type=f"image/{ext}")
+                                if upload_res and upload_res.get("fileId"):
+                                    gdrive_file_id = upload_res["fileId"]
+                                    gdrive_url = f"https://lh3.googleusercontent.com/d/{gdrive_file_id}"
+                        except Exception as gd_err:
+                            sys.stderr.write(f"Aviso Google Drive en oracle_bridge: {gd_err}\n")
 
-                        # Actualizar en BD en SMY_ARCHIVOS y asociar a SMY_USUARIOS
+                        # 2. Copia física local como respaldo
+                        uploads_user_dir = os.path.abspath("public/uploads/usuarios")
+                        try:
+                            os.makedirs(uploads_user_dir, exist_ok=True)
+                            abs_file_path = os.path.join(uploads_user_dir, file_name)
+                            with open(abs_file_path, "wb") as f_img:
+                                f_img.write(img_bytes)
+                        except Exception:
+                            pass
+
+                        # 3. Prioridad de visualización: URL de Google Drive
+                        final_avatar_url = gdrive_url or f"/uploads/usuarios/{file_name}"
+                        meta_dict = {"id_drive": gdrive_file_id, "ruta_drive": gdrive_url} if gdrive_file_id else None
+                        meta_str = json.dumps(meta_dict) if meta_dict else None
+
+                        # 4. Actualizar en BD en SMY_ARCHIVOS y asociar a SMY_USUARIOS
                         c.execute("SELECT id_archivo_foto_perfil FROM smy_usuarios WHERE id = :1", [id_usuario])
                         u_row = c.fetchone()
                         id_arc = u_row[0] if u_row else None
@@ -231,9 +257,10 @@ def main():
                                     extension = :ext,
                                     hash_archivo = :hash_val,
                                     tamano_bytes = :tam,
+                                    metadatos_json = :meta,
                                     fecha_ultima_modificacion = SYSDATE
                                 WHERE id = :id_arc
-                            """, {"ruta": final_avatar_url, "ext": ext, "hash_val": img_hash, "tam": len(img_bytes), "id_arc": id_arc})
+                            """, {"ruta": final_avatar_url, "ext": ext, "hash_val": img_hash, "tam": len(img_bytes), "meta": meta_str, "id_arc": id_arc})
                         else:
                             c.execute("SELECT SEQ_SMY_ARCHIVOS.NEXTVAL FROM DUAL")
                             new_id_arc = c.fetchone()[0]
@@ -241,9 +268,9 @@ def main():
                                 INSERT INTO smy_archivos (
                                     id, id_centro, id_clase_archivo, nombre_archivo, nombre_archivo_almacenado,
                                     hash_archivo, extension, tipo_mime, tamano_bytes, ruta_relativa,
-                                    ruta_completa_almacenamiento, id_estado_archivo, fecha_creacion
+                                    ruta_completa_almacenamiento, id_estado_archivo, metadatos_json, fecha_creacion
                                 ) VALUES (
-                                    :id, 1, 7, :nom, :nom, :hash_val, :ext, :mime, :tam, :ruta, :ruta, 1, SYSDATE
+                                    :id, 1, 7, :nom, :nom, :hash_val, :ext, :mime, :tam, :ruta, :ruta, 1, :meta, SYSDATE
                                 )
                             """, {
                                 "id": new_id_arc,
@@ -252,7 +279,8 @@ def main():
                                 "ext": ext,
                                 "mime": f"image/{ext}",
                                 "tam": len(img_bytes),
-                                "ruta": final_avatar_url
+                                "ruta": final_avatar_url,
+                                "meta": meta_str
                             })
                             c.execute("UPDATE smy_usuarios SET id_archivo_foto_perfil = :id_arc WHERE id = :id_u", {"id_arc": new_id_arc, "id_u": id_usuario})
                         conn.commit()

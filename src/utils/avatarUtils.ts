@@ -98,12 +98,11 @@ export function resolverAvatarUrl(avatarUrl?: string, fallbackInitials?: string)
     return '/uploads/talento_humano/27842950a090dfd62caa00788cab283a3a112305bde3599d8282036a02b2feba.jpg';
   }
 
-  // Si es un enlace de Google Drive (lh3 o drive.google.com)
+  // Si es un enlace de Google Drive (lh3 o drive.google.com), usar la ruta directa de Google CDN
   if (url.includes('googleusercontent.com') || url.includes('drive.google.com')) {
-    // Buscar el ID en export=view&id=XYZ o /d/XYZ o id=XYZ
     const match = url.match(/(?:id=|\/d\/)([a-zA-Z0-9_-]{20,})/);
     if (match && match[1]) {
-      return `/api/drive/foto/${match[1]}`;
+      return `https://lh3.googleusercontent.com/d/${match[1]}`;
     }
   }
 
