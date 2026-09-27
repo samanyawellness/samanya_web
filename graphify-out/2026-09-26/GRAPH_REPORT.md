@@ -1,7 +1,7 @@
 # Graph Report - SAMANYA_WEB  (2026-09-26)
 
 ## Corpus Check
-- 416 files · ~1,029,385 words
+- 416 files · ~1,029,778 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 27 file(s) not represented in the graph (top: (none) 5, .pkb 4, .pks 4)
 
