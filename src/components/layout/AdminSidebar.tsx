@@ -9,11 +9,26 @@ import {
   FileCheck2,
   Stethoscope,
   Building2,
-  ShieldCheck
+  ShieldCheck,
+  LogOut,
+  UserCog
 } from 'lucide-react';
+import { resolverAvatarUrl, DEFAULT_AVATAR, obtenerIniciales } from '../../utils/avatarUtils';
 
 export const AdminSidebar: React.FC = () => {
-  const { activeTab, setActiveTab, residentes, familiares, trabajadores, permisos, activeSede } = useAdmin();
+  const {
+    activeTab,
+    setActiveTab,
+    residentes,
+    familiares,
+    trabajadores,
+    permisos,
+    activeSede,
+    currentUser,
+    logout,
+    showConfirm,
+    setIsUserProfileOpen
+  } = useAdmin();
 
   const sedeResidentesCount = residentes.filter(r => r.idCentro === activeSede.id).length;
   const permisosPendientesCount = permisos.filter(p => p.estado === 'Pendiente').length;
@@ -128,14 +143,75 @@ export const AdminSidebar: React.FC = () => {
         })}
       </nav>
 
-      {/* Footer Info Sede */}
-      <div className="p-4 border-t border-white/10 bg-[#0E1F1A]/60">
-        <div className="text-xs text-[#9A917A] mb-1 font-mono">SEDE ACTIVA</div>
-        <div className="text-sm font-semibold text-white truncate">
-          {activeSede.nombre}
-        </div>
-        <div className="text-xs text-[#DCB87F]/80 truncate">
-          {activeSede.ciudad}
+      {/* Footer Info Usuario y Sede */}
+      <div className="p-4 border-t border-white/10 bg-[#0E1F1A]/80 space-y-3">
+        {currentUser && (
+          <div className="flex items-center justify-between gap-2 p-2 rounded-xl bg-white/5 border border-white/10 hover:bg-white/10 transition-colors">
+            <button
+              type="button"
+              onClick={() => setIsUserProfileOpen(true)}
+              className="flex items-center gap-2.5 min-w-0 text-left cursor-pointer group flex-1"
+              title="Click para editar mi perfil o cambiar contraseña"
+            >
+              <div className="relative shrink-0">
+                {currentUser.avatarUrl && currentUser.avatarUrl.trim() !== '' ? (
+                  <img
+                    src={resolverAvatarUrl(currentUser.avatarUrl)}
+                    alt={currentUser.nombreCompleto}
+                    className="w-8 h-8 rounded-full object-cover border border-[#DCB87F]/40 group-hover:border-[#DCB87F] transition-colors"
+                  />
+                ) : (
+                  <div
+                    className="w-8 h-8 rounded-full bg-[#182F28] border border-[#DCB87F]/60 text-[#DCB87F] flex items-center justify-center font-serif font-bold text-[11px] shadow-2xs tracking-wider select-none shrink-0"
+                    title={currentUser.nombreCompleto}
+                  >
+                    {obtenerIniciales(undefined, undefined, currentUser.nombreCompleto || 'Admin')}
+                  </div>
+                )}
+                <div className="absolute -bottom-0.5 -right-0.5 w-3 h-3 bg-[#DCB87F] rounded-full flex items-center justify-center">
+                  <UserCog className="w-2 h-2 text-[#182F28]" />
+                </div>
+              </div>
+              <div className="min-w-0 flex-1">
+                <div className="text-xs font-bold text-white truncate group-hover:text-[#DCB87F] transition-colors">
+                  {currentUser.nombreCompleto}
+                </div>
+                <div className="text-[10px] text-[#DCB87F] font-mono uppercase tracking-wider">
+                  {currentUser.nombreRol}
+                </div>
+              </div>
+            </button>
+
+            <button
+              type="button"
+              onClick={async () => {
+                const confirmed = await showConfirm({
+                  title: 'Cerrar Sesión',
+                  message: '¿Desea cerrar la sesión del portal administrativo?',
+                  type: 'warning',
+                  confirmText: 'Sí, Salir',
+                  cancelText: 'Permanecer'
+                });
+                if (confirmed) {
+                  logout();
+                }
+              }}
+              title="Cerrar Sesión"
+              className="p-1.5 rounded-lg text-[#9A917A] hover:text-[#E9A8A0] hover:bg-[#A4453A]/20 transition-colors cursor-pointer shrink-0"
+            >
+              <LogOut className="w-4 h-4" />
+            </button>
+          </div>
+        )}
+
+        <div>
+          <div className="text-[10px] text-[#9A917A] mb-0.5 font-mono tracking-wider">SEDE ACTIVA</div>
+          <div className="text-xs font-semibold text-white truncate">
+            {activeSede.nombre}
+          </div>
+          <div className="text-[11px] text-[#DCB87F]/80 truncate">
+            {activeSede.ciudad}
+          </div>
         </div>
       </div>
     </aside>

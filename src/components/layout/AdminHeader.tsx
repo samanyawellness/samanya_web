@@ -16,9 +16,11 @@ import {
   Users,
   ArrowRight,
   RefreshCw,
-  Database
+  Database,
+  LogOut,
+  UserCog
 } from 'lucide-react';
-import { resolverAvatarUrl, DEFAULT_AVATAR } from '../../utils/avatarUtils';
+import { resolverAvatarUrl, DEFAULT_AVATAR, obtenerIniciales } from '../../utils/avatarUtils';
 import { ResidentAvatar } from '../common/ResidentAvatar';
 
 export const AdminHeader: React.FC = () => {
@@ -44,7 +46,11 @@ export const AdminHeader: React.FC = () => {
     isSyncingGlobal,
     isOracleLive,
     sincronizarTodoConOracle,
-    limpiarCacheYReconectarOracle
+    limpiarCacheYReconectarOracle,
+    currentUser,
+    logout,
+    showConfirm,
+    setIsUserProfileOpen
   } = useAdmin();
 
   const [isSedeDropdownOpen, setIsSedeDropdownOpen] = useState(false);
@@ -473,17 +479,71 @@ export const AdminHeader: React.FC = () => {
           )}
         </div>
 
-        {/* Admin Profile */}
-        <div className="flex items-center gap-3 pl-3 border-l border-[#DEDBD1]">
-          <img
-            src="https://images.unsplash.com/photo-1573496359142-b8d87734a5a2?w=100&auto=format&fit=crop&q=80"
-            alt="Admin"
-            className="w-9 h-9 rounded-full object-cover border border-[#B3803F]/40 shadow-2xs"
-          />
-          <div className="hidden lg:block text-left leading-tight">
-            <div className="text-xs font-bold text-[#182F28]">Dra. Elena Valenzuela</div>
-            <div className="text-[11px] text-[#7A745F]">Directora Administrativa</div>
-          </div>
+        {/* Admin Profile & Logout */}
+        <div className="flex items-center gap-2.5 pl-3 border-l border-[#DEDBD1]">
+          <button
+            type="button"
+            onClick={() => setIsUserProfileOpen(true)}
+            className="flex items-center gap-2.5 p-1 rounded-xl hover:bg-[#F7F6F2] transition-colors text-left cursor-pointer group"
+            title="Editar mi perfil y contraseña"
+          >
+            <div className="relative shrink-0">
+              {currentUser?.avatarUrl && currentUser.avatarUrl.trim() !== '' ? (
+                <img
+                  src={resolverAvatarUrl(currentUser.avatarUrl)}
+                  alt={currentUser?.nombreCompleto || 'Admin'}
+                  className="w-9 h-9 rounded-full object-cover border border-[#B3803F]/40 shadow-2xs group-hover:border-[#182F28] transition-colors"
+                />
+              ) : (
+                <div
+                  className="w-9 h-9 rounded-full bg-[#182F28] border border-[#DCB87F]/60 text-[#DCB87F] flex items-center justify-center font-serif font-bold text-xs shadow-2xs tracking-wider select-none"
+                  title={currentUser?.nombreCompleto}
+                >
+                  {obtenerIniciales(undefined, undefined, currentUser?.nombreCompleto || 'Admin Principal')}
+                </div>
+              )}
+              <div className="absolute -bottom-0.5 -right-0.5 w-3.5 h-3.5 bg-[#182F28] text-white rounded-full flex items-center justify-center border border-white">
+                <UserCog className="w-2 h-2 text-[#DCB87F]" />
+              </div>
+            </div>
+            <div className="hidden lg:block text-left leading-tight">
+              <div className="text-xs font-bold text-[#182F28] max-w-[150px] truncate group-hover:text-[#B3803F] transition-colors">
+                {currentUser?.nombreCompleto || 'Administrador Principal'}
+              </div>
+              <div className="text-[11px] text-[#7A745F]">
+                {currentUser?.nombreRol || 'Administrador del Centro'}
+              </div>
+            </div>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setIsUserProfileOpen(true)}
+            className="w-8 h-8 rounded-xl bg-[#F7F6F2] hover:bg-[#ECE7DB] text-[#4B4636] hover:text-[#182F28] border border-[#DEDBD1] flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+            title="Editar perfil y cambiar contraseña"
+          >
+            <UserCog className="w-3.5 h-3.5 text-[#7A745F]" />
+          </button>
+
+          <button
+            type="button"
+            onClick={async () => {
+              const confirmed = await showConfirm({
+                title: 'Cerrar Sesión',
+                message: '¿Está seguro de cerrar su sesión de administrador?',
+                type: 'warning',
+                confirmText: 'Sí, Salir',
+                cancelText: 'Permanecer'
+              });
+              if (confirmed) {
+                logout();
+              }
+            }}
+            className="w-8 h-8 rounded-xl bg-[#F7F6F2] hover:bg-[#FBE8E6] text-[#7A745F] hover:text-[#A4453A] border border-[#DEDBD1] hover:border-[#E9A8A0] flex items-center justify-center transition-all cursor-pointer shadow-2xs"
+            title="Cerrar Sesión"
+          >
+            <LogOut className="w-3.5 h-3.5" />
+          </button>
         </div>
       </div>
     </header>

@@ -291,3 +291,13 @@ export type SolicitudDotacionPayload = {
   especificaciones?: string;
 };
 
+export type AuthUser = {
+  id: number;
+  username: string;
+  email: string;
+  nombreCompleto: string;
+  telefono?: string;
+  avatarUrl?: string;
+  rol: 'ADMIN';
+  nombreRol: string;
+};

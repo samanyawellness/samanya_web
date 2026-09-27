@@ -27,7 +27,9 @@ import { EditSedeModal } from './components/modals/EditSedeModal';
 import { GestionDotacionModal } from './components/modals/GestionDotacionModal';
 import { SolicitarDotacionModal } from './components/modals/SolicitarDotacionModal';
 import { ProgramarTurnosModal } from './components/modals/ProgramarTurnosModal';
+import { UserProfileModal } from './components/modals/UserProfileModal';
 import { SamanyaAiChat } from './components/chat/SamanyaAiChat';
+import { LoginView } from './components/views/LoginView';
 
 const AdminLayout: React.FC = () => {
   const { activeTab } = useAdmin();
@@ -67,6 +69,7 @@ const AdminLayout: React.FC = () => {
       <EditWorkerModal />
       <EditFamilyModal />
       <EditSedeModal />
+      <UserProfileModal />
 
       {/* Notificaciones Flotantes y Diálogos con Estilo Samanya */}
       <ToastNotification />
@@ -78,10 +81,26 @@ const AdminLayout: React.FC = () => {
   );
 };
 
+const AppContent: React.FC = () => {
+  const { isAuthenticated } = useAdmin();
+
+  if (!isAuthenticated) {
+    return (
+      <>
+        <LoginView />
+        <ToastNotification />
+        <SamanyaAlertModal />
+      </>
+    );
+  }
+
+  return <AdminLayout />;
+};
+
 export const App: React.FC = () => {
   return (
     <AdminProvider>
-      <AdminLayout />
+      <AppContent />
     </AdminProvider>
   );
 };

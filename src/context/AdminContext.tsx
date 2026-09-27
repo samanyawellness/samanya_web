@@ -12,7 +12,8 @@ import {
   DotacionResidente,
   HistorialCambioDotacion,
   SolicitudDotacionPayload,
-  ProgramarTurnosRangoPayload
+  ProgramarTurnosRangoPayload,
+  AuthUser
 } from '../types';
 import {
   SEED_SEDES,
@@ -38,6 +39,16 @@ export type AdminTab =
   | 'clinico';
 
 interface AdminContextType {
+  // Autenticación y Perfil de Administradores
+  currentUser: AuthUser | null;
+  isAuthenticated: boolean;
+  login: (usuario: string, password?: string) => Promise<{ success: boolean; error?: string }>;
+  logout: () => void;
+  isUserProfileOpen: boolean;
+  setIsUserProfileOpen: (open: boolean) => void;
+  updateProfile: (datos: { nombreCompleto: string; email: string; telefono?: string; avatarUrl?: string }) => Promise<boolean>;
+  changePassword: (datos: { claveActual: string; claveNueva: string }) => Promise<boolean>;
+
   // Navegación y Sedes
   activeTab: AdminTab;
   setActiveTab: (tab: AdminTab) => void;
@@ -674,6 +685,129 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const showToast = (message: string, type: 'success' | 'alert' | 'info' = 'success') => {
     setToast({ message, type });
     setTimeout(() => setToast(null), 3800);
+  };
+
+  // Autenticación de Administradores
+  const [currentUser, setCurrentUser] = useState<AuthUser | null>(() => {
+    const saved = localStorage.getItem('samanya_auth_user');
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (parsed && parsed.rol === 'ADMIN') {
+          return parsed;
+        }
+      } catch {}
+    }
+    return null;
+  });
+
+  const isAuthenticated = !!currentUser && currentUser.rol === 'ADMIN';
+
+  const login = async (usuario: string, password?: string): Promise<{ success: boolean; error?: string }> => {
+    try {
+      const resp = await adminApi.auth.login({ usuario, password });
+      if (resp && resp.success && resp.user) {
+        if (resp.user.rol !== 'ADMIN') {
+          return {
+            success: false,
+            error: `Acceso denegado: Este portal es exclusivo para Administradores. Su rol actual es '${resp.user.nombreRol}'.`
+          };
+        }
+        const userObj: AuthUser = {
+          id: resp.user.id,
+          username: resp.user.username,
+          email: resp.user.email,
+          nombreCompleto: resp.user.nombreCompleto,
+          telefono: resp.user.telefono,
+          avatarUrl: resp.user.avatarUrl,
+          rol: 'ADMIN',
+          nombreRol: resp.user.nombreRol
+        };
+        setCurrentUser(userObj);
+        localStorage.setItem('samanya_auth_user', JSON.stringify(userObj));
+        if (resp.token) {
+          localStorage.setItem('samanya_admin_token', resp.token);
+        }
+        showToast(`Bienvenido de nuevo, ${userObj.nombreCompleto}`, 'success');
+        return { success: true };
+      } else {
+        return {
+          success: false,
+          error: (resp as any)?.error || 'Credenciales no válidas.'
+        };
+      }
+    } catch (err: any) {
+      const msg = err.message || 'Error de conexión con el servidor.';
+      return { success: false, error: msg };
+    }
+  };
+
+  const logout = () => {
+    setCurrentUser(null);
+    localStorage.removeItem('samanya_auth_user');
+    localStorage.removeItem('samanya_admin_token');
+    showToast('Sesión finalizada correctamente', 'info');
+  };
+
+  const [isUserProfileOpen, setIsUserProfileOpen] = useState(false);
+
+  const updateProfile = async (datos: {
+    nombreCompleto: string;
+    email: string;
+    telefono?: string;
+    avatarUrl?: string;
+  }): Promise<boolean> => {
+    if (!currentUser) return false;
+    try {
+      const resp = await adminApi.auth.actualizarPerfil({
+        idUsuario: currentUser.id,
+        nombreCompleto: datos.nombreCompleto,
+        email: datos.email,
+        telefono: datos.telefono,
+        avatarUrl: datos.avatarUrl
+      });
+      if (resp && resp.success) {
+        const finalAvatar = resp.user?.avatarUrl !== undefined ? resp.user.avatarUrl : datos.avatarUrl;
+        const updatedUser: AuthUser = {
+          ...currentUser,
+          nombreCompleto: datos.nombreCompleto,
+          email: datos.email,
+          telefono: datos.telefono || currentUser.telefono,
+          avatarUrl: finalAvatar
+        };
+        setCurrentUser(updatedUser);
+        localStorage.setItem('samanya_auth_user', JSON.stringify(updatedUser));
+        showToast('Perfil actualizado correctamente', 'success');
+        return true;
+      } else {
+        showToast((resp as any)?.error || 'No se pudo actualizar el perfil', 'alert');
+        return false;
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Error al actualizar perfil en Oracle', 'alert');
+      return false;
+    }
+  };
+
+  const changePassword = async (datos: { claveActual: string; claveNueva: string }): Promise<boolean> => {
+    if (!currentUser) return false;
+    try {
+      const resp = await adminApi.auth.cambiarClave({
+        idUsuario: currentUser.id,
+        claveActual: datos.claveActual,
+        claveNueva: datos.claveNueva
+      });
+      if (resp && resp.success) {
+        showToast('Contraseña actualizada exitosamente', 'success');
+        return true;
+      } else {
+        showToast((resp as any)?.error || 'No se pudo actualizar la contraseña', 'alert');
+        return false;
+      }
+    } catch (err: any) {
+      showToast(err.message || 'Error al cambiar contraseña en Oracle', 'alert');
+      return false;
+    }
   };
 
   // Diálogo / Alerta y Confirmación con estilo institucional Samanya
@@ -2248,7 +2382,15 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         sincronizarTrabajadores,
         sincronizarFamiliares,
         sincronizarCatalogoDotacion,
-        limpiarCacheYReconectarOracle
+        limpiarCacheYReconectarOracle,
+        currentUser,
+        isAuthenticated,
+        login,
+        logout,
+        isUserProfileOpen,
+        setIsUserProfileOpen,
+        updateProfile,
+        changePassword
       }}
     >
       {children}

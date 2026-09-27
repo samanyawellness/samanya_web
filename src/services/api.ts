@@ -50,6 +50,61 @@ async function postToPackage<T>(endpoint: string, jsonPayload: Record<string, an
 }
 
 export const adminApi = {
+  // 0. Autenticación de Administradores (PKGLN_AUTH)
+  auth: {
+    async login(payload: { usuario: string; password?: string }) {
+      return postToPackage<{
+        success: boolean;
+        message: string;
+        token: string;
+        user: {
+          id: number;
+          username: string;
+          email: string;
+          nombreCompleto: string;
+          telefono?: string;
+          avatarUrl?: string;
+          rol: string;
+          nombreRol: string;
+        };
+      }>('/pkgln_auth/pr_autenticar', payload);
+    },
+
+    async actualizarPerfil(payload: {
+      idUsuario: number;
+      nombreCompleto: string;
+      email: string;
+      telefono?: string;
+      avatarUrl?: string;
+    }) {
+      return postToPackage<{
+        success: boolean;
+        message: string;
+        user?: {
+          id: number;
+          username: string;
+          email: string;
+          nombreCompleto: string;
+          telefono?: string;
+          avatarUrl?: string;
+          rol: string;
+          nombreRol: string;
+        };
+      }>('/pkgln_auth/pr_actualizar_perfil', payload);
+    },
+
+    async cambiarClave(payload: {
+      idUsuario: number;
+      claveActual: string;
+      claveNueva: string;
+    }) {
+      return postToPackage<{
+        success: boolean;
+        message: string;
+      }>('/pkgln_auth/pr_cambiar_clave', payload);
+    }
+  },
+
   // 1. Métricas e Incidentes (PKGLN_DASHBOARD_ADMINISTRADOR)
   dashboard: {
     async obtenerMetricas(idCentro: number) {

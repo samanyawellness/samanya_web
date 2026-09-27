@@ -1272,9 +1272,9 @@
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_auth.sql": {
-    "mtime": 1789774342.7481205,
-    "seen": 1789774535.551399,
-    "ast_hash": "66a17377945a4d93c07bba911647e791",
+    "mtime": 1790476301.944279,
+    "seen": 1790476756.1375961,
+    "ast_hash": "882648a60df2a96bc9e0f39fe8c13f66",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_consentimientos.sql": {
@@ -2238,9 +2238,9 @@
     "semantic_hash": ""
   },
   "src/App.tsx": {
-    "mtime": 1790307774.5260732,
-    "seen": 1790308013.4363928,
-    "ast_hash": "ea9fb2a1a70588e7da8ccb17fe7249aa",
+    "mtime": 1790476696.1595392,
+    "seen": 1790476756.1378837,
+    "ast_hash": "7454a50a6011f6405745232fe7afd7f5",
     "semantic_hash": ""
   },
   "src/components/common/ToastNotification.tsx": {
@@ -2250,15 +2250,15 @@
     "semantic_hash": ""
   },
   "src/components/layout/AdminHeader.tsx": {
-    "mtime": 1790219328.621102,
-    "seen": 1790219481.587808,
-    "ast_hash": "aadda413a6e14a75fd68af6027b2d0b6",
+    "mtime": 1790477341.0779881,
+    "seen": 1790477443.5162528,
+    "ast_hash": "8c2a9322212983b6607f3f0c0e220f68",
     "semantic_hash": ""
   },
   "src/components/layout/AdminSidebar.tsx": {
-    "mtime": 1789770897.3793201,
-    "seen": 1789772088.27211,
-    "ast_hash": "c95a444bf5160ea45331540b25b0b68e",
+    "mtime": 1790477371.0641024,
+    "seen": 1790477443.5162573,
+    "ast_hash": "c22838426878395ec8fc5f7a56af4fc1",
     "semantic_hash": ""
   },
   "src/components/modals/RegisterFamilyModal.tsx": {
@@ -2328,9 +2328,9 @@
     "semantic_hash": ""
   },
   "src/context/AdminContext.tsx": {
-    "mtime": 1790468174.2384045,
-    "seen": 1790468223.2472072,
-    "ast_hash": "7fd00d7fad54ffd2a64c99d00e25a919",
+    "mtime": 1790476582.1883476,
+    "seen": 1790476756.1379523,
+    "ast_hash": "6990f3f6c461e1aab32c6f1b7f1f5c55",
     "semantic_hash": ""
   },
   "src/data/seedData.ts": {
@@ -2346,15 +2346,15 @@
     "semantic_hash": ""
   },
   "src/services/api.ts": {
-    "mtime": 1790461090.1836307,
-    "seen": 1790461370.8821805,
-    "ast_hash": "1f50c3c1bcd12d07b38aaad07d67b5e3",
+    "mtime": 1790476470.6340408,
+    "seen": 1790476756.1379611,
+    "ast_hash": "4c41a4a6b0574ac26bc94ccf0c728eb9",
     "semantic_hash": ""
   },
   "src/types/index.ts": {
-    "mtime": 1790461084.6002479,
-    "seen": 1790461370.8821845,
-    "ast_hash": "4bf6ef033f903f0c0f475252813d5bc4",
+    "mtime": 1790475395.8915842,
+    "seen": 1790475880.1460984,
+    "ast_hash": "5ebdec6590834f9dd15810937b6b27ee",
     "semantic_hash": ""
   },
   "src/vite-env.d.ts": {
@@ -2430,9 +2430,9 @@
     "semantic_hash": ""
   },
   "backend/drive_upload.py": {
-    "mtime": 1790398620.7945838,
-    "seen": 1790400450.794443,
-    "ast_hash": "9c54327f7c2a83ef11c8e4f8b37b65ad",
+    "mtime": 1790468610.7643898,
+    "seen": 1790468688.6739752,
+    "ast_hash": "a32d858844daf949bc28cf4497b53a1a",
     "semantic_hash": ""
   },
   "src/utils/avatarUtils.ts": {
@@ -2466,9 +2466,9 @@
     "semantic_hash": ""
   },
   "backend/oracle_bridge.py": {
-    "mtime": 1790462557.9745479,
-    "seen": 1790463061.6239367,
-    "ast_hash": "999df8ffd362b62b1a37ce0f43efb019",
+    "mtime": 1790476330.344688,
+    "seen": 1790476756.1378493,
+    "ast_hash": "903e86041e7168e76c31451452be7662",
     "semantic_hash": ""
   },
   "src/components/modals/RegisterLeaveModal.tsx": {
@@ -2601,6 +2601,18 @@
     "mtime": 1790465058.0754747,
     "seen": 1790465122.1782296,
     "ast_hash": "cb3c87de60a9aa97f37ce4b56952aa62",
+    "semantic_hash": ""
+  },
+  "src/components/views/LoginView.tsx": {
+    "mtime": 1790475522.6748595,
+    "seen": 1790475880.1460652,
+    "ast_hash": "2e8f8c60f4765f436dcf6ac4d04d813e",
+    "semantic_hash": ""
+  },
+  "src/components/modals/UserProfileModal.tsx": {
+    "mtime": 1790477309.1133046,
+    "seen": 1790477443.5163105,
+    "ast_hash": "32a5e089333a5f26991c4ae6e93759da",
     "semantic_hash": ""
   }
 }

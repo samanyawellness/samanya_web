@@ -45,6 +45,16 @@ AS
         p_token_dispositivo IN smy_dispositivos_push.token_dispositivo%TYPE
     );
 
+    -- Actualización de información de perfil del usuario
+    PROCEDURE pr_actualizar_perfil (
+        pcl_json IN CLOB
+    );
+
+    -- Cambio seguro de contraseña de usuario
+    PROCEDURE pr_cambiar_clave (
+        pcl_json IN CLOB
+    );
+
 END PKGLN_AUTH;
 /
 
@@ -234,6 +244,132 @@ AS
             uti_ge_excepciones_pkg.p_grabar_log(vro_error);
             RAISE_APPLICATION_ERROR(-20000, 'Se presento un error comunicarse con soporte. Número error: ' || vro_error.id || ' - ' || SQLERRM);
     END pr_desactivar_dispositivo_push;
+
+    PROCEDURE pr_actualizar_perfil (
+        pcl_json IN CLOB
+    ) IS
+        v_id_usuario      smy_usuarios.id%TYPE;
+        v_nombre_completo VARCHAR2(200);
+        v_email           VARCHAR2(200);
+        v_telefono        VARCHAR2(50);
+        vro_usuario       smy_usuarios%ROWTYPE;
+        vro_auditoria     smy_auditoria_accesos%ROWTYPE;
+    BEGIN
+        -- 1. Extracción de parámetros obligatorios mediante JSON_VALUE
+        v_id_usuario      := TO_NUMBER(JSON_VALUE(pcl_json, '$.id_usuario'));
+        v_nombre_completo := TRIM(JSON_VALUE(pcl_json, '$.nombre_completo'));
+        v_email           := LOWER(TRIM(JSON_VALUE(pcl_json, '$.email')));
+        v_telefono        := TRIM(JSON_VALUE(pcl_json, '$.telefono'));
+
+        IF v_id_usuario IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20001, 'El identificador del usuario es obligatorio.');
+        END IF;
+
+        IF v_nombre_completo IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20001, 'El nombre completo es obligatorio.');
+        END IF;
+
+        IF v_email IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20001, 'El correo electrónico es obligatorio.');
+        END IF;
+
+        -- 2. Validación de existencia por PK exclusivamente vía DAO (Cero SELECT directo)
+        IF NOT pkgsmy_usuarios_dao.f_existe(v_id_usuario, vro_usuario) THEN
+            RAISE_APPLICATION_ERROR(-20001, 'El usuario no existe en la base de datos.');
+        END IF;
+
+        -- 3. Actualización mono-tabla de usuario vía DAO
+        vro_usuario.nombre_completo                := SUBSTR(v_nombre_completo, 1, 150);
+        vro_usuario.email                          := SUBSTR(v_email, 1, 120);
+        vro_usuario.telefono                       := SUBSTR(v_telefono, 1, 30);
+        vro_usuario.id_usuario_ultima_modificacion := v_id_usuario;
+
+        pkgsmy_usuarios_dao.p_actualizar(vro_usuario);
+
+        -- 4. Registro de auditoría vía DAO (Asignación directa de secuencia)
+        vro_auditoria.id             := SEQ_SMY_AUDITORIA_ACCESOS.NEXTVAL;
+        vro_auditoria.id_usuario     := v_id_usuario;
+        vro_auditoria.accion         := 'ACTUALIZAR_PERFIL';
+        vro_auditoria.direccion_ip   := '127.0.0.1';
+        vro_auditoria.detalles       := 'Actualización de perfil para el usuario: ' || vro_usuario.username;
+        vro_auditoria.fecha_creacion := f_fecha_actual;
+
+        pkgsmy_auditoria_accesos_dao.p_insertar(vro_auditoria);
+
+        -- 5. Control transaccional en pkgln_ (COMMIT controlado)
+        p_do_commit('pkgln_auth.pr_actualizar_perfil');
+
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK;
+            IF SQLCODE BETWEEN -20999 AND -20001 THEN
+                RAISE;
+            END IF;
+            vro_error.nombre_programa     := 'PKGLN_AUTH';
+            vro_error.nombre_metodo       := 'PR_ACTUALIZAR_PERFIL';
+            vro_error.parametros          := pcl_json;
+            vro_error.id_usuario_creacion := v_id_usuario;
+            uti_ge_excepciones_pkg.p_grabar_log(vro_error);
+            RAISE_APPLICATION_ERROR(-20000, 'Se presento un error comunicarse con soporte. Número error: ' || vro_error.id || ' - ' || SQLERRM);
+    END pr_actualizar_perfil;
+
+    PROCEDURE pr_cambiar_clave (
+        pcl_json IN CLOB
+    ) IS
+        v_id_usuario    smy_usuarios.id%TYPE;
+        v_password_hash VARCHAR2(255);
+        vro_usuario     smy_usuarios%ROWTYPE;
+        vro_auditoria   smy_auditoria_accesos%ROWTYPE;
+    BEGIN
+        -- 1. Extracción de parámetros mediante JSON_VALUE
+        v_id_usuario    := TO_NUMBER(JSON_VALUE(pcl_json, '$.id_usuario'));
+        v_password_hash := TRIM(JSON_VALUE(pcl_json, '$.password_hash'));
+
+        IF v_id_usuario IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20001, 'El identificador del usuario es obligatorio.');
+        END IF;
+
+        IF v_password_hash IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20001, 'El hash de contraseña es obligatorio.');
+        END IF;
+
+        -- 2. Validación de existencia por PK exclusivamente vía DAO
+        IF NOT pkgsmy_usuarios_dao.f_existe(v_id_usuario, vro_usuario) THEN
+            RAISE_APPLICATION_ERROR(-20001, 'El usuario no existe en la base de datos.');
+        END IF;
+
+        -- 3. Actualización de hash de clave vía DAO
+        vro_usuario.password_hash                  := v_password_hash;
+        vro_usuario.id_usuario_ultima_modificacion := v_id_usuario;
+
+        pkgsmy_usuarios_dao.p_actualizar(vro_usuario);
+
+        -- 4. Registro de auditoría vía DAO
+        vro_auditoria.id             := SEQ_SMY_AUDITORIA_ACCESOS.NEXTVAL;
+        vro_auditoria.id_usuario     := v_id_usuario;
+        vro_auditoria.accion         := 'CAMBIO_PASSWORD';
+        vro_auditoria.direccion_ip   := '127.0.0.1';
+        vro_auditoria.detalles       := 'Cambio seguro de clave para el usuario: ' || vro_usuario.username;
+        vro_auditoria.fecha_creacion := f_fecha_actual;
+
+        pkgsmy_auditoria_accesos_dao.p_insertar(vro_auditoria);
+
+        -- 5. Control transaccional en pkgln_ (COMMIT controlado)
+        p_do_commit('pkgln_auth.pr_cambiar_clave');
+
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK;
+            IF SQLCODE BETWEEN -20999 AND -20001 THEN
+                RAISE;
+            END IF;
+            vro_error.nombre_programa     := 'PKGLN_AUTH';
+            vro_error.nombre_metodo       := 'PR_CAMBIAR_CLAVE';
+            vro_error.parametros          := pcl_json;
+            vro_error.id_usuario_creacion := v_id_usuario;
+            uti_ge_excepciones_pkg.p_grabar_log(vro_error);
+            RAISE_APPLICATION_ERROR(-20000, 'Se presento un error comunicarse con soporte. Número error: ' || vro_error.id || ' - ' || SQLERRM);
+    END pr_cambiar_clave;
 
 END PKGLN_AUTH;
 /
