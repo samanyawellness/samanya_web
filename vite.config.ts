@@ -69,6 +69,13 @@ function samanyaApiPlugin(): Plugin {
           return;
         }
 
+        if (req.url === '/api/health') {
+          res.setHeader('Content-Type', 'application/json');
+          res.statusCode = 200;
+          res.end(JSON.stringify({ status: 'online', mode: 'local-dev', wallet_found: true }));
+          return;
+        }
+
         // Despacho directo a Oracle Autonomous Database vía backend/oracle_bridge.py
         if (
           (req.url?.startsWith('/api/pkgln_') ||
