@@ -222,9 +222,11 @@ def execute_oracle_request(pkg: str, proc: str, payload: dict) -> dict:
             str_avatar = str(avatar_input).strip()
             if str_avatar.startswith("data:image/"):
                 try:
+                    import hashlib
                     header, b64data = str_avatar.split(",", 1)
                     ext = "png" if "png" in header else ("webp" if "webp" in header else "jpg")
                     img_bytes = base64.b64decode(b64data)
+                    img_hash = hashlib.sha256(img_bytes).hexdigest()
 
                     # Guardar físicamente si el directorio es escribible
                     uploads_user_dir = os.path.abspath("public/uploads/usuarios")
@@ -247,22 +249,27 @@ def execute_oracle_request(pkg: str, proc: str, payload: dict) -> dict:
                             UPDATE smy_archivos
                             SET ruta_completa_almacenamiento = :ruta,
                                 ruta_relativa = :ruta,
-                                extension = :ext
+                                extension = :ext,
+                                hash_archivo = :hash_val,
+                                tamano_bytes = :tam,
+                                fecha_ultima_modificacion = SYSDATE
                             WHERE id = :id_arc
-                        """, {"ruta": final_avatar_url, "ext": ext, "id_arc": id_arc})
+                        """, {"ruta": final_avatar_url, "ext": ext, "hash_val": img_hash, "tam": len(img_bytes), "id_arc": id_arc})
                     else:
-                        c.execute("SELECT NVL(MAX(id), 0) + 1 FROM smy_archivos")
+                        c.execute("SELECT SEQ_SMY_ARCHIVOS.NEXTVAL FROM DUAL")
                         new_id_arc = c.fetchone()[0]
                         c.execute("""
                             INSERT INTO smy_archivos (
                                 id, id_centro, id_clase_archivo, nombre_archivo, nombre_archivo_almacenado,
-                                extension, tipo_mime, tamano_bytes, ruta_relativa, ruta_completa_almacenamiento, id_estado_archivo
+                                hash_archivo, extension, tipo_mime, tamano_bytes, ruta_relativa,
+                                ruta_completa_almacenamiento, id_estado_archivo, fecha_creacion
                             ) VALUES (
-                                :id, 1, 7, :nom, :nom, :ext, :mime, :tam, :ruta, :ruta, 1
+                                :id, 1, 7, :nom, :nom, :hash_val, :ext, :mime, :tam, :ruta, :ruta, 1, SYSDATE
                             )
                         """, {
                             "id": new_id_arc,
                             "nom": f"usuario_{id_usuario}.{ext}",
+                            "hash_val": img_hash,
                             "ext": ext,
                             "mime": f"image/{ext}",
                             "tam": len(img_bytes),
@@ -271,7 +278,7 @@ def execute_oracle_request(pkg: str, proc: str, payload: dict) -> dict:
                         c.execute("UPDATE smy_usuarios SET id_archivo_foto_perfil = :id_arc WHERE id = :id_u", {"id_arc": new_id_arc, "id_u": id_usuario})
                     conn.commit()
                 except Exception as img_err:
-                    print("Error guardando avatar:", img_err)
+                    sys.stderr.write(f"Error guardando avatar: {img_err}\n")
             elif str_avatar.startswith("/uploads/") or str_avatar.startswith("http"):
                 final_avatar_url = str_avatar
         elif avatar_input == "" or avatar_input is False:
