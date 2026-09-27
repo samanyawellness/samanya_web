@@ -44,3 +44,20 @@ scratch/
 # Local Uploads
 public/Samanya/
 public/uploads/
+
+# Oracle Wallet & Cryptographic Keys
+*.pem
+*.p12
+*.sso
+*.jks
+cwallet.sso
+ewallet.p12
+ewallet.pem
+keystore.jks
+truststore.jks
+tnsnames.ora
+sqlnet.ora
+ojdbc.properties
+api/wallet/
+backend/wallet/
+wallet/
