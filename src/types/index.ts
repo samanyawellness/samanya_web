@@ -84,6 +84,28 @@ export type Residente = {
     esPrincipal: boolean;
   }>;
   archivosAdjuntos?: ArchivoAdjuntoResidente[];
+  observaciones?: string;
+  bitacora?: BitacoraResidente[];
+};
+
+export type BitacoraResidente = {
+  id: number;
+  idResidente: number;
+  nombreResidente?: string;
+  habitacion?: string;
+  cama?: string;
+  idEmpleado?: number;
+  nombreEmpleado?: string;
+  idUsuario: number;
+  nombreUsuario?: string;
+  fecha: string;
+  hora: string;
+  idCategoriaBitacora: number;
+  categoria?: string;
+  contenido: string;
+  grabadoPorVoz?: boolean;
+  visibleAcudiente?: boolean;
+  fechaCreacion?: string;
 };
 
 export type FamiliarAcudiente = {

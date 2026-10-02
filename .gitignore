@@ -61,3 +61,6 @@ ojdbc.properties
 api/wallet/
 backend/wallet/
 wallet/
+
+# Graphify backups
+graphify-out/20*/

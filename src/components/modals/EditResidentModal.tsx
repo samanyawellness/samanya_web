@@ -75,6 +75,9 @@ export const EditResidentModal: React.FC = () => {
   const [nuevoArchivoDescripcion, setNuevoArchivoDescripcion] = useState<string>('');
   const [archivoSeleccionado, setArchivoSeleccionado] = useState<File | null>(null);
 
+  // Observación opcional para cambios de estado administrativo
+  const [observacionCambioEstado, setObservacionCambioEstado] = useState<string>('');
+
   const [loading, setLoading] = useState(false);
 
   useEffect(() => {
@@ -105,6 +108,7 @@ export const EditResidentModal: React.FC = () => {
       setArchivoSeleccionado(null);
       setNuevoArchivoDescripcion('');
       setNuevoArchivoClase('Historia Clínica / Epicrisis');
+      setObservacionCambioEstado('');
       setActiveTab('personales');
     }
   }, [editingResidente]);
@@ -259,12 +263,17 @@ export const EditResidentModal: React.FC = () => {
 
       const archivosFinales = [...archivosExistentes, ...archivosSubidos];
 
+      const hayCambioEstado = Boolean(
+        formData.estado && editingResidente && formData.estado !== editingResidente.estado
+      );
+
       await actualizarResidente(editingResidente.id, {
         ...formData,
         identificacion: identificacionRes,
         fotoUrl: fotoPreview,
         medicamentos,
-        archivosAdjuntos: archivosFinales.length > 0 ? archivosFinales : undefined
+        archivosAdjuntos: archivosFinales.length > 0 ? archivosFinales : undefined,
+        observacionCambioEstado: hayCambioEstado && observacionCambioEstado.trim() ? observacionCambioEstado.trim() : undefined
       });
 
       handleClose();
@@ -276,6 +285,7 @@ export const EditResidentModal: React.FC = () => {
   };
 
   const totalArchivos = archivosExistentes.length + nuevosArchivos.length + (archivoSeleccionado ? 1 : 0);
+  const hayCambioEstado = Boolean(formData.estado && editingResidente && formData.estado !== editingResidente.estado);
 
   return (
     <div className="fixed inset-0 z-50 flex items-center justify-center p-4 modal-backdrop animate-in fade-in duration-150">
@@ -529,12 +539,12 @@ export const EditResidentModal: React.FC = () => {
 
           {/* TAB 2: CUIDADO & DIETA */}
           {activeTab === 'cuidado' && (
-            <div className="space-y-4 animate-in fade-in duration-150">
+            <div className="space-y-5 animate-in fade-in duration-150 pb-20 min-h-[380px]">
               <h4 className="text-xs font-bold font-mono text-[#182F28] uppercase tracking-wider mb-3 flex items-center gap-1.5">
                 <Bed className="w-4 h-4 text-[#B3803F]" />
                 Habitación y Cuidados Asistenciales
               </h4>
-              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-3">
+              <div className="grid grid-cols-1 sm:grid-cols-2 md:grid-cols-3 gap-4">
                 <div>
                   <label className="block text-xs font-bold text-[#4B4636] mb-1">
                     Habitación *
@@ -576,18 +586,25 @@ export const EditResidentModal: React.FC = () => {
                 </div>
 
                 <div>
-                  <label className="block text-xs font-bold text-[#4B4636] mb-1">
-                    Estado Administrativo
-                  </label>
+                  <div className="flex items-center justify-between mb-1">
+                    <label className="block text-xs font-bold text-[#4B4636]">
+                      Estado Administrativo *
+                    </label>
+                    {hayCambioEstado && (
+                      <span className="text-[10px] font-bold px-1.5 py-0.5 rounded-full bg-amber-100 text-amber-800 border border-amber-300">
+                        Modificado
+                      </span>
+                    )}
+                  </div>
                   <select
                     value={formData.estado || 'Activo'}
                     onChange={(e) => setFormData({ ...formData, estado: e.target.value as any })}
-                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#DEDBD1] bg-[#F7F6F2] text-xs font-semibold text-[#182F28] focus:outline-none focus:border-[#B3803F]"
+                    className="w-full px-3.5 py-2.5 rounded-xl border border-[#DEDBD1] bg-white text-xs font-semibold text-[#182F28] focus:outline-none focus:border-[#B3803F] focus:ring-1 focus:ring-[#B3803F] cursor-pointer shadow-2xs"
                   >
-                    <option value="Activo">Activo</option>
-                    <option value="En Observación">En Observación</option>
-                    <option value="Hospitalizado">Hospitalizado</option>
-                    <option value="Egresado">Egresado</option>
+                    <option value="Activo">🟢 Activo (Residente en sede)</option>
+                    <option value="En Observación">🟡 En Observación (Monitoreo especial)</option>
+                    <option value="Hospitalizado">🔴 Hospitalizado (Centro asistencial externo)</option>
+                    <option value="Egresado">⚪ Egresado (Salida institucional definitiva)</option>
                   </select>
                 </div>
 
@@ -643,6 +660,49 @@ export const EditResidentModal: React.FC = () => {
                   </select>
                 </div>
               </div>
+
+              {/* Tarjeta condicional interactiva: Observación de Cambio de Estado en Bitácora */}
+              {hayCambioEstado && (
+                <div className="p-4 bg-[#FEF7EE] border border-[#DCB87F] rounded-2xl space-y-3 animate-in fade-in slide-in-from-top-2 duration-150 shadow-xs">
+                  <div className="flex items-center gap-2.5 flex-wrap">
+                    <div className="w-8 h-8 rounded-xl bg-[#DCB87F]/40 text-[#9A5B12] flex items-center justify-center shrink-0">
+                      <Clock className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h5 className="text-xs font-bold text-[#182F28]">
+                        Registro de Novedad por Cambio de Estado Administrativo
+                      </h5>
+                      <div className="flex items-center gap-2 mt-0.5 text-xs">
+                        <span className="text-[#5C6058]">Estado previo:</span>
+                        <span className="font-bold px-2 py-0.5 rounded-full bg-white border border-[#DEDBD1] text-[#182F28]">
+                          {editingResidente.estado}
+                        </span>
+                        <span className="text-[#9A5B12] font-bold">➔</span>
+                        <span className="text-[#5C6058]">Nuevo estado:</span>
+                        <span className="font-bold px-2 py-0.5 rounded-full bg-[#182F28] text-white">
+                          {formData.estado}
+                        </span>
+                      </div>
+                    </div>
+                  </div>
+
+                  <div>
+                    <label className="block text-xs font-bold text-[#182F28] mb-1">
+                      Observación / Motivo del Cambio de Estado <span className="text-[#7A745F] font-normal">(Opcional)</span>
+                    </label>
+                    <textarea
+                      rows={3}
+                      placeholder="Ej. Se traslada a centro hospitalario de urgencia por cuadro respiratorio / Residente regresa a sede tras hospitalización..."
+                      value={observacionCambioEstado}
+                      onChange={(e) => setObservacionCambioEstado(e.target.value)}
+                      className="w-full px-3.5 py-2.5 rounded-xl border border-[#DEDBD1] bg-white text-xs text-[#182F28] focus:outline-none focus:border-[#B3803F] placeholder:text-[#9A917A] shadow-inner"
+                    />
+                    <p className="text-[11px] text-[#7A745F] mt-1">
+                      ℹ️ Esta novedad quedará registrada automáticamente en la <strong>Bitácora Asistencial</strong> del residente con la notación de cambio de estado.
+                    </p>
+                  </div>
+                </div>
+              )}
             </div>
           )}
 

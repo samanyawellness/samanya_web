@@ -1558,11 +1558,113 @@ COMMIT;
 -- =============================================================================
 PROMPT 11. Insertando Bitácora Asistencial (SMY_BITACORA_RESIDENTE)...
 
+-- 11.1 REGISTROS INICIALES DE ADMISIÓN (Primer registro cronológico de cada residente)
+-- Residente 1 (Álvaro Delgado Mora - Ingreso: 2024-01-10)
 INSERT INTO SMY_BITACORA_RESIDENTE (
     ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
     ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
 ) VALUES (
-    1, 1, 2, 3, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)), '08:30',
+    1, 1, 1, 1, TO_DATE('2024-01-10', 'YYYY-MM-DD'), '08:00',
+    1, '[REGISTRO DEL RESIDENTE]: Ingreso oficial a la institución en compañía de su hija Lucía Delgado. Se asigna habitación 101-A. Trae pertenencias personales completas y silla de ruedas. Se realiza valoración médica inicial con antecedentes de hipertensión arterial severa y alergia a Penicilina. Se entrega protocolo de cuidados y plan de alimentación hiposódica a la familia.',
+    'N', NULL, 'S'
+);
+
+-- Residente 2 (Elena Pérez de Gómez - Ingreso: 2024-01-15)
+INSERT INTO SMY_BITACORA_RESIDENTE (
+    ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
+    ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
+) VALUES (
+    2, 2, 1, 1, TO_DATE('2024-01-15', 'YYYY-MM-DD'), '08:30',
+    1, '[REGISTRO DEL RESIDENTE]: Admisión e ingreso formal a la sede en compañía de su hijo Javier Pérez. Ubicada en habitación 101-B con pertenencias rotuladas. Se recibe con glucómetro y esquema de insulina. Se establece protocolo de glucometría capilar matutina diaria y dieta para diabéticos.',
+    'N', NULL, 'S'
+);
+
+-- Residente 3 (Fernando López Castro - Ingreso: 2024-02-01)
+INSERT INTO SMY_BITACORA_RESIDENTE (
+    ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
+    ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
+) VALUES (
+    3, 3, 1, 1, TO_DATE('2024-02-01', 'YYYY-MM-DD'), '09:00',
+    1, '[REGISTRO DEL RESIDENTE]: Ingreso del residente en silla de ruedas asistido por su acudiente. Asignado a habitación 102-A. Antecedente de secuelas de ACV isquémico izquierdo con hemiparesia facio-braquial. Se define programa integral de fisioterapia pasiva y movilización asistida.',
+    'N', NULL, 'S'
+);
+
+-- Residente 4 (Mercedes Hernández de Silva - Ingreso: 2024-02-10)
+INSERT INTO SMY_BITACORA_RESIDENTE (
+    ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
+    ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
+) VALUES (
+    4, 4, 1, 1, TO_DATE('2024-02-10', 'YYYY-MM-DD'), '09:15',
+    1, '[REGISTRO DEL RESIDENTE]: Admisión inicial en habitación 102-B en compañía de su familia. Se consigna disfagia leve a sólidos, iniciando con dieta blanda de fácil masticación y supervisión estrecha durante los horarios de alimentación.',
+    'N', NULL, 'S'
+);
+
+-- Residente 5 (Gustavo Torres Valderrama - Ingreso: 2024-02-15)
+INSERT INTO SMY_BITACORA_RESIDENTE (
+    ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
+    ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
+) VALUES (
+    5, 5, 1, 1, TO_DATE('2024-02-15', 'YYYY-MM-DD'), '08:45',
+    1, '[REGISTRO DEL RESIDENTE]: Ingreso formal a la institución asignado a habitación 103-A. Portador de marcapasos bicameral implantado en 2021. Se entrega expediente clínico completo y se instruye al personal en monitorización de frecuencia cardíaca y estimulación cognitiva.',
+    'N', NULL, 'S'
+);
+
+-- Residente 6 (Carmen Rosa Castro Pardo - Ingreso: 2024-03-01)
+INSERT INTO SMY_BITACORA_RESIDENTE (
+    ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
+    ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
+) VALUES (
+    6, 6, 1, 1, TO_DATE('2024-03-01', 'YYYY-MM-DD'), '10:00',
+    1, '[REGISTRO DEL RESIDENTE]: Admisión en habitación 103-B. Residente encamada con diagnóstico de Parkinson avanzado y alergia a Sulfas. Se activa protocolo estricto de prevención de lesiones por presión con cambios posturales cada dos horas y colchón antiescaras.',
+    'N', NULL, 'S'
+);
+
+-- Residente 7 (Roberto Morales Duque - Ingreso: 2024-03-10)
+INSERT INTO SMY_BITACORA_RESIDENTE (
+    ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
+    ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
+) VALUES (
+    7, 7, 1, 1, TO_DATE('2024-03-10', 'YYYY-MM-DD'), '08:30',
+    1, '[REGISTRO DEL RESIDENTE]: Ingreso a la Sede Campestre La Calera en habitación 104-A. Residente con insuficiencia cardíaca congestiva controlada NYHA II. Se activa control estricto de balance hídrico, peso interdiario y dieta hiposódica.',
+    'N', NULL, 'S'
+);
+
+-- Residente 8 (Teresa de Jesús Sánchez - Ingreso: 2024-03-20)
+INSERT INTO SMY_BITACORA_RESIDENTE (
+    ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
+    ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
+) VALUES (
+    8, 8, 1, 1, TO_DATE('2024-03-20', 'YYYY-MM-DD'), '09:30',
+    1, '[REGISTRO DEL RESIDENTE]: Admisión en habitación 104-B. Paciente funcionalmente independiente con osteoporosis severa y antecedente de fractura de Colles. Se realiza ambientación segura de la habitación libre de desniveles y se entrega calzado antideslizante.',
+    'N', NULL, 'S'
+);
+
+-- Residente 9 (Guillermo Navarro Soler - Ingreso: 2024-04-01)
+INSERT INTO SMY_BITACORA_RESIDENTE (
+    ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
+    ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
+) VALUES (
+    9, 9, 1, 1, TO_DATE('2024-04-01', 'YYYY-MM-DD'), '08:15',
+    1, '[REGISTRO DEL RESIDENTE]: Ingreso a la Sede Campestre en habitación 105-A. Requiere curación diaria y vigilancia estrecha de lesión en pie derecho grado Wagner 1 por neuropatía diabética. Se agenda valoración semanal de cicatrización con enfermería jefe.',
+    'N', NULL, 'S'
+);
+
+-- Residente 10 (Blanca Nieves Castillo - Ingreso: 2024-04-15)
+INSERT INTO SMY_BITACORA_RESIDENTE (
+    ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
+    ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
+) VALUES (
+    10, 10, 1, 1, TO_DATE('2024-04-15', 'YYYY-MM-DD'), '10:30',
+    1, '[REGISTRO DEL RESIDENTE]: Admisión inicial en habitación 105-B. Diagnóstico de artritis reumatoide e hipoacusia bilateral. Se rotula dispositivo auditivo de ayuda y se establecen pautas de comunicación frente a frente y asistencia en actividades de motricidad fina.',
+    'N', NULL, 'S'
+);
+
+-- 11.2 NOVEDADES ASISTENCIALES Y SEGUIMIENTO DIARIO
+INSERT INTO SMY_BITACORA_RESIDENTE (
+    ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
+    ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
+) VALUES (
+    11, 1, 2, 3, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)), '08:30',
     1, 'Don Álvaro amanece de buen ánimo. Se realiza baño asistido sin eventualidades. Desayuna el 100% de la porción hiposódica.',
     'N', 2, 'S'
 );
@@ -1571,7 +1673,7 @@ INSERT INTO SMY_BITACORA_RESIDENTE (
     ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
     ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
 ) VALUES (
-    2, 1, 1, 2, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)), '11:45',
+    12, 1, 1, 2, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)), '11:45',
     6, 'Se detecta cifra tensional de 165/102 mmHg. Se coloca al residente en reposo en posición semifowler. Se notifica al médico tratante y se agenda control en 2 horas.',
     'N', 1, 'S'
 );
@@ -1580,7 +1682,7 @@ INSERT INTO SMY_BITACORA_RESIDENTE (
     ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
     ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
 ) VALUES (
-    3, 2, 2, 3, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)), '09:15',
+    13, 2, 2, 3, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)), '09:15',
     5, 'Doña Elena participa activamente en la sesión matutina de estimulación cognitiva y memoria musical. Muy sonriente y comunicativa.',
     'N', 2, 'S'
 );
@@ -1589,7 +1691,7 @@ INSERT INTO SMY_BITACORA_RESIDENTE (
     ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
     ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
 ) VALUES (
-    4, 3, 2, 3, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)), '10:00',
+    14, 3, 2, 3, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)), '10:00',
     3, 'Sesión de fisioterapia pasiva en miembro superior izquierdo completada con el terapeuta. Se observa mejor tolerancia al estiramiento.',
     'N', 2, 'S'
 );
@@ -1598,9 +1700,27 @@ INSERT INTO SMY_BITACORA_RESIDENTE (
     ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
     ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
 ) VALUES (
-    5, 2, 3, 4, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)) - 1, '16:00',
+    15, 2, 3, 4, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)) - 1, '16:00',
     4, 'Visita de su hijo Javier Pérez. Compartieron en el jardín central durante 45 minutos. La residente estuvo muy complacida.',
     'N', 3, 'S'
+);
+
+INSERT INTO SMY_BITACORA_RESIDENTE (
+    ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
+    ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
+) VALUES (
+    16, 5, 2, 3, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)), '11:00',
+    5, 'Caminata asistida en zonas verdes con el cuidador. Marcha estable con apoyo, buen estado de ánimo y excelente oxigenación posterior.',
+    'N', 2, 'S'
+);
+
+INSERT INTO SMY_BITACORA_RESIDENTE (
+    ID, ID_RESIDENTE, ID_EMPLEADO, ID_USUARIO, FECHA, HORA,
+    ID_CATEGORIA_BITACORA, CONTENIDO, GRABADO_POR_VOZ, ID_TURNO_ASIGNADO, VISIBLE_ACUDIENTE
+) VALUES (
+    17, 7, 2, 3, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE '-05:00' AS DATE)), '07:45',
+    3, 'Control matutino de diuresis y signos vitales sin signos de sobrecarga hídrica. Se administra medicación antihipertensiva con desayuno.',
+    'N', 2, 'S'
 );
 
 COMMIT;

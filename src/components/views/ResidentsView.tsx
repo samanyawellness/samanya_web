@@ -35,7 +35,8 @@ export const ResidentsView: React.FC = () => {
     sincronizarResidentes,
     setIsGestionDotacionOpen,
     abrirSolicitarDotacion,
-    dotaciones
+    dotaciones,
+    cargarBitacoraResidente
   } = useAdmin();
 
   const [isSyncing, setIsSyncing] = useState(false);
@@ -74,6 +75,7 @@ export const ResidentsView: React.FC = () => {
   const handleOpenDetail = (res: Residente) => {
     setSelectedResidente(res);
     setIsResidenteDetailOpen(true);
+    cargarBitacoraResidente(res.id).catch(() => {});
   };
 
   const handleEditResident = (res: Residente) => {

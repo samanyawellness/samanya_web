@@ -39,6 +39,14 @@ export const RegisterResidentModal: React.FC = () => {
   const [fotoPreview, setFotoPreview] = useState<string | undefined>(undefined);
   const [errorMensaje, setErrorMensaje] = useState<string | null>(null);
 
+  // Registro del momento en que se ingresa al paso 6 para evitar submits accidentales por doble clic en el paso 5
+  const step6MountedAt = React.useRef<number>(0);
+  React.useEffect(() => {
+    if (step === 6) {
+      step6MountedAt.current = Date.now();
+    }
+  }, [step]);
+
   // Archivos y Documentos del Residente (Opcionales)
   const CLASES_ARCHIVOS: ClaseArchivoResidente[] = [
     'Historia Clínica / Epicrisis',
@@ -164,6 +172,7 @@ export const RegisterResidentModal: React.FC = () => {
     nivelMovilidad: 'Independiente' as const,
     tipoDieta: 'Normal / General' as const,
     alertasClinicas: '',
+    observaciones: '',
     // Acudiente en el mismo flujo
     incluirAcudiente: true,
     acudienteNombres: '',
@@ -258,6 +267,23 @@ export const RegisterResidentModal: React.FC = () => {
     return true;
   };
 
+  const getBotonSiguienteTexto = () => {
+    switch (step) {
+      case 1:
+        return 'Siguiente: Cuidado & Dieta →';
+      case 2:
+        return 'Siguiente: Medicamentos →';
+      case 3:
+        return 'Siguiente: Acudiente Responsable →';
+      case 4:
+        return 'Siguiente: Dotación & Entregas →';
+      case 5:
+        return 'Siguiente: Documentos & Archivos (Paso 6) →';
+      default:
+        return 'Continuar →';
+    }
+  };
+
   const handleNextStep = () => {
     if (!validarPaso(step)) return;
     setErrorMensaje(null);
@@ -272,12 +298,19 @@ export const RegisterResidentModal: React.FC = () => {
     setStep(targetStep as any);
   };
 
-  const handleSubmit = async (e: React.FormEvent) => {
-    e.preventDefault();
+  const handleSubmit = async (e?: React.FormEvent) => {
+    if (e) e.preventDefault();
     if (step < 6) {
       handleNextStep();
       return;
     }
+
+    // Salvaguarda: ignorar si el usuario acaba de pasar al paso 6 en los últimos 600ms (evita submits por doble clic en el paso 5)
+    if (Date.now() - step6MountedAt.current < 600) {
+      console.warn('[RegisterResidentModal] Guardado bloqueado por protección anti-doble clic al entrar al paso 6.');
+      return;
+    }
+
     if (!formData.nombres?.trim() || !formData.apellidos?.trim() || !formData.identificacion?.trim()) {
       showAlert(
         'Por favor complete los datos obligatorios del residente en el Paso 1 (Nombres, Apellidos y Documento).',
@@ -420,6 +453,7 @@ export const RegisterResidentModal: React.FC = () => {
         nivelMovilidad: formData.nivelMovilidad,
         tipoDieta: formData.tipoDieta,
         alertasClinicas: formData.alertasClinicas,
+        observaciones: formData.observaciones.trim() || undefined,
         fechaIngreso: formData.fechaIngreso,
         estado: formData.estado,
         fotoUrl: fotoPreview,
@@ -480,6 +514,7 @@ export const RegisterResidentModal: React.FC = () => {
         nivelMovilidad: 'Independiente',
         tipoDieta: 'Normal / General',
         alertasClinicas: '',
+        observaciones: '',
         incluirAcudiente: true,
         acudienteNombres: '',
         acudienteApellidos: '',
@@ -629,11 +664,13 @@ export const RegisterResidentModal: React.FC = () => {
 
         {/* Form Body */}
         <form
-          onSubmit={handleSubmit}
+          onSubmit={(e) => {
+            e.preventDefault();
+          }}
           onKeyDown={(e) => {
-            if (e.key === 'Enter' && (e.target as HTMLElement).tagName === 'INPUT' && step < 6) {
+            // Prevenir que presionar Enter en inputs o selects envíe accidentalmente el formulario o salte de paso
+            if (e.key === 'Enter' && (e.target as HTMLElement).tagName !== 'TEXTAREA') {
               e.preventDefault();
-              handleNextStep();
             }
           }}
           className="p-6 overflow-y-auto flex-1 space-y-4"
@@ -943,6 +980,26 @@ export const RegisterResidentModal: React.FC = () => {
                   onChange={(e) => setFormData({ ...formData, alertasClinicas: e.target.value })}
                   className="w-full px-3.5 py-2.5 rounded-xl border border-[#DEDBD1] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#B3803F] focus:bg-white"
                 />
+              </div>
+
+              <div>
+                <label className="block text-xs font-bold text-[#182F28] mb-1 flex items-center justify-between">
+                  <span className="flex items-center gap-1.5">
+                    <FileText className="w-3.5 h-3.5 text-[#274A3F]" />
+                    <span>Observaciones de Admisión (Bitácora de Ingreso)</span>
+                  </span>
+                  <span className="text-[11px] font-normal text-[#7A745F]">Primer registro en bitácora</span>
+                </label>
+                <textarea
+                  rows={3}
+                  placeholder="Ingrese observaciones de llegada, estado anímico, recomendaciones o pertenencias del residente. Se registrará automáticamente como la primera nota de bitácora..."
+                  value={formData.observaciones}
+                  onChange={(e) => setFormData({ ...formData, observaciones: e.target.value })}
+                  className="w-full px-3.5 py-2.5 rounded-xl border border-[#DEDBD1] bg-[#F7F6F2] text-sm focus:outline-none focus:border-[#B3803F] focus:bg-white"
+                />
+                <p className="text-[11px] text-[#7A745F] mt-1">
+                  💡 Este texto se registrará en la bitácora del residente con la distinción institucional <strong className="text-[#182F28]">[REGISTRO DEL RESIDENTE]</strong>.
+                </p>
               </div>
             </div>
           )}
@@ -1600,13 +1657,17 @@ export const RegisterResidentModal: React.FC = () => {
                 onClick={() => setStep((step - 1) as any)}
                 className="px-4 py-2 rounded-xl text-sm font-semibold text-[#5C6058] hover:bg-[#F7F6F2] transition-colors cursor-pointer"
               >
-                Anterior
+                ← Anterior
               </button>
             ) : (
               <div />
             )}
 
             <div className="flex items-center gap-3">
+              <span className="text-xs font-semibold text-[#7A745F] hidden sm:inline-block mr-1">
+                Paso {step} de 6
+              </span>
+
               <button
                 type="button"
                 onClick={() => setIsRegisterResidentOpen(false)}
@@ -1619,17 +1680,19 @@ export const RegisterResidentModal: React.FC = () => {
                 <button
                   type="button"
                   onClick={handleNextStep}
-                  className="px-5 py-2.5 bg-[#274A3F] hover:bg-[#182F28] text-white font-bold rounded-xl text-sm shadow-xs transition-all cursor-pointer"
+                  className="px-5 py-2.5 bg-[#274A3F] hover:bg-[#182F28] text-white font-bold rounded-xl text-sm shadow-xs transition-all cursor-pointer flex items-center gap-1.5"
                 >
-                  Continuar
+                  <span>{getBotonSiguienteTexto()}</span>
                 </button>
               ) : (
                 <button
-                  type="submit"
+                  type="button"
+                  onClick={() => handleSubmit()}
                   disabled={isSubmitting}
-                  className="px-5 py-2.5 bg-[#B3803F] hover:bg-[#9a6c32] text-white font-bold rounded-xl text-sm shadow-xs transition-all cursor-pointer disabled:opacity-50"
+                  className="px-6 py-2.5 bg-[#B3803F] hover:bg-[#9a6c32] text-white font-bold rounded-xl text-sm shadow-md transition-all cursor-pointer disabled:opacity-50 flex items-center gap-2"
                 >
-                  {isSubmitting ? 'Guardando en Base de Datos...' : 'Completar Admisión del Residente'}
+                  <UserPlus className="w-4 h-4" />
+                  <span>{isSubmitting ? 'Guardando en Base de Datos...' : 'Completar Admisión del Residente'}</span>
                 </button>
               )}
             </div>

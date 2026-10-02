@@ -134,8 +134,40 @@ AS
                 WHERE ra.id_acudiente = a.id
                   AND ra.id_parentesco = p.id
                   AND ra.id_residente = r.id
+            ),
+            'bitacora'            VALUE (
+                SELECT JSON_ARRAYAGG(
+                    JSON_OBJECT(
+                        'id'                 VALUE b.id,
+                        'idResidente'        VALUE b.id_residente,
+                        'nombreResidente'    VALUE r.nombres || ' ' || r.apellidos,
+                        'habitacion'         VALUE r.habitacion,
+                        'cama'               VALUE r.cama,
+                        'idEmpleado'         VALUE b.id_empleado,
+                        'nombreEmpleado'     VALUE NVL(e.nombres || ' ' || e.apellidos, 'Personal de Turno'),
+                        'idUsuario'          VALUE b.id_usuario,
+                        'nombreUsuario'      VALUE NVL(u.nombre_completo, 'Usuario del Sistema'),
+                        'fecha'              VALUE TO_CHAR(b.fecha, 'YYYY-MM-DD'),
+                        'hora'               VALUE b.hora,
+                        'idCategoriaBitacora' VALUE b.id_categoria_bitacora,
+                        'categoria'          VALUE NVL(cat.nombre_categoria_bitacora, 'Rutina'),
+                        'contenido'          VALUE b.contenido,
+                        'grabadoPorVoz'      VALUE b.grabado_por_voz,
+                        'visibleAcudiente'   VALUE b.visible_acudiente,
+                        'fechaCreacion'      VALUE TO_CHAR(b.fecha_creacion, 'YYYY-MM-DD"T"HH24:MI:SS')
+                    )
+                    ORDER BY b.fecha DESC, b.hora DESC, b.id DESC
+                    RETURNING CLOB
+                )
+                FROM smy_bitacora_residente b,
+                     smy_empleados e,
+                     smy_usuarios u,
+                     smy_categorias_bitacora cat
+                WHERE b.id_empleado = e.id(+)
+                  AND b.id_usuario = u.id(+)
+                  AND b.id_categoria_bitacora = cat.id(+)
+                  AND b.id_residente = r.id
             )
-            RETURNING CLOB
         )
         INTO vcl_resultado
         FROM smy_residentes r,

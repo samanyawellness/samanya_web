@@ -149,6 +149,7 @@ export const adminApi = {
         email: string;
         esPrincipal?: boolean;
       };
+      observaciones?: string;
     }) {
       return postToPackage('/pkgln_admision_residente/pr_registrar_residente', payload);
     },
@@ -172,8 +173,15 @@ export const adminApi = {
       medicamentos?: MedicamentoPrescrito[];
       idEstadoResidente?: number;
       fechaIngreso?: string;
+      observacionCambioEstado?: string;
+      observaciones?: string;
+      idUsuario?: number;
     }) {
       return postToPackage('/pkgln_admision_residente/pr_actualizar_residente', payload);
+    },
+
+    async consultarBitacora(idResidente: number): Promise<{ success: boolean; data?: any[] }> {
+      return postToPackage('/pkgca_smy_bitacora_residente/f_consultar_por_residente_json', { idResidente });
     },
 
     async consultarCenso(idCentro?: number): Promise<{ success: boolean; data?: any[]; count?: number }> {

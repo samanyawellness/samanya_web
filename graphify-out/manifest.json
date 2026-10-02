@@ -1182,15 +1182,15 @@
     "semantic_hash": "b03454a5e38fe63cb9689f922148ae21"
   },
   "backend/db/scripts/build_all.sql": {
-    "mtime": 1790462985.1966326,
-    "seen": 1790463061.6236205,
-    "ast_hash": "e7ccd1459a5675af2eae0aa90a86767a",
+    "mtime": 1790910491.31495,
+    "seen": 1790910754.169615,
+    "ast_hash": "605ecda71c72c1d7dbf48496a730aaed",
     "semantic_hash": ""
   },
   "backend/db/scripts/datos_prueba_dummy.sql": {
-    "mtime": 1790465049.831466,
-    "seen": 1790465122.1779797,
-    "ast_hash": "ded54e063266b02b464e240821f47824",
+    "mtime": 1790911155.0952916,
+    "seen": 1790911296.6112535,
+    "ast_hash": "13cbd7e13bebd959fe75ec6cf535a520",
     "semantic_hash": ""
   },
   "backend/db/scripts/f_fecha_actual.sql": {
@@ -1212,9 +1212,9 @@
     "semantic_hash": "77095fd2cae8914d3c2cffca2ea84b33"
   },
   "backend/db/scripts/pkgca_residentes.sql": {
-    "mtime": 1790460870.4576833,
-    "seen": 1790461370.881817,
-    "ast_hash": "9f4fbdc24f64be63a785c6019527bfbd",
+    "mtime": 1790914588.5801632,
+    "seen": 1790914981.746817,
+    "ast_hash": "5e35d1d713ba11d1fd3a7b4532a6dbe7",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgca_smy_archivos.sql": {
@@ -1854,9 +1854,9 @@
     "semantic_hash": "cbb25f9314d7994543575432aeb7511a"
   },
   "creacion_modelo_relacional.sql": {
-    "mtime": 1790460704.6969316,
-    "seen": 1790461370.8820915,
-    "ast_hash": "a234e59f93f3da0fbc8dc8cf959bc8bc",
+    "mtime": 1790913852.98272,
+    "seen": 1790914039.49861,
+    "ast_hash": "4ceac14ebaa7060847888cc9c087a45f",
     "semantic_hash": ""
   },
   "docs/diagrams/samanya.architecture.json": {
@@ -2202,9 +2202,9 @@
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_admision_residente.sql": {
-    "mtime": 1790306708.947788,
-    "seen": 1790306999.3882117,
-    "ast_hash": "7ace2a6d970248b1f5e96777fa053d2f",
+    "mtime": 1790913841.394841,
+    "seen": 1790914039.498144,
+    "ast_hash": "5b1cbca01e3db9a318989ee6d94465d4",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_cuadrantes_turnos.sql": {
@@ -2250,15 +2250,15 @@
     "semantic_hash": ""
   },
   "src/components/layout/AdminHeader.tsx": {
-    "mtime": 1790477341.0779881,
-    "seen": 1790477443.5162528,
-    "ast_hash": "8c2a9322212983b6607f3f0c0e220f68",
+    "mtime": 1790481643.7016373,
+    "seen": 1790910754.1699238,
+    "ast_hash": "7f0b623ef98139d2b92248326ee5acb0",
     "semantic_hash": ""
   },
   "src/components/layout/AdminSidebar.tsx": {
-    "mtime": 1790477371.0641024,
-    "seen": 1790477443.5162573,
-    "ast_hash": "c22838426878395ec8fc5f7a56af4fc1",
+    "mtime": 1790481530.361092,
+    "seen": 1790910754.169926,
+    "ast_hash": "2a516dc6ab61b1f84ae85c529059028b",
     "semantic_hash": ""
   },
   "src/components/modals/RegisterFamilyModal.tsx": {
@@ -2268,9 +2268,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/RegisterResidentModal.tsx": {
-    "mtime": 1790461116.7968812,
-    "seen": 1790461370.8821485,
-    "ast_hash": "5558c106a58505e8594aa465b4999391",
+    "mtime": 1790911725.7148137,
+    "seen": 1790911820.1826546,
+    "ast_hash": "24bba4720f10661bf4f2d02741504a1f",
     "semantic_hash": ""
   },
   "src/components/modals/RegisterWorkerModal.tsx": {
@@ -2280,9 +2280,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/ResidentDetailModal.tsx": {
-    "mtime": 1790466281.100587,
-    "seen": 1790466361.7518585,
-    "ast_hash": "6e4daa492c2d9dade4b1f25ee50551a8",
+    "mtime": 1790914836.8370097,
+    "seen": 1790914981.748829,
+    "ast_hash": "500c38a5eb4ff693a66438202ab3fa66",
     "semantic_hash": ""
   },
   "src/components/views/ClinicalSupervisionView.tsx": {
@@ -2310,9 +2310,9 @@
     "semantic_hash": ""
   },
   "src/components/views/ResidentsView.tsx": {
-    "mtime": 1790385400.4196181,
-    "seen": 1790385614.5080817,
-    "ast_hash": "fba6a355894ea3c3377e94438ec0991e",
+    "mtime": 1790914777.877381,
+    "seen": 1790914981.7488968,
+    "ast_hash": "911c79164c3a74fd6c62ee077f44ea28",
     "semantic_hash": ""
   },
   "src/components/views/ShiftsView.tsx": {
@@ -2328,15 +2328,15 @@
     "semantic_hash": ""
   },
   "src/context/AdminContext.tsx": {
-    "mtime": 1790477991.6553774,
-    "seen": 1790478765.373428,
-    "ast_hash": "a4446b4da209dc55748fcc262bd3ab05",
+    "mtime": 1790914749.0527315,
+    "seen": 1790914981.7489183,
+    "ast_hash": "0ba510695e98afaba76395f01a2d3964",
     "semantic_hash": ""
   },
   "src/data/seedData.ts": {
-    "mtime": 1790399911.7067218,
-    "seen": 1790400450.7946591,
-    "ast_hash": "3f81de06add870cc903a40d47270f689",
+    "mtime": 1790911186.7461598,
+    "seen": 1790911296.614175,
+    "ast_hash": "dfe59d1e3eda25c17538bfbd584ff30d",
     "semantic_hash": ""
   },
   "src/main.tsx": {
@@ -2346,15 +2346,15 @@
     "semantic_hash": ""
   },
   "src/services/api.ts": {
-    "mtime": 1790477975.4149568,
-    "seen": 1790478765.373436,
-    "ast_hash": "726b4aaf61b8cbaf174f4e05ae6b7cc0",
+    "mtime": 1790914883.0366924,
+    "seen": 1790914981.7490652,
+    "ast_hash": "29e0bba95a1ab786406cdf91896bf76e",
     "semantic_hash": ""
   },
   "src/types/index.ts": {
-    "mtime": 1790475395.8915842,
-    "seen": 1790475880.1460984,
-    "ast_hash": "5ebdec6590834f9dd15810937b6b27ee",
+    "mtime": 1790910505.376909,
+    "seen": 1790910754.1699898,
+    "ast_hash": "b09ee45ed691fc04987050968de5d7e2",
     "semantic_hash": ""
   },
   "src/vite-env.d.ts": {
@@ -2370,9 +2370,9 @@
     "semantic_hash": ""
   },
   "vite.config.ts": {
-    "mtime": 1790462563.5721228,
-    "seen": 1790463061.6240664,
-    "ast_hash": "25c4e5399e4d6294ba13250adcbcef6c",
+    "mtime": 1790481306.0139017,
+    "seen": 1790910754.1700013,
+    "ast_hash": "1733e79caf3571346ef32b4260c59f92",
     "semantic_hash": ""
   },
   "index.html": {
@@ -2400,9 +2400,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/EditResidentModal.tsx": {
-    "mtime": 1790461122.6350334,
-    "seen": 1790461370.8821301,
-    "ast_hash": "70fbb26c4cf44fb5dfd3702fb3df94f1",
+    "mtime": 1790912570.7146614,
+    "seen": 1790912786.271155,
+    "ast_hash": "5cfa0b19ab73d527225dc0969508dbb6",
     "semantic_hash": ""
   },
   "src/components/modals/EditWorkerModal.tsx": {
@@ -2436,9 +2436,9 @@
     "semantic_hash": ""
   },
   "src/utils/avatarUtils.ts": {
-    "mtime": 1790040865.4442482,
-    "seen": 1790041339.9561276,
-    "ast_hash": "2ca078078b6b85dfdc424ecc37e1ef04",
+    "mtime": 1790482203.6644585,
+    "seen": 1790910754.1699915,
+    "ast_hash": "a0e66b3745cf9840af0e03c5114fd247",
     "semantic_hash": ""
   },
   "public/uploads/talento_humano/27842950a090dfd62caa00788cab283a3a112305bde3599d8282036a02b2feba.jpg": {
@@ -2466,9 +2466,9 @@
     "semantic_hash": ""
   },
   "backend/oracle_bridge.py": {
-    "mtime": 1790478073.7863739,
-    "seen": 1790478765.3733203,
-    "ast_hash": "7a2d771edf6d08a9b26a31a9189002c7",
+    "mtime": 1790482115.174656,
+    "seen": 1790910754.169885,
+    "ast_hash": "90b80b7d2149ce57fbd153bafb98873f",
     "semantic_hash": ""
   },
   "src/components/modals/RegisterLeaveModal.tsx": {
@@ -2610,15 +2610,15 @@
     "semantic_hash": ""
   },
   "src/components/modals/UserProfileModal.tsx": {
-    "mtime": 1790477309.1133046,
-    "seen": 1790477443.5163105,
-    "ast_hash": "32a5e089333a5f26991c4ae6e93759da",
+    "mtime": 1790481564.8860726,
+    "seen": 1790910754.1699603,
+    "ast_hash": "39af85827f2d079e5bf4310825c2a85f",
     "semantic_hash": ""
   },
   "api/index.py": {
-    "mtime": 1790479801.0452769,
-    "seen": 1790480281.6880789,
-    "ast_hash": "e74803472aec982ede76f563ed616203",
+    "mtime": 1790482167.96776,
+    "seen": 1790910754.1696117,
+    "ast_hash": "dc0820bcbb59b306b99f9d0b9549135a",
     "semantic_hash": ""
   },
   "api/requirements.txt": {
@@ -2631,6 +2631,12 @@
     "mtime": 1790479764.8245416,
     "seen": 1790480281.6894689,
     "ast_hash": "bf4f6303f51596fdb737768245383286",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgca_smy_bitacora_residente.sql": {
+    "mtime": 1790914616.6756732,
+    "seen": 1790914981.7468452,
+    "ast_hash": "ff58aa76a41558307acadc21afe318c3",
     "semantic_hash": ""
   }
 }

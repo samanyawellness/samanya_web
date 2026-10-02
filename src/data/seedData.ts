@@ -212,6 +212,26 @@ export const SEED_RESIDENTES: Residente[] = [
         email: 'mauricio.restrepo@empresa.com',
         esPrincipal: false
       }
+    ],
+    observaciones: 'Ingresa en compañía de su hija Claudia Restrepo. Se ubica en habitación individual 104 con pertenencias completas.',
+    bitacora: [
+      {
+        id: 1001,
+        idResidente: 1,
+        nombreResidente: 'Blanca Gómez de Restrepo',
+        habitacion: '104',
+        cama: '104-A',
+        idUsuario: 1,
+        nombreUsuario: 'Administrador Principal',
+        fecha: '2024-01-15',
+        hora: '10:30',
+        idCategoriaBitacora: 1,
+        categoria: 'Rutina',
+        contenido: '[REGISTRO DEL RESIDENTE]: Ingresa en compañía de su hija Claudia Restrepo. Se ubica en habitación individual 104 con pertenencias completas y plan farmacoterapéutico revisado.',
+        grabadoPorVoz: false,
+        visibleAcudiente: true,
+        fechaCreacion: '2024-01-15T10:30:00'
+      }
     ]
   },
   {
@@ -256,6 +276,26 @@ export const SEED_RESIDENTES: Residente[] = [
         email: 'sonia.daza@outlook.com',
         esPrincipal: true
       }
+    ],
+    observaciones: 'Ingresa en compañía de su hija Sonia Daza. Se establece protocolo de glucometría capilar y dieta para diabéticos.',
+    bitacora: [
+      {
+        id: 1002,
+        idResidente: 2,
+        nombreResidente: 'Carlos Julio Daza Morales',
+        habitacion: '108',
+        cama: '108-B',
+        idUsuario: 1,
+        nombreUsuario: 'Administrador Principal',
+        fecha: '2024-05-18',
+        hora: '09:00',
+        idCategoriaBitacora: 1,
+        categoria: 'Rutina',
+        contenido: '[REGISTRO DEL RESIDENTE]: Admisión e ingreso formal a la sede en compañía de su hija Sonia Daza. Se ubica en habitación 108-B. Se establece protocolo de glucometría capilar diaria y dieta para diabéticos.',
+        grabadoPorVoz: false,
+        visibleAcudiente: true,
+        fechaCreacion: '2024-05-18T09:00:00'
+      }
     ]
   },
   {
@@ -290,6 +330,26 @@ export const SEED_RESIDENTES: Residente[] = [
         email: 'fernando.vargas@yahoo.com',
         esPrincipal: true
       }
+    ],
+    observaciones: 'Ingresa en compañía de su hijo Fernando Vargas. Medicación antihipertensiva verificada.',
+    bitacora: [
+      {
+        id: 1003,
+        idResidente: 3,
+        nombreResidente: 'Lucila Silva de Vargas',
+        habitacion: '201',
+        cama: '201-A',
+        idUsuario: 1,
+        nombreUsuario: 'Administrador Principal',
+        fecha: '2024-08-01',
+        hora: '10:00',
+        idCategoriaBitacora: 1,
+        categoria: 'Rutina',
+        contenido: '[REGISTRO DEL RESIDENTE]: Ingreso oficial en habitación 201-A en compañía de su familia. Residente orientada e independiente. Se revisa prescripción de Losartán 50mg.',
+        grabadoPorVoz: false,
+        visibleAcudiente: true,
+        fechaCreacion: '2024-08-01T10:00:00'
+      }
     ]
   },
   {
@@ -323,6 +383,26 @@ export const SEED_RESIDENTES: Residente[] = [
         email: 'abermudez@hotmail.com',
         esPrincipal: true
       }
+    ],
+    observaciones: 'Ingresa asistido en silla de ruedas por su hermano Alejandro Bermúdez. Cuidados de piel por decúbito activos.',
+    bitacora: [
+      {
+        id: 1004,
+        idResidente: 4,
+        nombreResidente: 'Hernando Bermúdez Castro',
+        habitacion: '205',
+        cama: '205-A',
+        idUsuario: 1,
+        nombreUsuario: 'Administrador Principal',
+        fecha: '2023-11-15',
+        hora: '08:30',
+        idCategoriaBitacora: 1,
+        categoria: 'Rutina',
+        contenido: '[REGISTRO DEL RESIDENTE]: Admisión en habitación 205-A con apoyo de su hermano. Residente dependiente total. Se instaura protocolo de movilización en silla de ruedas asistida y cuidados de integridad cutánea.',
+        grabadoPorVoz: false,
+        visibleAcudiente: true,
+        fechaCreacion: '2023-11-15T08:30:00'
+      }
     ]
   },
   {
@@ -347,7 +427,27 @@ export const SEED_RESIDENTES: Residente[] = [
     alertasClinicas: 'Dificultad leve para deglutir sólidos grandes.',
     estado: 'En Observación',
     fechaIngreso: '2025-01-10',
-    acudientes: []
+    acudientes: [],
+    observaciones: 'Ingreso a valoración en habitación 210-A. Se supervisa deglución de sólidos.',
+    bitacora: [
+      {
+        id: 1005,
+        idResidente: 5,
+        nombreResidente: 'Esperanza Montoya Cuéllar',
+        habitacion: '210',
+        cama: '210-A',
+        idUsuario: 1,
+        nombreUsuario: 'Administrador Principal',
+        fecha: '2025-01-10',
+        hora: '09:15',
+        idCategoriaBitacora: 1,
+        categoria: 'Rutina',
+        contenido: '[REGISTRO DEL RESIDENTE]: Admisión inicial en observación en habitación 210-A. Se inicia dieta hiposódica blanda con supervisión en deglución.',
+        grabadoPorVoz: false,
+        visibleAcudiente: true,
+        fechaCreacion: '2025-01-10T09:15:00'
+      }
+    ]
   },
   {
     id: 6,
@@ -371,7 +471,27 @@ export const SEED_RESIDENTES: Residente[] = [
     alertasClinicas: 'Ninguna alergia conocida.',
     estado: 'Activo',
     fechaIngreso: '2024-09-05',
-    acudientes: []
+    acudientes: [],
+    observaciones: 'Ingreso formal en habitación 212-B. Residente independiente y colaborativo.',
+    bitacora: [
+      {
+        id: 1006,
+        idResidente: 6,
+        nombreResidente: 'Guillermo Ospina Rincón',
+        habitacion: '212',
+        cama: '212-B',
+        idUsuario: 1,
+        nombreUsuario: 'Administrador Principal',
+        fecha: '2024-09-05',
+        hora: '10:30',
+        idCategoriaBitacora: 1,
+        categoria: 'Rutina',
+        contenido: '[REGISTRO DEL RESIDENTE]: Ingreso oficial a la institución en habitación 212-B. Residente independiente en actividades básicas cotidianas sin alergias reportadas.',
+        grabadoPorVoz: false,
+        visibleAcudiente: true,
+        fechaCreacion: '2024-09-05T10:30:00'
+      }
+    ]
   }
 ];
 

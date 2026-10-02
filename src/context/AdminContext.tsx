@@ -13,7 +13,8 @@ import {
   HistorialCambioDotacion,
   SolicitudDotacionPayload,
   ProgramarTurnosRangoPayload,
-  AuthUser
+  AuthUser,
+  BitacoraResidente
 } from '../types';
 import {
   SEED_SEDES,
@@ -28,6 +29,29 @@ import {
 } from '../data/seedData';
 import { adminApi } from '../services/api';
 import { limpiarIdentificacion } from '../utils/formatters';
+
+// Utilidades de Fecha y Hora oficial para Bogotá - Colombia (UTC-5 / America/Bogota)
+export const obtenerFechaBogota = (): string =>
+  new Intl.DateTimeFormat('en-CA', { timeZone: 'America/Bogota' }).format(new Date());
+
+export const obtenerHoraBogota = (): string =>
+  new Intl.DateTimeFormat('es-CO', {
+    timeZone: 'America/Bogota',
+    hour: '2-digit',
+    minute: '2-digit',
+    hour12: false
+  }).format(new Date());
+
+export const obtenerIsoBogota = (): string =>
+  new Intl.DateTimeFormat('sv-SE', {
+    timeZone: 'America/Bogota',
+    year: 'numeric',
+    month: '2-digit',
+    day: '2-digit',
+    hour: '2-digit',
+    minute: '2-digit',
+    second: '2-digit'
+  }).format(new Date()).replace(' ', 'T');
 
 export type AdminTab =
   | 'dashboard'
@@ -139,9 +163,15 @@ interface AdminContextType {
       email: string;
     };
     dotacionInicial?: Array<Partial<DotacionResidente>>;
+    observaciones?: string;
   }) => Promise<void>;
 
-  actualizarResidente: (idResidente: number, data: Partial<Residente>) => Promise<void>;
+  actualizarResidente: (
+    idResidente: number,
+    data: Partial<Residente> & { observacionCambioEstado?: string; idUsuario?: number }
+  ) => Promise<void>;
+  cargarBitacoraResidente: (idResidente: number) => Promise<BitacoraResidente[]>;
+  agregarEntradaBitacora: (idResidente: number, entrada: { contenido: string; idCategoriaBitacora?: number; categoria?: string }) => Promise<void>;
   sincronizarResidentes: (silencioso?: boolean) => Promise<void>;
 
   registrarFamiliar: (data: Omit<FamiliarAcudiente, 'id' | 'nombreCompleto'> & {
@@ -935,6 +965,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         email: string;
       };
       dotacionInicial?: Array<Partial<DotacionResidente>>;
+      observaciones?: string;
     }
   ): Promise<void> => {
     // Cálculo de edad
@@ -997,6 +1028,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       idEstadoResidente,
       fechaIngreso,
       alertasClinicas: data.alertasClinicas,
+      observaciones: data.observaciones?.trim() || undefined,
       medicamentos: data.medicamentos,
       acudienteAsociado: data.familiarContacto
         ? {
@@ -1061,15 +1093,45 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       );
       const realId = resCreado ? Number(resCreado.id) : newId;
 
-      if (data.archivosAdjuntos && data.archivosAdjuntos.length > 0) {
-        setResidentes((prev) =>
-          prev.map((r) =>
-            r.id === realId || r.identificacion === limpiarIdentificacion(data.identificacion)
-              ? { ...r, id: realId, archivosAdjuntos: data.archivosAdjuntos, fotoUrl: data.fotoUrl || r.fotoUrl }
-              : r
-          )
-        );
-      }
+      // Crear asiento inicial en la bitácora con la distinción del registro del residente
+      const textoObservacion = data.observaciones?.trim()
+        ? `[REGISTRO DEL RESIDENTE]: ${data.observaciones.trim()}`
+        : `[REGISTRO DEL RESIDENTE]: Admisión inicial y apertura de expediente del residente en sede ${activeSede.nombre}.`;
+
+      const bitacoraInicial: BitacoraResidente[] = [
+        {
+          id: Date.now(),
+          idResidente: realId,
+          nombreResidente: `${data.nombres} ${data.apellidos}`.trim(),
+          habitacion: data.habitacion,
+          cama: data.cama,
+          idUsuario: currentUser?.id || 1,
+          nombreUsuario: currentUser?.nombreCompleto || 'Administrador',
+          fecha: fechaIngreso || obtenerFechaBogota(),
+          hora: obtenerHoraBogota(),
+          idCategoriaBitacora: 1,
+          categoria: 'Rutina',
+          contenido: textoObservacion,
+          grabadoPorVoz: false,
+          visibleAcudiente: true,
+          fechaCreacion: obtenerIsoBogota()
+        }
+      ];
+
+      setResidentes((prev) =>
+        prev.map((r) =>
+          r.id === realId || r.identificacion === limpiarIdentificacion(data.identificacion)
+            ? {
+                ...r,
+                id: realId,
+                observaciones: data.observaciones?.trim(),
+                bitacora: bitacoraInicial,
+                archivosAdjuntos: data.archivosAdjuntos || r.archivosAdjuntos,
+                fotoUrl: data.fotoUrl || r.fotoUrl
+              }
+            : r
+        )
+      );
 
       // Si incluye dotación inicial acordada al ingreso, registrarla con el ID real de Oracle
       if (data.dotacionInicial && data.dotacionInicial.length > 0) {
@@ -1913,23 +1975,52 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   };
 
   // 7. Actualizar Residente
-  const actualizarResidente = async (idResidente: number, data: Partial<Residente>) => {
+  const actualizarResidente = async (
+    idResidente: number,
+    data: Partial<Residente> & { observacionCambioEstado?: string; idUsuario?: number }
+  ) => {
     let idReal = idResidente;
+    const resActual = residentes.find((r) => r.id === idResidente);
+
     // Si el ID proviene de Date.now() (excede los 9-10 dígitos de NUMBER(10) en Oracle)
     if (idReal > 999999999) {
       try {
         const respCenso = await adminApi.residentes.consultarCenso(activeSede.id);
         if (respCenso && respCenso.data) {
-          const identBuscada = limpiarIdentificacion(String(data.identificacion || ''));
-          const matching = respCenso.data.find(
-            (r: any) => limpiarIdentificacion(String(r.identificacion)) === identBuscada
-          );
-          if (matching && matching.id) {
-            idReal = Number(matching.id);
+          const identBuscada = limpiarIdentificacion(String(data.identificacion || resActual?.identificacion || ''));
+          if (identBuscada) {
+            const matching = respCenso.data.find(
+              (r: any) => limpiarIdentificacion(String(r.identificacion)) === identBuscada
+            );
+            if (matching && matching.id) {
+              idReal = Number(matching.id);
+            }
           }
         }
       } catch (e) {
         console.warn('Error resolviendo ID real del residente:', e);
+      }
+    }
+
+    // Mapeo canónico a SMY_ESTADOS_RESIDENTES:
+    // 1: ACTIVO, 2: EGRESADO, 3: HOSPITALIZADO, 4: FALLECIDO, 5: EN OBSERVACION
+    let idEstadoResidenteNum: number | undefined = undefined;
+    if (data.estado) {
+      switch (data.estado) {
+        case 'Activo':
+          idEstadoResidenteNum = 1;
+          break;
+        case 'Egresado':
+          idEstadoResidenteNum = 2;
+          break;
+        case 'Hospitalizado':
+          idEstadoResidenteNum = 3;
+          break;
+        case 'En Observación':
+          idEstadoResidenteNum = 5;
+          break;
+        default:
+          idEstadoResidenteNum = 1;
       }
     }
 
@@ -1968,20 +2059,37 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         : undefined,
       alertasClinicas: data.alertasClinicas,
       fechaIngreso: data.fechaIngreso,
-      idEstadoResidente: data.estado
-        ? data.estado === 'Activo'
-          ? 1
-          : data.estado === 'En Observación'
-          ? 2
-          : data.estado === 'Hospitalizado'
-          ? 3
-          : 4
-        : undefined,
-      medicamentos: data.medicamentos
+      idEstadoResidente: idEstadoResidenteNum,
+      estado: data.estado,
+      nombreEstado: data.estado,
+      medicamentos: data.medicamentos,
+      observacionCambioEstado: data.observacionCambioEstado?.trim() || undefined,
+      idUsuario: data.idUsuario || currentUser?.id || 1
     };
 
     try {
       await adminApi.residentes.actualizarResidente(payload);
+
+      const hayCambioEstado = Boolean(data.estado && resActual && data.estado !== resActual.estado);
+      const obsTexto = data.observacionCambioEstado?.trim();
+
+      const nuevaNotaBitacora: BitacoraResidente | null = hayCambioEstado && resActual ? {
+        id: Date.now(),
+        idResidente: idReal,
+        nombreResidente: resActual.nombreCompleto,
+        habitacion: data.habitacion || resActual.habitacion,
+        cama: data.cama || resActual.cama,
+        idUsuario: currentUser?.id || 1,
+        nombreUsuario: currentUser?.nombreCompleto || 'Administrador',
+        fecha: obtenerFechaBogota(),
+        hora: obtenerHoraBogota(),
+        idCategoriaBitacora: 1,
+        categoria: 'Novedad Administrativa',
+        contenido: `[CAMBIO DE ESTADO]: De "${resActual.estado}" a "${data.estado}".${obsTexto ? ` Observación: ${obsTexto}` : ''}`,
+        grabadoPorVoz: false,
+        visibleAcudiente: true,
+        fechaCreacion: obtenerIsoBogota()
+      } : null;
 
       setResidentes((prev) =>
         prev.map((r) => {
@@ -2004,6 +2112,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             }
           }
 
+          const bitacoraActualizada = nuevaNotaBitacora
+            ? [nuevaNotaBitacora, ...(r.bitacora || [])]
+            : r.bitacora;
+
           return {
             ...r,
             ...data,
@@ -2012,7 +2124,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             edad,
             fechaIngreso: data.fechaIngreso || r.fechaIngreso,
             estado: data.estado || r.estado,
-            medicamentos: data.medicamentos !== undefined ? data.medicamentos : r.medicamentos
+            medicamentos: data.medicamentos !== undefined ? data.medicamentos : r.medicamentos,
+            bitacora: bitacoraActualizada
           };
         })
       );
@@ -2023,15 +2136,87 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           data.nombres && data.apellidos
             ? `${data.nombres} ${data.apellidos}`.trim()
             : prev.nombreCompleto;
-        return { ...prev, ...data, id: idReal, nombreCompleto };
+        const bitacoraActualizada = nuevaNotaBitacora
+          ? [nuevaNotaBitacora, ...(prev.bitacora || [])]
+          : prev.bitacora;
+        return { ...prev, ...data, id: idReal, nombreCompleto, bitacora: bitacoraActualizada };
       });
 
       showToast('✅ Cambios del residente guardados exitosamente en Oracle', 'success');
+      sincronizarResidentes(true).catch(() => {});
     } catch (err: any) {
       console.error('[Error actualizarResidente Oracle]:', err);
       showToast(`❌ Error al actualizar en base de datos Oracle: ${err.message || 'Fallo de actualización'}`, 'alert');
       throw err;
     }
+  };
+
+  // 7.1 Cargar Bitácora del Residente desde Oracle (SMY_BITACORA_RESIDENTE)
+  const cargarBitacoraResidente = async (idResidente: number): Promise<BitacoraResidente[]> => {
+    let idReal = idResidente;
+    const resActual = residentes.find((r) => r.id === idResidente);
+    if (idReal > 999999999) {
+      try {
+        const respCenso = await adminApi.residentes.consultarCenso(activeSede.id);
+        if (respCenso && respCenso.data) {
+          const identBuscada = limpiarIdentificacion(String(resActual?.identificacion || ''));
+          if (identBuscada) {
+            const matching = respCenso.data.find(
+              (r: any) => limpiarIdentificacion(String(r.identificacion)) === identBuscada
+            );
+            if (matching && matching.id) {
+              idReal = Number(matching.id);
+            }
+          }
+        }
+      } catch (e) {
+        console.warn('Error resolviendo ID real del residente para bitácora:', e);
+      }
+    }
+
+    try {
+      const resp = await adminApi.residentes.consultarBitacora(idReal);
+      if (resp && resp.success && Array.isArray(resp.data)) {
+        const bitacoraMapeada: BitacoraResidente[] = resp.data.map((b: any) => ({
+          id: Number(b.id),
+          idResidente: Number(b.idResidente) || idReal,
+          nombreResidente: b.nombreResidente || resActual?.nombreCompleto || '',
+          habitacion: b.habitacion || resActual?.habitacion || '',
+          cama: b.cama || resActual?.cama || '',
+          idEmpleado: b.idEmpleado ? Number(b.idEmpleado) : undefined,
+          nombreEmpleado: b.nombreEmpleado,
+          idUsuario: Number(b.idUsuario) || 1,
+          nombreUsuario: b.nombreUsuario || 'Usuario del Sistema',
+          fecha: b.fecha ? String(b.fecha).slice(0, 10) : obtenerFechaBogota(),
+          hora: b.hora || obtenerHoraBogota(),
+          idCategoriaBitacora: Number(b.idCategoriaBitacora) || 1,
+          categoria: b.categoria || 'Rutina',
+          contenido: b.contenido || '',
+          grabadoPorVoz: b.grabadoPorVoz === 'S' || b.grabadoPorVoz === true,
+          visibleAcudiente: b.visibleAcudiente === 'S' || b.visibleAcudiente === true,
+          fechaCreacion: b.fechaCreacion || obtenerIsoBogota()
+        }));
+
+        setResidentes((prev) =>
+          prev.map((r) =>
+            r.id === idResidente || r.id === idReal
+              ? { ...r, bitacora: bitacoraMapeada }
+              : r
+          )
+        );
+
+        setSelectedResidente((prev) =>
+          prev && (prev.id === idResidente || prev.id === idReal)
+            ? { ...prev, bitacora: bitacoraMapeada }
+            : prev
+        );
+
+        return bitacoraMapeada;
+      }
+    } catch (err) {
+      console.error('[AdminContext] Error al consultar bitácora desde Oracle:', err);
+    }
+    return resActual?.bitacora || [];
   };
 
   // 8. Actualizar Trabajador
@@ -2344,6 +2529,78 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setIsEditSedeOpen,
         registrarResidente,
         actualizarResidente,
+        cargarBitacoraResidente,
+        agregarEntradaBitacora: async (
+          idResidente: number,
+          entrada: { contenido: string; idCategoriaBitacora?: number; categoria?: string }
+        ) => {
+          let idReal = idResidente;
+          const res = residentes.find((r) => r.id === idResidente);
+          if (idReal > 999999999) {
+            try {
+              const respCenso = await adminApi.residentes.consultarCenso(activeSede.id);
+              if (respCenso && respCenso.data) {
+                const identBuscada = limpiarIdentificacion(String(res?.identificacion || ''));
+                if (identBuscada) {
+                  const matching = respCenso.data.find(
+                    (r: any) => limpiarIdentificacion(String(r.identificacion)) === identBuscada
+                  );
+                  if (matching && matching.id) {
+                    idReal = Number(matching.id);
+                  }
+                }
+              }
+            } catch (e) {
+              console.warn('Error resolviendo ID real del residente:', e);
+            }
+          }
+
+          // Persistir en Oracle con la función horaria legal f_fecha_actual
+          try {
+            await adminApi.residentes.actualizarResidente({
+              idResidente: idReal,
+              observaciones: entrada.contenido.trim(),
+              idUsuario: currentUser?.id || 1
+            });
+          } catch (err) {
+            console.warn('[agregarEntradaBitacora] Fallo al persistir en Oracle, guardando localmente:', err);
+          }
+
+          const nuevaNota: BitacoraResidente = {
+            id: Date.now(),
+            idResidente: idReal,
+            nombreResidente: res?.nombreCompleto,
+            habitacion: res?.habitacion,
+            cama: res?.cama,
+            idUsuario: currentUser?.id || 1,
+            nombreUsuario: currentUser?.nombreCompleto || 'Administrador',
+            fecha: obtenerFechaBogota(),
+            hora: obtenerHoraBogota(),
+            idCategoriaBitacora: entrada.idCategoriaBitacora || 1,
+            categoria: entrada.categoria || 'Rutina',
+            contenido: entrada.contenido.trim(),
+            grabadoPorVoz: false,
+            visibleAcudiente: true,
+            fechaCreacion: obtenerIsoBogota()
+          };
+          setResidentes((prev) =>
+            prev.map((r) =>
+              r.id === idResidente || r.id === idReal
+                ? {
+                    ...r,
+                    bitacora: [nuevaNota, ...(r.bitacora || [])]
+                  }
+                : r
+            )
+          );
+          setSelectedResidente((prev) =>
+            prev && (prev.id === idResidente || prev.id === idReal)
+              ? { ...prev, bitacora: [nuevaNota, ...(prev.bitacora || [])] }
+              : prev
+          );
+          showToast('Nota agregada a la bitácora del residente exitosamente', 'success');
+          cargarBitacoraResidente(idReal).catch(() => {});
+        },
         sincronizarResidentes,
         registrarFamiliar,
         actualizarFamiliar,

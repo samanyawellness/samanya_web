@@ -1,4 +1,4 @@
-import React, { useState, useMemo } from 'react';
+import React, { useState, useMemo, useEffect } from 'react';
 import { useAdmin } from '../../context/AdminContext';
 import {
   X,
@@ -22,13 +22,14 @@ import {
   Paperclip,
   FileText,
   ExternalLink,
-  ChevronRight
+  ChevronRight,
+  BookOpen
 } from 'lucide-react';
 import { ResidentAvatar } from '../common/ResidentAvatar';
 import { DotacionResidente } from '../../types';
 import { ImprimirSolicitudDotacionModal } from './ImprimirSolicitudDotacionModal';
 
-type TabFicha = 'general' | 'medicamentos' | 'familiares' | 'dotacion' | 'documentos';
+type TabFicha = 'general' | 'bitacora' | 'medicamentos' | 'familiares' | 'dotacion' | 'documentos';
 
 export const ResidentDetailModal: React.FC = () => {
   const {
@@ -46,10 +47,15 @@ export const ResidentDetailModal: React.FC = () => {
     agregarArticuloDotacionResidente,
     registrarRecambioDotacion,
     abrirSolicitarDotacion,
-    entregarDotacionSolicitada
+    entregarDotacionSolicitada,
+    agregarEntradaBitacora,
+    cargarBitacoraResidente
   } = useAdmin();
 
   const [tabActiva, setTabActiva] = useState<TabFicha>('general');
+  const [textoNuevaNota, setTextoNuevaNota] = useState('');
+  const [categoriaNuevaNota, setCategoriaNuevaNota] = useState('Rutina');
+  const [cargandoBitacora, setCargandoBitacora] = useState(false);
 
   const [mostrarFormAgregarDotacion, setMostrarFormAgregarDotacion] = useState(false);
   const [nuevoArticuloDotacion, setNuevoArticuloDotacion] = useState({
@@ -66,6 +72,14 @@ export const ResidentDetailModal: React.FC = () => {
 
   // Sincronización reactiva con la lista global de residentes
   const resident = residentes.find((r) => r.id === selectedResidente?.id) || selectedResidente;
+
+  // Cargar bitácora desde Oracle al abrir el modal o cambiar de residente
+  useEffect(() => {
+    if (isResidenteDetailOpen && resident?.id) {
+      setCargandoBitacora(true);
+      cargarBitacoraResidente(resident.id).finally(() => setCargandoBitacora(false));
+    }
+  }, [isResidenteDetailOpen, resident?.id]);
 
   const dotacionesResidente = (dotaciones || []).filter((d) => d.idResidente === resident?.id);
   const dotacionesSolicitadas = dotacionesResidente.filter((d) => d.estadoElemento === 'Solicitado');
@@ -174,6 +188,26 @@ export const ResidentDetailModal: React.FC = () => {
           >
             <User className="w-4 h-4 text-[#274A3F]" />
             <span>Información General</span>
+          </button>
+
+          <button
+            type="button"
+            onClick={() => setTabActiva('bitacora')}
+            className={`py-3 px-3.5 text-xs font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+              tabActiva === 'bitacora'
+                ? 'border-[#182F28] text-[#182F28] bg-white rounded-t-xl shadow-2xs'
+                : 'border-transparent text-[#7A745F] hover:text-[#182F28] hover:bg-[#EAE7DC]/60'
+            }`}
+          >
+            <BookOpen className="w-4 h-4 text-[#274A3F]" />
+            <span>Bitácora Diaria</span>
+            {(resident.bitacora?.length || 0) > 0 ? (
+              <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-[#274A3F]/15 text-[#274A3F]">
+                {resident.bitacora?.length}
+              </span>
+            ) : cargandoBitacora ? (
+              <RefreshCw className="w-3 h-3 text-[#274A3F] animate-spin" />
+            ) : null}
           </button>
 
           <button
@@ -389,6 +423,208 @@ export const ResidentDetailModal: React.FC = () => {
                   </p>
                 </div>
               </div>
+
+              {/* Widget Destacado de Última Nota en Bitácora dentro de Información General */}
+              <div className="p-4 bg-white rounded-2xl border border-[#DEDBD1] shadow-2xs space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <div className="flex items-center gap-2">
+                    <div className="w-7 h-7 rounded-lg bg-[#274A3F] text-[#DCB87F] flex items-center justify-center">
+                      <BookOpen className="w-4 h-4" />
+                    </div>
+                    <div>
+                      <h5 className="font-serif font-bold text-xs text-[#182F28]">Última Novedad en Bitácora</h5>
+                      <span className="text-[10px] text-[#7A745F]">
+                        {resident.bitacora && resident.bitacora.length > 0
+                          ? `${resident.bitacora.length} nota(s) en historial`
+                          : cargandoBitacora
+                          ? 'Consultando base de datos Oracle...'
+                          : 'Sin notas registradas'}
+                      </span>
+                    </div>
+                  </div>
+                  <button
+                    type="button"
+                    onClick={() => setTabActiva('bitacora')}
+                    className="text-xs font-bold text-[#274A3F] hover:text-[#182F28] flex items-center gap-1 hover:underline cursor-pointer"
+                  >
+                    <span>Ver Historial Completo</span>
+                    <ChevronRight className="w-3.5 h-3.5" />
+                  </button>
+                </div>
+
+                {cargandoBitacora ? (
+                  <div className="p-3 bg-[#F7F6F2] rounded-xl text-center text-xs text-[#7A745F] flex items-center justify-center gap-2">
+                    <RefreshCw className="w-3.5 h-3.5 animate-spin text-[#274A3F]" />
+                    <span>Cargando bitácora desde base de datos Oracle...</span>
+                  </div>
+                ) : resident.bitacora && resident.bitacora.length > 0 ? (
+                  <div className="p-3 bg-[#F7F6F2] rounded-xl border border-[#DEDBD1]/60 text-xs">
+                    <div className="flex items-center justify-between text-[11px] text-[#7A745F] mb-1">
+                      <span className="font-bold text-[#182F28]">{resident.bitacora[0].categoria || 'Rutina'}</span>
+                      <span className="font-mono">{resident.bitacora[0].fecha} • {resident.bitacora[0].hora}</span>
+                    </div>
+                    <p className="text-[#26241F] line-clamp-2 italic font-serif">
+                      "{resident.bitacora[0].contenido}"
+                    </p>
+                  </div>
+                ) : (
+                  <p className="text-xs text-[#7A745F] italic">
+                    No hay anotaciones registradas aún en la bitácora de este residente.
+                  </p>
+                )}
+              </div>
+            </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* PESTAÑA: BITÁCORA ASISTENCIAL & HISTORIAL */}
+          {/* ========================================================================= */}
+          {tabActiva === 'bitacora' && (
+            <div className="space-y-4 animate-in fade-in duration-150">
+              <div className="flex items-center justify-between border-b border-[#DEDBD1] pb-3">
+                <div className="flex items-center gap-2">
+                  <div className="w-8 h-8 rounded-xl bg-[#274A3F] text-[#DCB87F] flex items-center justify-center">
+                    <BookOpen className="w-4 h-4" />
+                  </div>
+                  <div>
+                    <h4 className="font-serif font-bold text-sm text-[#182F28]">
+                      Bitácora y Novedades del Residente
+                    </h4>
+                    <p className="text-[11px] text-[#7A745F]">
+                      Registro cronológico de novedades diarias, cuidados y notas de admisión
+                    </p>
+                  </div>
+                </div>
+                <div className="flex items-center gap-2">
+                  <button
+                    type="button"
+                    disabled={cargandoBitacora}
+                    onClick={async () => {
+                      if (!resident?.id) return;
+                      setCargandoBitacora(true);
+                      try {
+                        await cargarBitacoraResidente(resident.id);
+                      } finally {
+                        setCargandoBitacora(false);
+                      }
+                    }}
+                    className="p-1.5 hover:bg-[#EAE7DC] text-[#274A3F] rounded-lg transition-colors cursor-pointer disabled:opacity-50"
+                    title="Recargar bitácora desde la base de datos Oracle"
+                  >
+                    <RefreshCw className={`w-3.5 h-3.5 ${cargandoBitacora ? 'animate-spin' : ''}`} />
+                  </button>
+                  <span className="text-xs text-[#274A3F] font-mono font-bold bg-[#EAE7DC] px-2.5 py-1 rounded-full border border-[#DEDBD1]">
+                    {resident.bitacora?.length || 0} nota(s)
+                  </span>
+                </div>
+              </div>
+
+              {/* Formulario rápido para nueva nota */}
+              <div className="p-3.5 bg-[#F7F6F2] rounded-2xl border border-[#DEDBD1] space-y-2.5">
+                <div className="flex items-center justify-between">
+                  <span className="text-xs font-bold text-[#182F28] flex items-center gap-1.5">
+                    <Plus className="w-3.5 h-3.5 text-[#274A3F]" />
+                    <span>Agregar Nota a la Bitácora</span>
+                  </span>
+                  <select
+                    value={categoriaNuevaNota}
+                    onChange={(e) => setCategoriaNuevaNota(e.target.value)}
+                    className="text-xs px-2.5 py-1 rounded-lg border border-[#DEDBD1] bg-white text-[#182F28]"
+                  >
+                    <option value="Rutina">Rutina / General</option>
+                    <option value="Comportamiento">Comportamiento</option>
+                    <option value="Salud">Salud / Médico</option>
+                    <option value="Visita Familiar">Visita Familiar</option>
+                    <option value="Actividad Recreativa">Actividad Recreativa</option>
+                    <option value="Alerta">Alerta</option>
+                  </select>
+                </div>
+                <div className="flex gap-2">
+                  <textarea
+                    rows={2}
+                    placeholder="Escriba una observación o novedad asistencial..."
+                    value={textoNuevaNota}
+                    onChange={(e) => setTextoNuevaNota(e.target.value)}
+                    className="flex-1 px-3 py-2 rounded-xl border border-[#DEDBD1] bg-white text-xs focus:outline-none focus:border-[#B3803F]"
+                  />
+                  <button
+                    type="button"
+                    disabled={!textoNuevaNota.trim()}
+                    onClick={async () => {
+                      if (!textoNuevaNota.trim()) return;
+                      await agregarEntradaBitacora(resident.id, {
+                        contenido: textoNuevaNota.trim(),
+                        categoria: categoriaNuevaNota
+                      });
+                      setTextoNuevaNota('');
+                    }}
+                    className="px-4 py-2 bg-[#182F28] hover:bg-[#274A3F] text-white font-bold text-xs rounded-xl transition-colors disabled:opacity-50 cursor-pointer shrink-0 self-end"
+                  >
+                    Guardar
+                  </button>
+                </div>
+              </div>
+
+              {/* Lista de entradas de bitácora */}
+              {resident.bitacora && resident.bitacora.length > 0 ? (
+                <div className="space-y-3">
+                  {resident.bitacora.map((item, idx) => {
+                    const esRegistroAdmision = item.contenido.includes('[REGISTRO DEL RESIDENTE]');
+                    const esCambioEstado = item.contenido.includes('[CAMBIO DE ESTADO]');
+                    return (
+                      <div
+                        key={item.id || idx}
+                        className={`p-4 rounded-2xl border transition-all ${
+                          esRegistroAdmision
+                            ? 'bg-[#F2F8F5] border-[#274A3F]/40 shadow-xs'
+                            : esCambioEstado
+                            ? 'bg-[#FEF9F2] border-amber-300/80 shadow-xs'
+                            : 'bg-white border-[#DEDBD1] hover:border-[#B3803F]/50 shadow-2xs'
+                        }`}
+                      >
+                        <div className="flex items-center justify-between gap-2 mb-2">
+                          <div className="flex items-center gap-2 flex-wrap">
+                            {esRegistroAdmision ? (
+                              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#182F28] text-[#DCB87F] border border-[#DCB87F]/40 flex items-center gap-1 shadow-2xs">
+                                <span>⭐</span>
+                                <span>Registro Inicial de Admisión</span>
+                              </span>
+                            ) : esCambioEstado ? (
+                              <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300/70 flex items-center gap-1 shadow-2xs">
+                                <span>🔄</span>
+                                <span>Cambio de Estado Administrativo</span>
+                              </span>
+                            ) : (
+                              <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EAE7DC] text-[#274A3F] border border-[#DEDBD1]">
+                                {item.categoria || 'Rutina'}
+                              </span>
+                            )}
+                            <span className="text-xs text-[#7A745F] font-medium flex items-center gap-1">
+                              <Calendar className="w-3 h-3 text-[#274A3F]" />
+                              <span>{item.fecha}</span>
+                              <span>•</span>
+                              <Clock className="w-3 h-3 text-[#274A3F]" />
+                              <span>{item.hora}</span>
+                            </span>
+                          </div>
+
+                          <span className="text-[11px] text-[#7A745F]">
+                            Por: <strong className="text-[#182F28]">{item.nombreUsuario || item.nombreEmpleado || 'Administrador'}</strong>
+                          </span>
+                        </div>
+
+                        <p className="text-xs text-[#182F28] leading-relaxed whitespace-pre-wrap">
+                          {item.contenido}
+                        </p>
+                      </div>
+                    );
+                  })}
+                </div>
+              ) : (
+                <div className="p-8 bg-[#F7F6F2] rounded-2xl text-center text-xs text-[#7A745F] border border-[#DEDBD1]">
+                  No hay anotaciones registradas en la bitácora aún.
+                </div>
+              )}
             </div>
           )}
 

@@ -52,7 +52,8 @@ AS
      *       "idParentesco": 1,
      *       "telefono": "3108459921",
      *       "email": "claudia@gmail.com"
-     *   }
+     *   },
+     *   "observaciones": "Residente ingresa orientado y colaborador en compañía de su hija. Trae pertenencias completas."
      * }
      */
     PROCEDURE pr_registrar_residente (
@@ -107,6 +108,8 @@ AS
         vro_acudiente          smy_acudientes%ROWTYPE;
         vro_res_acu            smy_residente_acudiente%ROWTYPE;
         vro_med                smy_medicamentos_prescritos%ROWTYPE;
+        vro_bitacora           smy_bitacora_residente%ROWTYPE;
+        v_observaciones        VARCHAR2(4000);
 
         -- Datos acudiente asociado
         v_acu_nombres          smy_acudientes.nombres%TYPE;
@@ -243,6 +246,37 @@ AS
             END IF;
         END LOOP;
 
+        -- 5.2 Registro de la observación inicial de admisión en la bitácora del residente (SMY_BITACORA_RESIDENTE)
+        -- Regla arquitectónica: Genera el primer registro de bitácora delegando la inserción al DAO de la tabla.
+        -- Incluye la distinción '[REGISTRO DEL RESIDENTE]:' al principio del contenido.
+        v_observaciones := TRIM(JSON_VALUE(pcl_json, '$.observaciones'));
+        IF v_observaciones IS NULL THEN
+            v_observaciones := TRIM(JSON_VALUE(pcl_json, '$.observacionesIngreso'));
+        END IF;
+
+        IF v_observaciones IS NOT NULL AND LENGTH(v_observaciones) > 0 THEN
+            vro_bitacora.contenido := '[REGISTRO DEL RESIDENTE]: ' || v_observaciones;
+        ELSE
+            vro_bitacora.contenido := '[REGISTRO DEL RESIDENTE]: Admisión inicial y apertura de expediente del residente en sede.';
+        END IF;
+
+        vro_bitacora.id                             := SEQ_SMY_BITACORA_RESIDENTE.NEXTVAL;
+        vro_bitacora.id_residente                   := vro_residente.id;
+        vro_bitacora.id_empleado                    := TO_NUMBER(JSON_VALUE(pcl_json, '$.idEmpleado'));
+        vro_bitacora.id_usuario                     := NVL(TO_NUMBER(JSON_VALUE(pcl_json, '$.idUsuario')), 1);
+        vro_bitacora.fecha                          := TRUNC(NVL(vro_residente.fecha_ingreso, f_fecha_actual));
+        vro_bitacora.hora                           := TO_CHAR(f_fecha_actual, 'HH24:MI');
+        vro_bitacora.id_categoria_bitacora          := NVL(TO_NUMBER(JSON_VALUE(pcl_json, '$.idCategoriaBitacora')), 1); -- 1: Rutina / General
+        vro_bitacora.grabado_por_voz                := 'N';
+        vro_bitacora.id_archivo_audio               := NULL;
+        vro_bitacora.id_archivo_foto                := NULL;
+        vro_bitacora.id_turno_asignado              := NULL;
+        vro_bitacora.visible_acudiente              := NVL(JSON_VALUE(pcl_json, '$.visibleAcudiente'), 'S');
+        vro_bitacora.fecha_creacion                 := f_fecha_actual;
+        vro_bitacora.id_usuario_ultima_modificacion := vro_bitacora.id_usuario;
+
+        PKGSMY_BITACORA_RESIDENTE_DAO.p_insertar(vro_bitacora);
+
         -- 6. Control transaccional mediante p_do_commit
         p_do_commit('pkgln_admision_residente.pr_registrar_residente');
 
@@ -262,8 +296,10 @@ AS
     PROCEDURE pr_actualizar_residente (
         pcl_json IN CLOB
     ) IS
-        v_id_residente smy_residentes.id%TYPE;
-        vro_residente  smy_residentes%ROWTYPE;
+        v_id_residente  smy_residentes.id%TYPE;
+        vro_residente   smy_residentes%ROWTYPE;
+        v_id_estado_ant smy_residentes.id_estado_residente%TYPE;
+        vro_error       smy_errores%ROWTYPE;
     BEGIN
         v_id_residente := TO_NUMBER(JSON_VALUE(pcl_json, '$.idResidente'));
 
@@ -275,6 +311,8 @@ AS
         IF PKGSMY_RESIDENTES_DAO.f_existe(v_id_residente, vro_residente) = FALSE THEN
             RAISE_APPLICATION_ERROR(-20006, 'El residente indicado no existe.');
         END IF;
+
+        v_id_estado_ant := vro_residente.id_estado_residente;
 
         -- Actualizar campos proporcionados
         IF JSON_VALUE(pcl_json, '$.nombres') IS NOT NULL THEN
@@ -322,12 +360,141 @@ AS
         IF JSON_VALUE(pcl_json, '$.fechaIngreso') IS NOT NULL THEN
             vro_residente.fecha_ingreso := TO_DATE(SUBSTR(JSON_VALUE(pcl_json, '$.fechaIngreso'), 1, 10), 'YYYY-MM-DD');
         END IF;
-        IF JSON_VALUE(pcl_json, '$.idEstadoResidente') IS NOT NULL THEN
-            vro_residente.id_estado_residente := TO_NUMBER(JSON_VALUE(pcl_json, '$.idEstadoResidente'));
-        END IF;
 
-        -- Modificación delegada al DAO
+        -- Manejo robusto del estado del residente (por ID numérico o por nombre)
+        DECLARE
+            v_nuevo_estado NUMBER(10);
+            v_nom_est_in   VARCHAR2(50);
+        BEGIN
+            IF JSON_VALUE(pcl_json, '$.idEstadoResidente') IS NOT NULL THEN
+                v_nuevo_estado := TO_NUMBER(JSON_VALUE(pcl_json, '$.idEstadoResidente'));
+            END IF;
+
+            v_nom_est_in := UPPER(TRIM(NVL(JSON_VALUE(pcl_json, '$.estado'), JSON_VALUE(pcl_json, '$.nombreEstado'))));
+            IF v_nom_est_in IS NOT NULL THEN
+                IF v_nom_est_in LIKE '%ACTIVO%' THEN
+                    v_nuevo_estado := 1;
+                ELSIF v_nom_est_in LIKE '%EGRESAD%' THEN
+                    v_nuevo_estado := 2;
+                ELSIF v_nom_est_in LIKE '%HOSPITAL%' THEN
+                    v_nuevo_estado := 3;
+                ELSIF v_nom_est_in LIKE '%FALLEC%' THEN
+                    v_nuevo_estado := 4;
+                ELSIF v_nom_est_in LIKE '%OBSERVA%' THEN
+                    v_nuevo_estado := 5;
+                END IF;
+            END IF;
+
+            IF v_nuevo_estado IS NOT NULL THEN
+                -- Garantizar que el estado 5 (EN OBSERVACION) exista en SMY_ESTADOS_RESIDENTES
+                IF v_nuevo_estado = 5 THEN
+                    DECLARE
+                        vro_chk_5 smy_estados_residentes%ROWTYPE;
+                    BEGIN
+                        IF NOT PKGSMY_ESTADOS_RESIDENTES_DAO.f_existe(5, vro_chk_5) THEN
+                            vro_chk_5.id                             := 5;
+                            vro_chk_5.id_organizacion                := NVL(vro_residente.id_centro, 1);
+                            vro_chk_5.nombre_estado_residente        := 'EN OBSERVACION';
+                            vro_chk_5.fecha_creacion                 := f_fecha_actual;
+                            vro_chk_5.id_usuario_ultima_modificacion := 1;
+                            PKGSMY_ESTADOS_RESIDENTES_DAO.p_valores_defecto(vro_chk_5);
+                            PKGSMY_ESTADOS_RESIDENTES_DAO.p_insertar(vro_chk_5);
+                        END IF;
+                    END;
+                END IF;
+
+                vro_residente.id_estado_residente := v_nuevo_estado;
+
+                -- Ajustar fecha de egreso según el estado con hora oficial de Bogotá
+                IF vro_residente.id_estado_residente IN (2, 4) AND vro_residente.fecha_egreso IS NULL THEN
+                    vro_residente.fecha_egreso := f_fecha_actual;
+                ELSIF vro_residente.id_estado_residente NOT IN (2, 4) THEN
+                    vro_residente.fecha_egreso := NULL;
+                END IF;
+            END IF;
+        END;
+
+        -- Auditoría de modificación
+        vro_residente.id_usuario_ultima_modificacion := NVL(TO_NUMBER(JSON_VALUE(pcl_json, '$.idUsuario')), 1);
+
+        -- Modificación delegada al DAO exclusivo de la tabla
         PKGSMY_RESIDENTES_DAO.p_actualizar(vro_residente);
+
+        -- Registrar en bitácora si hubo cambio de estado administrativo
+        IF vro_residente.id_estado_residente IS NOT NULL 
+           AND v_id_estado_ant IS NOT NULL 
+           AND vro_residente.id_estado_residente <> v_id_estado_ant THEN
+            
+            DECLARE
+                vro_estado_ant    smy_estados_residentes%ROWTYPE;
+                vro_estado_nuevo  smy_estados_residentes%ROWTYPE;
+                v_nom_ant         VARCHAR2(100) := 'Desconocido';
+                v_nom_nuevo       VARCHAR2(100) := 'Desconocido';
+                v_obs_cambio      VARCHAR2(4000);
+                vro_bitacora      smy_bitacora_residente%ROWTYPE;
+            BEGIN
+                IF PKGSMY_ESTADOS_RESIDENTES_DAO.f_existe(v_id_estado_ant, vro_estado_ant) THEN
+                    v_nom_ant := vro_estado_ant.nombre_estado_residente;
+                END IF;
+
+                IF PKGSMY_ESTADOS_RESIDENTES_DAO.f_existe(vro_residente.id_estado_residente, vro_estado_nuevo) THEN
+                    v_nom_nuevo := vro_estado_nuevo.nombre_estado_residente;
+                END IF;
+
+                v_obs_cambio := TRIM(JSON_VALUE(pcl_json, '$.observacionCambioEstado'));
+                IF v_obs_cambio IS NULL THEN
+                    v_obs_cambio := TRIM(JSON_VALUE(pcl_json, '$.observaciones'));
+                END IF;
+
+                vro_bitacora.id                             := SEQ_SMY_BITACORA_RESIDENTE.NEXTVAL;
+                vro_bitacora.id_residente                   := v_id_residente;
+                vro_bitacora.id_empleado                    := NULL;
+                vro_bitacora.id_usuario                     := NVL(TO_NUMBER(JSON_VALUE(pcl_json, '$.idUsuario')), 1);
+                vro_bitacora.fecha                          := TRUNC(f_fecha_actual);
+                vro_bitacora.hora                           := TO_CHAR(f_fecha_actual, 'HH24:MI');
+                vro_bitacora.id_categoria_bitacora          := 1;
+                vro_bitacora.contenido                      := '[CAMBIO DE ESTADO]: De "' || v_nom_ant || '" a "' || v_nom_nuevo || '".' 
+                                                              || CASE WHEN v_obs_cambio IS NOT NULL THEN ' Observación: ' || v_obs_cambio ELSE '' END;
+                vro_bitacora.grabado_por_voz                := 'N';
+                vro_bitacora.id_archivo_audio               := NULL;
+                vro_bitacora.id_archivo_foto                := NULL;
+                vro_bitacora.id_turno_asignado              := NULL;
+                vro_bitacora.visible_acudiente              := 'S';
+                vro_bitacora.fecha_creacion                 := f_fecha_actual;
+                vro_bitacora.id_usuario_ultima_modificacion := vro_bitacora.id_usuario;
+
+                PKGSMY_BITACORA_RESIDENTE_DAO.p_valores_defecto(vro_bitacora);
+                PKGSMY_BITACORA_RESIDENTE_DAO.p_insertar(vro_bitacora);
+            END;
+        ELSIF TRIM(JSON_VALUE(pcl_json, '$.observaciones')) IS NOT NULL 
+           OR TRIM(JSON_VALUE(pcl_json, '$.observacionCambioEstado')) IS NOT NULL THEN
+            DECLARE
+                v_obs_extra        VARCHAR2(4000);
+                vro_bitacora_extra smy_bitacora_residente%ROWTYPE;
+            BEGIN
+                v_obs_extra := TRIM(NVL(JSON_VALUE(pcl_json, '$.observacionCambioEstado'), JSON_VALUE(pcl_json, '$.observaciones')));
+                IF v_obs_extra IS NOT NULL THEN
+                    vro_bitacora_extra.id                             := SEQ_SMY_BITACORA_RESIDENTE.NEXTVAL;
+                    vro_bitacora_extra.id_residente                   := v_id_residente;
+                    vro_bitacora_extra.id_empleado                    := NULL;
+                    vro_bitacora_extra.id_usuario                     := NVL(TO_NUMBER(JSON_VALUE(pcl_json, '$.idUsuario')), 1);
+                    vro_bitacora_extra.fecha                          := TRUNC(f_fecha_actual);
+                    vro_bitacora_extra.hora                           := TO_CHAR(f_fecha_actual, 'HH24:MI');
+                    vro_bitacora_extra.id_categoria_bitacora          := 1;
+                    vro_bitacora_extra.contenido                      := '[ACTUALIZACION]: ' || v_obs_extra;
+                    vro_bitacora_extra.grabado_por_voz                := 'N';
+                    vro_bitacora_extra.id_archivo_audio               := NULL;
+                    vro_bitacora_extra.id_archivo_foto                := NULL;
+                    vro_bitacora_extra.id_turno_asignado              := NULL;
+                    vro_bitacora_extra.visible_acudiente              := 'S';
+                    vro_bitacora_extra.fecha_creacion                 := f_fecha_actual;
+                    vro_bitacora_extra.id_usuario_ultima_modificacion := vro_bitacora_extra.id_usuario;
+
+                    PKGSMY_BITACORA_RESIDENTE_DAO.p_valores_defecto(vro_bitacora_extra);
+                    PKGSMY_BITACORA_RESIDENTE_DAO.p_insertar(vro_bitacora_extra);
+                END IF;
+            END;
+        END IF;
 
         -- Commit controlado
         p_do_commit('pkgln_admision_residente.pr_actualizar_residente');
