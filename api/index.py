@@ -70,13 +70,17 @@ def get_wallet_directory() -> str:
 
 def get_connection():
     wallet_dir = get_wallet_directory()
+    user = os.environ.get('ORACLE_USER') or os.environ.get('DB_USER') or 'SAMANYA'
+    password = os.environ.get('ORACLE_PASSWORD') or os.environ.get('DB_PASSWORD') or 'T3k3r_2025_DEV'
+    dsn = os.environ.get('ORACLE_DSN') or os.environ.get('DB_CONNECT_STRING') or 'samanya_high'
+    wallet_pw = os.environ.get('ORACLE_WALLET_PASSWORD') or os.environ.get('DB_WALLET_PASSWORD') or 'Samanya2026*'
     return oracledb.connect(
-        user=os.environ.get('ORACLE_USER', 'SAMANYA'),
-        password=os.environ.get('ORACLE_PASSWORD', 'T3k3r_2025_DEV'),
-        dsn=os.environ.get('ORACLE_DSN', 'samanya_tp'),
+        user=user,
+        password=password,
+        dsn=dsn,
         config_dir=wallet_dir,
         wallet_location=wallet_dir,
-        wallet_password=os.environ.get('ORACLE_WALLET_PASSWORD', 'Samanya2026*')
+        wallet_password=wallet_pw
     )
 
 def json_serial(obj):
