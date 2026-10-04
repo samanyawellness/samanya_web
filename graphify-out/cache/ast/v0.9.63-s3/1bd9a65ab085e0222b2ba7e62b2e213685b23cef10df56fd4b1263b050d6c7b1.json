@@ -1,0 +1,1 @@
+{"nodes": [{"id": "$graphify-root$_backend_db_scripts_inicializa_bd_sql", "label": "inicializa_bd.sql", "file_type": "code", "source_file": "backend/db/scripts/inicializa_bd.sql", "source_location": null}], "edges": []}

@@ -13,6 +13,7 @@ import { WorkersView } from './components/views/WorkersView';
 import { ShiftsView } from './components/views/ShiftsView';
 import { LeavesView } from './components/views/LeavesView';
 import { ClinicalSupervisionView } from './components/views/ClinicalSupervisionView';
+import { InventoryView } from './components/views/InventoryView';
 
 // Modals
 import { RegisterResidentModal } from './components/modals/RegisterResidentModal';
@@ -52,6 +53,7 @@ const AdminLayout: React.FC = () => {
           {activeTab === 'turnos' && <ShiftsView />}
           {activeTab === 'permisos' && <LeavesView />}
           {activeTab === 'clinico' && <ClinicalSupervisionView />}
+          {activeTab === 'inventario' && <InventoryView />}
         </main>
       </div>
 

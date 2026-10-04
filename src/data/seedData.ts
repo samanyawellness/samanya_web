@@ -7,7 +7,13 @@ import {
   PermisoAusencia,
   IncidenteOperativo,
   ElementoDotacionCatalogo,
-  DotacionResidente
+  DotacionResidente,
+  CategoriaArticulo,
+  ArticuloCatalogo,
+  BodegaSede,
+  InventarioStockSede,
+  MovimientoInventario,
+  TrasladoSedes
 } from '../types';
 
 export const SEED_SEDES: SedeCentro[] = [
@@ -19,7 +25,9 @@ export const SEED_SEDES: SedeCentro[] = [
     direccion: 'Calle 122 # 18-35, Usaquén',
     telefono: '+57 (601) 745-8900',
     capacidadTotal: 40,
-    esSedePrincipal: true
+    esSedePrincipal: true,
+    manejaInventario: true,
+    manejaCostosInventario: true
   },
   {
     id: 2,
@@ -29,7 +37,21 @@ export const SEED_SEDES: SedeCentro[] = [
     direccion: 'Km 4 Vía La Calera',
     telefono: '+57 (601) 862-4400',
     capacidadTotal: 45,
-    esSedePrincipal: false
+    esSedePrincipal: false,
+    manejaInventario: true,
+    manejaCostosInventario: false // Ejemplo: La Calera solo controla cantidades físicas
+  },
+  {
+    id: 3,
+    nombre: 'Sede Satélite Día Chía',
+    codigo: 'SEDE-CHIA-DIA',
+    ciudad: 'Chía, Cundinamarca',
+    direccion: 'Carrera 9 # 14-20',
+    telefono: '+57 (601) 885-1234',
+    capacidadTotal: 15,
+    esSedePrincipal: false,
+    manejaInventario: false,
+    manejaCostosInventario: false
   }
 ];
 
@@ -972,4 +994,496 @@ export const SEED_DOTACIONES_RESIDENTES: DotacionResidente[] = [
     ]
   }
 ];
+
+// =============================================================================
+// SEED DATA: MÓDULO DE INVENTARIO Y ALMACÉN MULTISEDE
+// =============================================================================
+
+export const SEED_CATEGORIAS_ARTICULOS: CategoriaArticulo[] = [
+  {
+    id: 1,
+    idOrganizacion: 1,
+    codigoCategoria: 'ASIST_CUR',
+    nombreCategoria: 'Insumos Asistenciales y Curación',
+    descripcion: 'Gasas, apósitos, sondas, guantes, pañales y tiras reactivas',
+    colorHex: '#0EA5E9',
+    estado: 'Activo'
+  },
+  {
+    id: 2,
+    idOrganizacion: 1,
+    codigoCategoria: 'MED_URG',
+    nombreCategoria: 'Medicamentos y Fármacos de Urgencia',
+    descripcion: 'Botiquín de sede, soluciones salinas, analgésicos y primeros auxilios',
+    colorHex: '#EF4444',
+    estado: 'Activo'
+  },
+  {
+    id: 3,
+    idOrganizacion: 1,
+    codigoCategoria: 'ASEO_DES',
+    nombreCategoria: 'Aseo y Desinfección Hospitalaria',
+    descripcion: 'Clorhexidina, alcohol antiséptico, desinfectantes y toallas desechables',
+    colorHex: '#10B981',
+    estado: 'Activo'
+  },
+  {
+    id: 4,
+    idOrganizacion: 1,
+    codigoCategoria: 'LENC_CAMA',
+    nombreCategoria: 'Lencería y Ropa de Cama',
+    descripcion: 'Sábanas institucionales, protectores impermeables, cobijas y toallas',
+    colorHex: '#8B5CF6',
+    estado: 'Activo'
+  },
+  {
+    id: 5,
+    idOrganizacion: 1,
+    codigoCategoria: 'NUT_ALIM',
+    nombreCategoria: 'Nutrición y Suplementos Especiales',
+    descripcion: 'Ensure, Glucerna, espesantes para disfagia y suplementos proteicos',
+    colorHex: '#F59E0B',
+    estado: 'Activo'
+  },
+  {
+    id: 6,
+    idOrganizacion: 1,
+    codigoCategoria: 'EQUIP_BIO',
+    nombreCategoria: 'Equipamiento Menor y Dispositivos',
+    descripcion: 'Tensiómetros, oxímetros de pulso, termómetros y glucómetros',
+    colorHex: '#64748B',
+    estado: 'Activo'
+  }
+];
+
+export const SEED_ARTICULOS_CATALOGO: ArticuloCatalogo[] = [
+  {
+    id: 1,
+    idOrganizacion: 1,
+    idCategoria: 1,
+    nombreCategoria: 'Insumos Asistenciales y Curación',
+    colorCategoria: '#0EA5E9',
+    codigoArticulo: 'INS-PAN-01',
+    nombreArticulo: 'Pañal Desechable Adulto Talla G (Paquete x 30)',
+    descripcion: 'Pañales para incontinencia severa con barreras antiescurrimiento',
+    unidadMedida: 'UNIDAD',
+    unidadesPorEmpaque: 30,
+    tipoEmpaque: 'Paquete',
+    requiereLoteVencimiento: false,
+    esDescontablePorResidente: true,
+    costoEstandar: 1933,
+    estado: 'Activo'
+  },
+  {
+    id: 2,
+    idOrganizacion: 1,
+    idCategoria: 1,
+    nombreCategoria: 'Insumos Asistenciales y Curación',
+    colorCategoria: '#0EA5E9',
+    codigoArticulo: 'INS-GLU-02',
+    nombreArticulo: 'Tiras Reactivas Glucometría Accu-Chek (Caja x 50)',
+    descripcion: 'Tiras para monitoreo diario de glucosa capilar',
+    unidadMedida: 'UNIDAD',
+    unidadesPorEmpaque: 50,
+    tipoEmpaque: 'Caja',
+    requiereLoteVencimiento: true,
+    esDescontablePorResidente: true,
+    costoEstandar: 1900,
+    estado: 'Activo'
+  },
+  {
+    id: 3,
+    idOrganizacion: 1,
+    idCategoria: 2,
+    nombreCategoria: 'Medicamentos y Fármacos de Urgencia',
+    colorCategoria: '#EF4444',
+    codigoArticulo: 'MED-SOL-01',
+    nombreArticulo: 'Solución Salina Normal 0.9% Bolsa 500ml',
+    descripcion: 'Bolsa para irrigación, curaciones y micronebulizaciones',
+    unidadMedida: 'UNIDAD',
+    requiereLoteVencimiento: true,
+    esDescontablePorResidente: true,
+    costoEstandar: 6500,
+    estado: 'Activo'
+  },
+  {
+    id: 4,
+    idOrganizacion: 1,
+    idCategoria: 3,
+    nombreCategoria: 'Aseo y Desinfección Hospitalaria',
+    colorCategoria: '#10B981',
+    codigoArticulo: 'ASE-CLX-01',
+    nombreArticulo: 'Jabón Quirúrgico Clorhexidina 4% Galón',
+    descripcion: 'Antiséptico de alto nivel para lavado clínico de manos',
+    unidadMedida: 'FRASCO',
+    requiereLoteVencimiento: true,
+    esDescontablePorResidente: false,
+    costoEstandar: 82000,
+    estado: 'Activo'
+  },
+  {
+    id: 5,
+    idOrganizacion: 1,
+    idCategoria: 4,
+    nombreCategoria: 'Lencería y Ropa de Cama',
+    colorCategoria: '#8B5CF6',
+    codigoArticulo: 'LEN-SAB-01',
+    nombreArticulo: 'Juego de Sábanas Cama Sencilla Algodón 180H',
+    descripcion: 'Sábana ajustable, sobre-sábana y funda color blanco',
+    unidadMedida: 'UNIDAD',
+    requiereLoteVencimiento: false,
+    esDescontablePorResidente: true,
+    costoEstandar: 45000,
+    estado: 'Activo'
+  },
+  {
+    id: 6,
+    idOrganizacion: 1,
+    idCategoria: 5,
+    nombreCategoria: 'Nutrición y Suplementos Especiales',
+    colorCategoria: '#F59E0B',
+    codigoArticulo: 'NUT-ENS-01',
+    nombreArticulo: 'Ensure Advance Vainilla Lata 850g',
+    descripcion: 'Suplemento nutricional con HMB y proteína para masa muscular',
+    unidadMedida: 'FRASCO',
+    requiereLoteVencimiento: true,
+    esDescontablePorResidente: true,
+    costoEstandar: 89000,
+    estado: 'Activo'
+  }
+];
+
+export const SEED_BODEGAS_SEDE: BodegaSede[] = [
+  {
+    id: 1,
+    idCentro: 1,
+    codigoBodega: 'BOD-PRIN',
+    nombreBodega: 'Almacén Central - Sede Bogotá',
+    descripcion: 'Bodega principal de insumos clínicos y farmacia',
+    esBodegaPrincipal: true,
+    estado: 'Activo'
+  },
+  {
+    id: 2,
+    idCentro: 2,
+    codigoBodega: 'BOD-PRIN',
+    nombreBodega: 'Almacén Principal - Sede Campestre',
+    descripcion: 'Bodega de insumos y materiales sede campestre',
+    esBodegaPrincipal: true,
+    estado: 'Activo'
+  }
+];
+
+export const SEED_INVENTARIO_STOCK: InventarioStockSede[] = [
+  {
+    id: 1,
+    idCentro: 1,
+    nombreCentro: 'Sede Central Bogotá',
+    idBodega: 1,
+    nombreBodega: 'Almacén Central - Sede Bogotá',
+    idArticulo: 1,
+    codigoArticulo: 'INS-PAN-01',
+    nombreArticulo: 'Pañal Desechable Adulto Talla G (Paquete x 30)',
+    categoria: 'Insumos Asistenciales y Curación',
+    colorCategoria: '#0EA5E9',
+    unidadMedida: 'PAQUETE',
+    cantidadDisponible: 45,
+    cantidadReservada: 0,
+    stockMinimo: 15,
+    stockMaximo: 60,
+    puntoReorden: 20,
+    ubicacionEstante: 'Estante A-1',
+    fechaUltimoMovimiento: '2026-03-28',
+    costoEstandar: 58000,
+    valorTotalStock: 2610000,
+    estadoSuministro: 'OPTIMO'
+  },
+  {
+    id: 2,
+    idCentro: 1,
+    nombreCentro: 'Sede Central Bogotá',
+    idBodega: 1,
+    nombreBodega: 'Almacén Central - Sede Bogotá',
+    idArticulo: 2,
+    codigoArticulo: 'INS-GLU-02',
+    nombreArticulo: 'Tiras Reactivas Glucometría Accu-Chek (Caja x 50)',
+    categoria: 'Insumos Asistenciales y Curación',
+    colorCategoria: '#0EA5E9',
+    unidadMedida: 'CAJA',
+    numeroLote: 'L-2026-GLU',
+    fechaVencimiento: '2026-04-18',
+    diasParaVencer: 15,
+    cantidadDisponible: 8,
+    cantidadReservada: 0,
+    stockMinimo: 10,
+    stockMaximo: 40,
+    puntoReorden: 15,
+    ubicacionEstante: 'Botiquín Frío 2',
+    fechaUltimoMovimiento: '2026-03-30',
+    costoEstandar: 95000,
+    valorTotalStock: 760000,
+    estadoSuministro: 'BAJO'
+  },
+  {
+    id: 3,
+    idCentro: 1,
+    nombreCentro: 'Sede Central Bogotá',
+    idBodega: 1,
+    nombreBodega: 'Almacén Central - Sede Bogotá',
+    idArticulo: 3,
+    codigoArticulo: 'MED-SOL-01',
+    nombreArticulo: 'Solución Salina Normal 0.9% Bolsa 500ml',
+    categoria: 'Medicamentos y Fármacos de Urgencia',
+    colorCategoria: '#EF4444',
+    unidadMedida: 'UNIDAD',
+    numeroLote: 'L-SAL-8891',
+    fechaVencimiento: '2026-11-30',
+    diasParaVencer: 240,
+    cantidadDisponible: 32,
+    cantidadReservada: 0,
+    stockMinimo: 15,
+    stockMaximo: 50,
+    puntoReorden: 20,
+    ubicacionEstante: 'Estante B-3',
+    fechaUltimoMovimiento: '2026-03-25',
+    costoEstandar: 6500,
+    valorTotalStock: 208000,
+    estadoSuministro: 'OPTIMO'
+  },
+  {
+    id: 4,
+    idCentro: 1,
+    nombreCentro: 'Sede Central Bogotá',
+    idBodega: 1,
+    nombreBodega: 'Almacén Central - Sede Bogotá',
+    idArticulo: 4,
+    codigoArticulo: 'ASE-CLX-01',
+    nombreArticulo: 'Jabón Quirúrgico Clorhexidina 4% Galón',
+    categoria: 'Aseo y Desinfección Hospitalaria',
+    colorCategoria: '#10B981',
+    unidadMedida: 'FRASCO',
+    numeroLote: 'L-CLX-2025',
+    fechaVencimiento: '2026-12-15',
+    diasParaVencer: 255,
+    cantidadDisponible: 12,
+    cantidadReservada: 0,
+    stockMinimo: 6,
+    stockMaximo: 20,
+    puntoReorden: 8,
+    ubicacionEstante: 'Bodega Limpieza 1',
+    fechaUltimoMovimiento: '2026-03-20',
+    costoEstandar: 82000,
+    valorTotalStock: 984000,
+    estadoSuministro: 'OPTIMO'
+  },
+  {
+    id: 5,
+    idCentro: 1,
+    nombreCentro: 'Sede Central Bogotá',
+    idBodega: 1,
+    nombreBodega: 'Almacén Central - Sede Bogotá',
+    idArticulo: 5,
+    codigoArticulo: 'LEN-SAB-01',
+    nombreArticulo: 'Juego de Sábanas Cama Sencilla Algodón 180H',
+    categoria: 'Lencería y Ropa de Cama',
+    colorCategoria: '#8B5CF6',
+    unidadMedida: 'UNIDAD',
+    cantidadDisponible: 24,
+    cantidadReservada: 0,
+    stockMinimo: 10,
+    stockMaximo: 40,
+    puntoReorden: 15,
+    ubicacionEstante: 'Ropería Central',
+    fechaUltimoMovimiento: '2026-03-15',
+    costoEstandar: 45000,
+    valorTotalStock: 1080000,
+    estadoSuministro: 'OPTIMO'
+  },
+  {
+    id: 6,
+    idCentro: 1,
+    nombreCentro: 'Sede Central Bogotá',
+    idBodega: 1,
+    nombreBodega: 'Almacén Central - Sede Bogotá',
+    idArticulo: 6,
+    codigoArticulo: 'NUT-ENS-01',
+    nombreArticulo: 'Ensure Advance Vainilla Lata 850g',
+    categoria: 'Nutrición y Suplementos Especiales',
+    colorCategoria: '#F59E0B',
+    unidadMedida: 'FRASCO',
+    numeroLote: 'ENS-COL-99',
+    fechaVencimiento: '2026-05-10',
+    diasParaVencer: 37,
+    cantidadDisponible: 14,
+    cantidadReservada: 0,
+    stockMinimo: 8,
+    stockMaximo: 30,
+    puntoReorden: 12,
+    ubicacionEstante: 'Alacena Nutricional',
+    fechaUltimoMovimiento: '2026-03-29',
+    costoEstandar: 89000,
+    valorTotalStock: 1246000,
+    estadoSuministro: 'POR_VENCER'
+  },
+  // Sede 2 (Campestre La Calera)
+  {
+    id: 7,
+    idCentro: 2,
+    nombreCentro: 'Sede Campestre La Calera',
+    idBodega: 2,
+    nombreBodega: 'Almacén Principal - Sede Campestre',
+    idArticulo: 1,
+    codigoArticulo: 'INS-PAN-01',
+    nombreArticulo: 'Pañal Desechable Adulto Talla G (Paquete x 30)',
+    categoria: 'Insumos Asistenciales y Curación',
+    colorCategoria: '#0EA5E9',
+    unidadMedida: 'PAQUETE',
+    cantidadDisponible: 28,
+    cantidadReservada: 0,
+    stockMinimo: 15,
+    stockMaximo: 60,
+    puntoReorden: 20,
+    ubicacionEstante: 'Depósito 1',
+    fechaUltimoMovimiento: '2026-03-27',
+    costoEstandar: 58000,
+    valorTotalStock: 1624000,
+    estadoSuministro: 'OPTIMO'
+  },
+  {
+    id: 8,
+    idCentro: 2,
+    nombreCentro: 'Sede Campestre La Calera',
+    idBodega: 2,
+    nombreBodega: 'Almacén Principal - Sede Campestre',
+    idArticulo: 2,
+    codigoArticulo: 'INS-GLU-02',
+    nombreArticulo: 'Tiras Reactivas Glucometría Accu-Chek (Caja x 50)',
+    categoria: 'Insumos Asistenciales y Curación',
+    colorCategoria: '#0EA5E9',
+    unidadMedida: 'CAJA',
+    numeroLote: 'L-2026-C2',
+    fechaVencimiento: '2026-08-30',
+    diasParaVencer: 148,
+    cantidadDisponible: 18,
+    cantidadReservada: 0,
+    stockMinimo: 10,
+    stockMaximo: 35,
+    puntoReorden: 15,
+    ubicacionEstante: 'Botiquín Sede',
+    fechaUltimoMovimiento: '2026-03-24',
+    costoEstandar: 95000,
+    valorTotalStock: 1710000,
+    estadoSuministro: 'OPTIMO'
+  }
+];
+
+export const SEED_MOVIMIENTOS_INVENTARIO: MovimientoInventario[] = [
+  {
+    id: 1,
+    idCentro: 1,
+    nombreCentro: 'Sede Central Bogotá',
+    numeroDocumento: 'INV-ENT-2026-0001',
+    tipoMovimiento: 'ENTRADA_COMPRA',
+    fechaMovimiento: '2026-03-20 09:30:00',
+    idUsuarioRegistra: 1,
+    nombreUsuarioRegistra: 'Dra. Valentina Morales',
+    observaciones: 'Recepción de pedido mensual de insumos clínicos y farmacia',
+    estado: 'APLICADO',
+    totalArticulos: 60,
+    costoTotal: 3480000,
+    detalles: [
+      {
+        id: 101,
+        idMovimiento: 1,
+        idBodega: 1,
+        idArticulo: 1,
+        codigoArticulo: 'INS-PAN-01',
+        nombreArticulo: 'Pañal Desechable Adulto Talla G (Paquete x 30)',
+        unidadMedida: 'PAQUETE',
+        cantidad: 30,
+        costoUnitario: 58000,
+        costoTotal: 1740000,
+        saldoAnterior: 15,
+        saldoPosterior: 45
+      },
+      {
+        id: 102,
+        idMovimiento: 1,
+        idBodega: 1,
+        idArticulo: 3,
+        codigoArticulo: 'MED-SOL-01',
+        nombreArticulo: 'Solución Salina Normal 0.9% Bolsa 500ml',
+        unidadMedida: 'UNIDAD',
+        numeroLote: 'L-SAL-8891',
+        fechaVencimiento: '2026-11-30',
+        cantidad: 20,
+        costoUnitario: 6500,
+        costoTotal: 130000,
+        saldoAnterior: 12,
+        saldoPosterior: 32
+      }
+    ]
+  },
+  {
+    id: 2,
+    idCentro: 1,
+    nombreCentro: 'Sede Central Bogotá',
+    numeroDocumento: 'INV-SAL-2026-0004',
+    tipoMovimiento: 'SALIDA_ENTREGA_RESIDENTE',
+    fechaMovimiento: '2026-03-28 11:15:00',
+    idUsuarioRegistra: 2,
+    nombreUsuarioRegistra: 'Martha Cecilia Rodríguez Peña',
+    idResidente: 1,
+    nombreResidente: 'Álvaro Delgado Mora',
+    observaciones: 'Suministro semanal de pañales para residente habitación 101',
+    estado: 'APLICADO',
+    totalArticulos: 2,
+    costoTotal: 116000,
+    detalles: [
+      {
+        id: 103,
+        idMovimiento: 2,
+        idBodega: 1,
+        idArticulo: 1,
+        codigoArticulo: 'INS-PAN-01',
+        nombreArticulo: 'Pañal Desechable Adulto Talla G (Paquete x 30)',
+        unidadMedida: 'PAQUETE',
+        cantidad: 2,
+        costoUnitario: 58000,
+        costoTotal: 116000,
+        saldoAnterior: 47,
+        saldoPosterior: 45
+      }
+    ]
+  }
+];
+
+export const SEED_TRASLADOS_SEDES: TrasladoSedes[] = [
+  {
+    id: 1,
+    codigoTraslado: 'TRS-2026-0001',
+    idCentroOrigen: 1,
+    nombreCentroOrigen: 'Sede Central Bogotá',
+    idCentroDestino: 2,
+    nombreCentroDestino: 'Sede Campestre La Calera',
+    fechaEnvio: '2026-03-29 14:00:00',
+    estadoTraslado: 'EN_TRANSITO',
+    idUsuarioDespacha: 1,
+    nombreUsuarioDespacha: 'Dra. Valentina Morales',
+    notasDespacho: 'Apoyo por stock crítico de tiras de glucosa y pañales en sede campestre',
+    detalles: [
+      {
+        id: 201,
+        idTraslado: 1,
+        idArticulo: 1,
+        codigoArticulo: 'INS-PAN-01',
+        nombreArticulo: 'Pañal Desechable Adulto Talla G (Paquete x 30)',
+        unidadMedida: 'PAQUETE',
+        cantidadEnviada: 10,
+        estadoItem: 'EN_TRANSITO'
+      }
+    ]
+  }
+];
+
 

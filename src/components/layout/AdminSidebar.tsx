@@ -11,7 +11,8 @@ import {
   Building2,
   ShieldCheck,
   LogOut,
-  UserCog
+  UserCog,
+  Boxes
 } from 'lucide-react';
 import { resolverAvatarUrl, DEFAULT_AVATAR, obtenerIniciales } from '../../utils/avatarUtils';
 
@@ -25,6 +26,7 @@ export const AdminSidebar: React.FC = () => {
     permisos,
     activeSede,
     currentUser,
+    inventarioStock,
     logout,
     showConfirm,
     setIsUserProfileOpen
@@ -35,8 +37,16 @@ export const AdminSidebar: React.FC = () => {
     setAvatarError(false);
   }, [currentUser?.avatarUrl]);
 
+  // Si la sede actual tiene deshabilitado el inventario y se encuentra en esa pestaña, redirigir al resumen general
+  useEffect(() => {
+    if (activeTab === 'inventario' && activeSede && activeSede.manejaInventario === false) {
+      setActiveTab('dashboard');
+    }
+  }, [activeTab, activeSede, setActiveTab]);
+
   const sedeResidentesCount = residentes.filter(r => r.idCentro === activeSede.id).length;
   const permisosPendientesCount = permisos.filter(p => p.estado === 'Pendiente').length;
+  const stockBajoCount = inventarioStock.filter(s => s.idCentro === activeSede.id && s.estadoSuministro === 'BAJO').length;
 
   const navItems: Array<{
     tab: AdminTab;
@@ -84,7 +94,15 @@ export const AdminSidebar: React.FC = () => {
       tab: 'clinico',
       label: 'Supervisión Clínica',
       icon: <Stethoscope className="w-5 h-5" />
-    }
+    },
+    // Módulo condicional por Sede: Solo visible si la sede no tiene deshabilitado manejaInventario = false
+    ...(activeSede && activeSede.manejaInventario !== false ? [{
+      tab: 'inventario' as AdminTab,
+      label: 'Inventario & Almacén',
+      icon: <Boxes className="w-5 h-5" />,
+      badge: stockBajoCount > 0 ? stockBajoCount : undefined,
+      badgeColor: 'bg-amber-600 text-white'
+    }] : [])
   ];
 
   return (

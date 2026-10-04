@@ -1,0 +1,1 @@
+{"nodes": [{"id": "$graphify-root$_backend_db_scripts_cambios_inventario_sql", "label": "cambios_inventario.sql", "file_type": "code", "source_file": "backend/db/scripts/cambios_inventario.sql", "source_location": null}], "edges": []}

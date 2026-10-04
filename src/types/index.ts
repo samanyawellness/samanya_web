@@ -8,6 +8,8 @@ export type SedeCentro = {
   capacidadTotal: number;
   esSedePrincipal?: boolean;
   idOrganizacion?: number;
+  manejaInventario?: boolean;
+  manejaCostosInventario?: boolean;
 };
 
 export type MedicamentoPrescrito = {
@@ -461,4 +463,188 @@ export type ValoracionIngreso = {
   idArchivoFirmaEntrega?: number | null;
   firmaEntregaBase64?: string;
 };
+
+// =============================================================================
+// MÓDULO DE INVENTARIO Y ALMACÉN MULTISEDE
+// =============================================================================
+
+export type CategoriaArticulo = {
+  id: number;
+  idOrganizacion: number;
+  codigoCategoria: string;
+  nombreCategoria: string;
+  descripcion?: string;
+  colorHex?: string;
+  estado: 'Activo' | 'Inactivo';
+};
+
+export type ArticuloCatalogo = {
+  id: number;
+  idOrganizacion: number;
+  idCategoria: number;
+  nombreCategoria?: string;
+  colorCategoria?: string;
+  codigoArticulo: string;
+  nombreArticulo: string;
+  descripcion?: string;
+  unidadMedida: 'UNIDAD' | 'CAJA' | 'PAQUETE' | 'FRASCO' | 'LITRO' | 'KILO' | 'ROLLO';
+  requiereLoteVencimiento: boolean;
+  esDescontablePorResidente: boolean;
+  costoEstandar: number;
+  unidadesPorEmpaque?: number; // Cantidad de unidades físicas que contiene el empaque comercial (ej: 30 pañales)
+  tipoEmpaque?: string; // Ej: 'Paquete', 'Caja', 'Blíster', 'Bolsa'
+  stockMinimoSede?: number;
+  stockMaximoSede?: number;
+  estado: 'Activo' | 'Inactivo';
+};
+
+export type BodegaSede = {
+  id: number;
+  idCentro: number;
+  codigoBodega: string;
+  nombreBodega: string;
+  descripcion?: string;
+  esBodegaPrincipal: boolean;
+  estado: 'Activo' | 'Inactivo';
+};
+
+export type InventarioStockSede = {
+  id: number;
+  idCentro: number;
+  nombreCentro?: string;
+  idBodega: number;
+  nombreBodega?: string;
+  idArticulo: number;
+  codigoArticulo: string;
+  nombreArticulo: string;
+  categoria: string;
+  colorCategoria?: string;
+  unidadMedida: string;
+  numeroLote?: string;
+  fechaVencimiento?: string;
+  cantidadDisponible: number;
+  cantidadReservada: number;
+  stockMinimo: number;
+  stockMaximo: number;
+  puntoReorden?: number;
+  ubicacionEstante?: string;
+  fechaUltimoMovimiento?: string;
+  costoEstandar?: number;
+  valorTotalStock?: number;
+  diasParaVencer?: number;
+  estadoSuministro?: 'OPTIMO' | 'REORDEN' | 'BAJO' | 'POR_VENCER' | 'VENCIDO';
+};
+
+export type TipoMovimientoInventario =
+  | 'ENTRADA_COMPRA'
+  | 'ENTRADA_DONACION'
+  | 'SALIDA_CONSUMO_SEDE'
+  | 'SALIDA_ENTREGA_RESIDENTE'
+  | 'SALIDA_MERMA_VENCIDO'
+  | 'AJUSTE_FISICO_POSITIVO'
+  | 'AJUSTE_FISICO_NEGATIVO'
+  | 'TRASLADO_SALIDA'
+  | 'TRASLADO_ENTRADA';
+
+export type MovimientoInvDetalle = {
+  id: number;
+  idMovimiento: number;
+  idBodega: number;
+  idArticulo: number;
+  codigoArticulo?: string;
+  nombreArticulo?: string;
+  unidadMedida?: string;
+  numeroLote?: string;
+  fechaVencimiento?: string;
+  cantidad: number;
+  costoUnitario: number;
+  costoTotal: number;
+  saldoAnterior: number;
+  saldoPosterior: number;
+};
+
+export type MovimientoInventario = {
+  id: number;
+  idCentro: number;
+  nombreCentro?: string;
+  numeroDocumento: string;
+  tipoMovimiento: TipoMovimientoInventario;
+  fechaMovimiento: string;
+  idUsuarioRegistra: number;
+  nombreUsuarioRegistra?: string;
+  idResidente?: number;
+  nombreResidente?: string;
+  idProveedor?: number;
+  observaciones?: string;
+  estado: 'APLICADO' | 'ANULADO';
+  detalles: MovimientoInvDetalle[];
+  totalArticulos?: number;
+  costoTotal?: number;
+};
+
+export type EstadoTrasladoSedes = 'EN_TRANSITO' | 'RECIBIDO_CONFORME' | 'RECIBIDO_CON_NOVEDAD' | 'CANCELADO';
+
+export type TrasladoSedesDetalle = {
+  id: number;
+  idTraslado: number;
+  idArticulo: number;
+  codigoArticulo?: string;
+  nombreArticulo?: string;
+  unidadMedida?: string;
+  numeroLote?: string;
+  fechaVencimiento?: string;
+  cantidadEnviada: number;
+  cantidadRecibida?: number;
+  estadoItem: string;
+};
+
+export type TrasladoSedes = {
+  id: number;
+  codigoTraslado: string;
+  idCentroOrigen: number;
+  nombreCentroOrigen?: string;
+  idCentroDestino: number;
+  nombreCentroDestino?: string;
+  fechaEnvio: string;
+  fechaRecepcion?: string;
+  estadoTraslado: EstadoTrasladoSedes;
+  idUsuarioDespacha: number;
+  nombreUsuarioDespacha?: string;
+  idUsuarioRecibe?: number;
+  nombreUsuarioRecibe?: string;
+  notasDespacho?: string;
+  notasRecepcion?: string;
+  detalles: TrasladoSedesDetalle[];
+};
+
+export type RegistrarMovimientoPayload = {
+  idCentro: number;
+  idBodega: number;
+  tipoMovimiento: TipoMovimientoInventario;
+  observaciones?: string;
+  idResidente?: number;
+  detalles: Array<{
+    idArticulo: number;
+    cantidad: number;
+    numeroLote?: string;
+    fechaVencimiento?: string;
+    costoUnitario?: number;
+    cantidadEmpaques?: number;
+    unidadesPorEmpaque?: number;
+    tipoEmpaque?: string;
+  }>;
+};
+
+export type RegistrarTrasladoPayload = {
+  idCentroOrigen: number;
+  idCentroDestino: number;
+  notasDespacho?: string;
+  detalles: Array<{
+    idArticulo: number;
+    cantidadEnviada: number;
+    numeroLote?: string;
+    fechaVencimiento?: string;
+  }>;
+};
+
 

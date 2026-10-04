@@ -16,7 +16,16 @@ import {
   AuthUser,
   BitacoraResidente,
   ValoracionIngreso,
-  EstadoCivil
+  EstadoCivil,
+  CategoriaArticulo,
+  ArticuloCatalogo,
+  BodegaSede,
+  InventarioStockSede,
+  MovimientoInvDetalle,
+  MovimientoInventario,
+  TrasladoSedes,
+  RegistrarMovimientoPayload,
+  RegistrarTrasladoPayload
 } from '../types';
 import {
   SEED_SEDES,
@@ -27,7 +36,13 @@ import {
   SEED_PERMISOS,
   SEED_INCIDENTES,
   SEED_CATALOGO_DOTACION,
-  SEED_DOTACIONES_RESIDENTES
+  SEED_DOTACIONES_RESIDENTES,
+  SEED_CATEGORIAS_ARTICULOS,
+  SEED_ARTICULOS_CATALOGO,
+  SEED_BODEGAS_SEDE,
+  SEED_INVENTARIO_STOCK,
+  SEED_MOVIMIENTOS_INVENTARIO,
+  SEED_TRASLADOS_SEDES
 } from '../data/seedData';
 import { adminApi } from '../services/api';
 import { limpiarIdentificacion } from '../utils/formatters';
@@ -62,7 +77,8 @@ export type AdminTab =
   | 'trabajadores'
   | 'turnos'
   | 'permisos'
-  | 'clinico';
+  | 'clinico'
+  | 'inventario';
 
 interface AdminContextType {
   // Autenticación y Perfil de Administradores
@@ -82,6 +98,7 @@ interface AdminContextType {
   activeSedeId: number;
   activeSede: SedeCentro;
   setActiveSedeId: (id: number) => void;
+  actualizarSede: (idCentro: number, data: Partial<SedeCentro>) => Promise<void>;
 
   // Datos principales
   residentes: Residente[];
@@ -134,7 +151,7 @@ interface AdminContextType {
   cargarFichaIngreso: (idResidente: number) => Promise<any>;
   estadosCiviles: EstadoCivil[];
 
-  // Dotación e Inventario
+  // Dotación
   catalogoDotacion: ElementoDotacionCatalogo[];
   dotaciones: DotacionResidente[];
   guardarElementoCatalogo: (item: Partial<ElementoDotacionCatalogo>) => Promise<void>;
@@ -147,6 +164,19 @@ interface AdminContextType {
     idDotacionResidente: number,
     cambio: { motivo: string; condicionNuevo?: string; observaciones?: string }
   ) => Promise<void>;
+
+  // Módulo de Inventario y Almacén Multisede
+  categoriasArticulos: CategoriaArticulo[];
+  articulosCatalogo: ArticuloCatalogo[];
+  bodegasSede: BodegaSede[];
+  inventarioStock: InventarioStockSede[];
+  movimientosInventario: MovimientoInventario[];
+  trasladosSedes: TrasladoSedes[];
+  registrarMovimientoStock: (payload: RegistrarMovimientoPayload) => Promise<boolean>;
+  despacharTraslado: (payload: RegistrarTrasladoPayload) => Promise<boolean>;
+  recibirTraslado: (idTraslado: number, notasRecepcion?: string) => Promise<boolean>;
+  crearArticuloCatalogo: (articulo: Omit<ArticuloCatalogo, 'id'>) => Promise<boolean>;
+  actualizarArticuloCatalogo: (id: number, datos: Partial<ArticuloCatalogo>) => Promise<boolean>;
 
   // Modales de Edición
   editingResidente: Residente | null;
@@ -197,8 +227,6 @@ interface AdminContextType {
   actualizarFamiliar: (idFamiliar: number, data: Partial<FamiliarAcudiente> & { esPrincipal?: boolean }) => Promise<void>;
 
   eliminarFamiliar: (idFamiliar: number) => Promise<void>;
-
-  actualizarSede: (idCentro: number, data: Partial<SedeCentro>) => Promise<void>;
 
   registrarTrabajador: (data: Omit<TrabajadorEmpleado, 'id' | 'nombreCompleto' | 'fechaContratacion'>) => Promise<void>;
 
@@ -264,14 +292,19 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
       try {
         const parsed = JSON.parse(saved);
         if (Array.isArray(parsed) && parsed.length > 0) {
-          // Migrar en caliente nombres antiguos guardados en caché local
+          // Migrar en caliente nombres antiguos y banderas de inventario guardadas en caché local
           const migrado = parsed.map((s: SedeCentro) => {
+            const seedMatch = SEED_SEDES.find((seed) => seed.id === s.id);
+            const manejaInv = s.manejaInventario !== undefined ? s.manejaInventario : (seedMatch?.manejaInventario ?? true);
+            const manejaCostos = s.manejaCostosInventario !== undefined ? s.manejaCostosInventario : (seedMatch?.manejaCostosInventario ?? true);
+            let updated: SedeCentro = { ...s, manejaInventario: manejaInv, manejaCostosInventario: manejaCostos };
+
             if (s.id === 1 && (s.nombre.includes('Santa Bárbara') || s.nombre.includes('Santa Barbara'))) {
-              return { ...s, nombre: 'Sede Central Bogotá', codigo: 'SEDE-CENTRAL' };
+              updated = { ...updated, nombre: 'Sede Central Bogotá', codigo: 'SEDE-CENTRAL' };
             }
             if (s.id === 2 && (s.nombre.includes('El Nogal') || s.nombre.includes('Nogal'))) {
-              return {
-                ...s,
+              updated = {
+                ...updated,
                 nombre: 'Sede Campestre La Calera',
                 codigo: 'SEDE-NORTE',
                 ciudad: 'La Calera, Cundinamarca',
@@ -279,7 +312,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
                 capacidadTotal: 45
               };
             }
-            return s;
+            return updated;
           });
           localStorage.setItem('samanya_admin_sedes', JSON.stringify(migrado));
           return migrado;
@@ -354,6 +387,61 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isSyncingGlobal, setIsSyncingGlobal] = useState(false);
   const [isOracleLive, setIsOracleLive] = useState(false);
   const [oracleMetrics, setOracleMetrics] = useState<AdminDashboardMetrics | null>(null);
+
+  // Módulo de Inventario y Almacén Multisede
+  const [categoriasArticulos, setCategoriasArticulos] = useState<CategoriaArticulo[]>(() => {
+    const saved = localStorage.getItem('samanya_admin_categorias_inv');
+    return saved ? JSON.parse(saved) : SEED_CATEGORIAS_ARTICULOS;
+  });
+
+  const [articulosCatalogo, setArticulosCatalogo] = useState<ArticuloCatalogo[]>(() => {
+    const saved = localStorage.getItem('samanya_admin_articulos_inv');
+    return saved ? JSON.parse(saved) : SEED_ARTICULOS_CATALOGO;
+  });
+
+  const [bodegasSede, setBodegasSede] = useState<BodegaSede[]>(() => {
+    const saved = localStorage.getItem('samanya_admin_bodegas_inv');
+    return saved ? JSON.parse(saved) : SEED_BODEGAS_SEDE;
+  });
+
+  const [inventarioStock, setInventarioStock] = useState<InventarioStockSede[]>(() => {
+    const saved = localStorage.getItem('samanya_admin_stock_inv');
+    return saved ? JSON.parse(saved) : SEED_INVENTARIO_STOCK;
+  });
+
+  const [movimientosInventario, setMovimientosInventario] = useState<MovimientoInventario[]>(() => {
+    const saved = localStorage.getItem('samanya_admin_movimientos_inv');
+    return saved ? JSON.parse(saved) : SEED_MOVIMIENTOS_INVENTARIO;
+  });
+
+  const [trasladosSedes, setTrasladosSedes] = useState<TrasladoSedes[]>(() => {
+    const saved = localStorage.getItem('samanya_admin_traslados_inv');
+    return saved ? JSON.parse(saved) : SEED_TRASLADOS_SEDES;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('samanya_admin_categorias_inv', JSON.stringify(categoriasArticulos));
+  }, [categoriasArticulos]);
+
+  useEffect(() => {
+    localStorage.setItem('samanya_admin_articulos_inv', JSON.stringify(articulosCatalogo));
+  }, [articulosCatalogo]);
+
+  useEffect(() => {
+    localStorage.setItem('samanya_admin_bodegas_inv', JSON.stringify(bodegasSede));
+  }, [bodegasSede]);
+
+  useEffect(() => {
+    localStorage.setItem('samanya_admin_stock_inv', JSON.stringify(inventarioStock));
+  }, [inventarioStock]);
+
+  useEffect(() => {
+    localStorage.setItem('samanya_admin_movimientos_inv', JSON.stringify(movimientosInventario));
+  }, [movimientosInventario]);
+
+  useEffect(() => {
+    localStorage.setItem('samanya_admin_traslados_inv', JSON.stringify(trasladosSedes));
+  }, [trasladosSedes]);
 
   // Guardado en localStorage al mutar
   useEffect(() => {
@@ -2540,19 +2628,391 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   // 11. Actualizar Sede y Camas
   const actualizarSede = async (idCentro: number, data: Partial<SedeCentro>) => {
-    await adminApi.sedes.actualizarSede({
-      idCentro,
-      capacidadTotal: data.capacidadTotal,
-      nombre: data.nombre,
-      direccion: data.direccion,
-      telefono: data.telefono
+    try {
+      await adminApi.sedes.actualizarSede({
+        idCentro,
+        capacidadTotal: data.capacidadTotal,
+        nombre: data.nombre,
+        direccion: data.direccion,
+        telefono: data.telefono
+      });
+    } catch (e) {
+      // Ignorar si api offline
+    }
+
+    setSedes((prev) => {
+      const updated = prev.map((s) => (s.id === idCentro ? { ...s, ...data } : s));
+      localStorage.setItem('samanya_admin_sedes', JSON.stringify(updated));
+      return updated;
     });
 
-    setSedes((prev) =>
-      prev.map((s) => (s.id === idCentro ? { ...s, ...data } : s))
-    );
+    showToast('Configuración de la sede actualizada exitosamente', 'success');
+  };
 
-    showToast('Configuración de la sede y camas actualizada exitosamente', 'success');
+  // 12. Métodos del Módulo de Inventario y Almacén Multisede
+  const registrarMovimientoStock = async (payload: RegistrarMovimientoPayload): Promise<boolean> => {
+    try {
+      const fechaActual = `${obtenerFechaBogota()} ${obtenerHoraBogota()}:00`;
+      const docNumero = `INV-${payload.tipoMovimiento.slice(0, 3)}-${Date.now().toString().slice(-4)}`;
+      const bodega = bodegasSede.find(b => b.id === payload.idBodega) || bodegasSede[0];
+      const centro = sedes.find(s => s.id === payload.idCentro) || activeSede;
+      const residenteObj = payload.idResidente ? residentes.find(r => r.id === payload.idResidente) : undefined;
+
+      const detallesGenerados: MovimientoInvDetalle[] = [];
+      let nuevoStock = [...inventarioStock];
+
+      for (const item of payload.detalles) {
+        const art = articulosCatalogo.find(a => a.id === item.idArticulo);
+        let stockItem = nuevoStock.find(
+          s => s.idCentro === payload.idCentro && s.idBodega === payload.idBodega && s.idArticulo === item.idArticulo
+        );
+
+        const saldoAnt = stockItem ? stockItem.cantidadDisponible : 0;
+        let saldoPost = saldoAnt;
+
+        if (
+          payload.tipoMovimiento.startsWith('ENTRADA') ||
+          payload.tipoMovimiento === 'AJUSTE_FISICO_POSITIVO' ||
+          payload.tipoMovimiento === 'TRASLADO_ENTRADA'
+        ) {
+          saldoPost = saldoAnt + item.cantidad;
+        } else {
+          saldoPost = Math.max(0, saldoAnt - item.cantidad);
+        }
+
+        const costoUnit = item.costoUnitario || art?.costoEstandar || 0;
+        const costoTot = costoUnit * item.cantidad;
+
+        detallesGenerados.push({
+          id: Date.now() + Math.floor(Math.random() * 1000),
+          idMovimiento: 0,
+          idBodega: payload.idBodega,
+          idArticulo: item.idArticulo,
+          codigoArticulo: art?.codigoArticulo || 'ART',
+          nombreArticulo: art?.nombreArticulo || 'Artículo',
+          unidadMedida: art?.unidadMedida || 'UNIDAD',
+          numeroLote: item.numeroLote,
+          fechaVencimiento: item.fechaVencimiento,
+          cantidad: item.cantidad,
+          costoUnitario: costoUnit,
+          costoTotal: costoTot,
+          saldoAnterior: saldoAnt,
+          saldoPosterior: saldoPost
+        });
+
+        if (stockItem) {
+          nuevoStock = nuevoStock.map(s => {
+            if (s.id === stockItem!.id) {
+              const valorTot = saldoPost * (s.costoEstandar || costoUnit);
+              const estadoSum: 'OPTIMO' | 'REORDEN' | 'BAJO' =
+                saldoPost <= s.stockMinimo ? 'BAJO' : saldoPost <= (s.puntoReorden || s.stockMinimo * 1.5) ? 'REORDEN' : 'OPTIMO';
+              return {
+                ...s,
+                cantidadDisponible: saldoPost,
+                valorTotalStock: valorTot,
+                estadoSuministro: estadoSum,
+                fechaUltimoMovimiento: obtenerFechaBogota(),
+                numeroLote: item.numeroLote || s.numeroLote,
+                fechaVencimiento: item.fechaVencimiento || s.fechaVencimiento
+              };
+            }
+            return s;
+          });
+        } else {
+          const nuevoStockItem: InventarioStockSede = {
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            idCentro: payload.idCentro,
+            nombreCentro: centro.nombre,
+            idBodega: payload.idBodega,
+            nombreBodega: bodega?.nombreBodega || 'Bodega Principal',
+            idArticulo: item.idArticulo,
+            codigoArticulo: art?.codigoArticulo || 'ART',
+            nombreArticulo: art?.nombreArticulo || 'Artículo',
+            categoria: art?.nombreCategoria || 'General',
+            colorCategoria: art?.colorCategoria || '#10B981',
+            unidadMedida: art?.unidadMedida || 'UNIDAD',
+            numeroLote: item.numeroLote,
+            fechaVencimiento: item.fechaVencimiento,
+            cantidadDisponible: saldoPost,
+            cantidadReservada: 0,
+            stockMinimo: 10,
+            stockMaximo: 50,
+            puntoReorden: 15,
+            ubicacionEstante: 'Bodega Principal',
+            fechaUltimoMovimiento: obtenerFechaBogota(),
+            costoEstandar: costoUnit,
+            valorTotalStock: saldoPost * costoUnit,
+            estadoSuministro: saldoPost <= 10 ? 'BAJO' : 'OPTIMO'
+          };
+          nuevoStock.push(nuevoStockItem);
+        }
+      }
+
+      setInventarioStock(nuevoStock);
+
+      const nuevoMov: MovimientoInventario = {
+        id: Date.now(),
+        idCentro: payload.idCentro,
+        nombreCentro: centro.nombre,
+        numeroDocumento: docNumero,
+        tipoMovimiento: payload.tipoMovimiento,
+        fechaMovimiento: fechaActual,
+        idUsuarioRegistra: currentUser?.id || 1,
+        nombreUsuarioRegistra: currentUser?.nombreCompleto || 'Administrador',
+        idResidente: payload.idResidente,
+        nombreResidente: residenteObj ? `${residenteObj.nombres} ${residenteObj.apellidos}` : undefined,
+        observaciones: payload.observaciones,
+        estado: 'APLICADO',
+        totalArticulos: payload.detalles.reduce((acc, d) => acc + d.cantidad, 0),
+        costoTotal: detallesGenerados.reduce((acc, d) => acc + d.costoTotal, 0),
+        detalles: detallesGenerados
+      };
+
+      setMovimientosInventario(prev => [nuevoMov, ...prev]);
+      showToast(`Movimiento ${docNumero} registrado exitosamente`, 'success');
+      return true;
+    } catch (e) {
+      console.error(e);
+      showToast('Error registrando movimiento de inventario', 'alert');
+      return false;
+    }
+  };
+
+  const despacharTraslado = async (payload: RegistrarTrasladoPayload): Promise<boolean> => {
+    try {
+      const centroOrigen = sedes.find(s => s.id === payload.idCentroOrigen);
+      const centroDestino = sedes.find(s => s.id === payload.idCentroDestino);
+      const codigoTraslado = `TRS-${Date.now().toString().slice(-4)}`;
+
+      // Descontar del centro origen
+      let nuevoStock = [...inventarioStock];
+      for (const item of payload.detalles) {
+        nuevoStock = nuevoStock.map(s => {
+          if (s.idCentro === payload.idCentroOrigen && s.idArticulo === item.idArticulo) {
+            const saldoPost = Math.max(0, s.cantidadDisponible - item.cantidadEnviada);
+            return {
+              ...s,
+              cantidadDisponible: saldoPost,
+              valorTotalStock: saldoPost * (s.costoEstandar || 0)
+            };
+          }
+          return s;
+        });
+      }
+      setInventarioStock(nuevoStock);
+
+      const nuevoTraslado: TrasladoSedes = {
+        id: Date.now(),
+        codigoTraslado,
+        idCentroOrigen: payload.idCentroOrigen,
+        nombreCentroOrigen: centroOrigen?.nombre || 'Sede Origen',
+        idCentroDestino: payload.idCentroDestino,
+        nombreCentroDestino: centroDestino?.nombre || 'Sede Destino',
+        fechaEnvio: `${obtenerFechaBogota()} ${obtenerHoraBogota()}:00`,
+        estadoTraslado: 'EN_TRANSITO',
+        idUsuarioDespacha: currentUser?.id || 1,
+        nombreUsuarioDespacha: currentUser?.nombreCompleto || 'Administrador',
+        notasDespacho: payload.notasDespacho,
+        detalles: payload.detalles.map(d => {
+          const art = articulosCatalogo.find(a => a.id === d.idArticulo);
+          return {
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            idTraslado: 0,
+            idArticulo: d.idArticulo,
+            codigoArticulo: art?.codigoArticulo,
+            nombreArticulo: art?.nombreArticulo,
+            unidadMedida: art?.unidadMedida,
+            numeroLote: d.numeroLote,
+            fechaVencimiento: d.fechaVencimiento,
+            cantidadEnviada: d.cantidadEnviada,
+            estadoItem: 'EN_TRANSITO'
+          };
+        })
+      };
+
+      setTrasladosSedes(prev => [nuevoTraslado, ...prev]);
+      showToast(`Traslado ${codigoTraslado} despachado en tránsito`, 'success');
+      return true;
+    } catch (e) {
+      console.error(e);
+      showToast('Error despachando traslado', 'alert');
+      return false;
+    }
+  };
+
+  const recibirTraslado = async (idTraslado: number, notasRecepcion?: string): Promise<boolean> => {
+    try {
+      const traslado = trasladosSedes.find(t => t.id === idTraslado);
+      if (!traslado) return false;
+
+      // Incrementar stock en centro destino
+      let nuevoStock = [...inventarioStock];
+      const bodegaDestino = bodegasSede.find(b => b.idCentro === traslado.idCentroDestino) || bodegasSede[0];
+
+      for (const item of traslado.detalles) {
+        const art = articulosCatalogo.find(a => a.id === item.idArticulo);
+        let stockItem = nuevoStock.find(
+          s => s.idCentro === traslado.idCentroDestino && s.idArticulo === item.idArticulo
+        );
+
+        if (stockItem) {
+          nuevoStock = nuevoStock.map(s => {
+            if (s.id === stockItem!.id) {
+              const saldoPost = s.cantidadDisponible + item.cantidadEnviada;
+              return {
+                ...s,
+                cantidadDisponible: saldoPost,
+                valorTotalStock: saldoPost * (s.costoEstandar || 0),
+                fechaUltimoMovimiento: obtenerFechaBogota()
+              };
+            }
+            return s;
+          });
+        } else {
+          nuevoStock.push({
+            id: Date.now() + Math.floor(Math.random() * 1000),
+            idCentro: traslado.idCentroDestino,
+            nombreCentro: traslado.nombreCentroDestino,
+            idBodega: bodegaDestino ? bodegaDestino.id : 1,
+            nombreBodega: bodegaDestino ? bodegaDestino.nombreBodega : 'Bodega Principal',
+            idArticulo: item.idArticulo,
+            codigoArticulo: art?.codigoArticulo || 'ART',
+            nombreArticulo: art?.nombreArticulo || 'Artículo',
+            categoria: art?.nombreCategoria || 'General',
+            colorCategoria: art?.colorCategoria || '#10B981',
+            unidadMedida: art?.unidadMedida || 'UNIDAD',
+            numeroLote: item.numeroLote,
+            fechaVencimiento: item.fechaVencimiento,
+            cantidadDisponible: item.cantidadEnviada,
+            cantidadReservada: 0,
+            stockMinimo: 10,
+            stockMaximo: 50,
+            puntoReorden: 15,
+            ubicacionEstante: 'Bodega Principal',
+            fechaUltimoMovimiento: obtenerFechaBogota(),
+            costoEstandar: art?.costoEstandar || 0,
+            valorTotalStock: item.cantidadEnviada * (art?.costoEstandar || 0),
+            estadoSuministro: 'OPTIMO'
+          });
+        }
+      }
+
+      setInventarioStock(nuevoStock);
+
+      // Actualizar estado del traslado
+      setTrasladosSedes(prev =>
+        prev.map(t => {
+          if (t.id === idTraslado) {
+            return {
+              ...t,
+              estadoTraslado: 'RECIBIDO_CONFORME',
+              fechaRecepcion: `${obtenerFechaBogota()} ${obtenerHoraBogota()}:00`,
+              idUsuarioRecibe: currentUser?.id || 1,
+              nombreUsuarioRecibe: currentUser?.nombreCompleto || 'Administrador',
+              notasRecepcion: notasRecepcion || 'Recepción conforme en almacén de sede'
+            };
+          }
+          return t;
+        })
+      );
+
+      showToast(`Traslado ${traslado.codigoTraslado} recibido e ingresado a bodega`, 'success');
+      return true;
+    } catch (e) {
+      console.error(e);
+      showToast('Error recibiendo traslado', 'alert');
+      return false;
+    }
+  };
+
+  const crearArticuloCatalogo = async (articulo: Omit<ArticuloCatalogo, 'id'>): Promise<boolean> => {
+    try {
+      const nuevoId = Date.now();
+      const nuevoArticulo: ArticuloCatalogo = {
+        ...articulo,
+        id: nuevoId
+      };
+      setArticulosCatalogo(prev => [...prev, nuevoArticulo]);
+
+      // Generar registro inicial de stock en cada sede que maneja inventario
+      const nuevasLineasStock: InventarioStockSede[] = sedes
+        .filter(s => s.manejaInventario)
+        .map(s => {
+          const bod = bodegasSede.find(b => b.idCentro === s.id) || bodegasSede[0];
+          return {
+            id: Date.now() + s.id,
+            idCentro: s.id,
+            nombreCentro: s.nombre,
+            idBodega: bod ? bod.id : 1,
+            nombreBodega: bod ? bod.nombreBodega : 'Almacén Principal',
+            idArticulo: nuevoId,
+            codigoArticulo: articulo.codigoArticulo,
+            nombreArticulo: articulo.nombreArticulo,
+            categoria: articulo.nombreCategoria || 'General',
+            colorCategoria: articulo.colorCategoria || '#10B981',
+            unidadMedida: articulo.unidadMedida,
+            cantidadDisponible: 0,
+            cantidadReservada: 0,
+            stockMinimo: 10,
+            stockMaximo: 50,
+            puntoReorden: 15,
+            ubicacionEstante: 'Por Asignar',
+            costoEstandar: articulo.costoEstandar,
+            valorTotalStock: 0,
+            estadoSuministro: 'BAJO'
+          };
+        });
+
+      setInventarioStock(prev => [...prev, ...nuevasLineasStock]);
+      showToast(`Artículo ${articulo.codigoArticulo} registrado en el catálogo`, 'success');
+      return true;
+    } catch (e) {
+      console.error(e);
+      showToast('Error creando artículo', 'alert');
+      return false;
+    }
+  };
+
+  const actualizarArticuloCatalogo = async (id: number, datos: Partial<ArticuloCatalogo>): Promise<boolean> => {
+    try {
+      setArticulosCatalogo(prev =>
+        prev.map(art => {
+          if (art.id === id) {
+            return { ...art, ...datos };
+          }
+          return art;
+        })
+      );
+
+      // Sincronizar cambios relevantes en inventarioStock
+      setInventarioStock(prev =>
+        prev.map(stock => {
+          if (stock.idArticulo === id) {
+            const nuevoCosto = datos.costoEstandar !== undefined ? datos.costoEstandar : stock.costoEstandar;
+            return {
+              ...stock,
+              codigoArticulo: datos.codigoArticulo || stock.codigoArticulo,
+              nombreArticulo: datos.nombreArticulo || stock.nombreArticulo,
+              categoria: datos.nombreCategoria || stock.categoria,
+              colorCategoria: datos.colorCategoria || stock.colorCategoria,
+              unidadMedida: datos.unidadMedida || stock.unidadMedida,
+              costoEstandar: nuevoCosto,
+              valorTotalStock: nuevoCosto !== undefined ? stock.cantidadDisponible * nuevoCosto : stock.valorTotalStock,
+              stockMinimo: datos.stockMinimoSede !== undefined ? datos.stockMinimoSede : stock.stockMinimo,
+              stockMaximo: datos.stockMaximoSede !== undefined ? datos.stockMaximoSede : stock.stockMaximo
+            };
+          }
+          return stock;
+        })
+      );
+
+      showToast('Artículo actualizado exitosamente en el catálogo', 'success');
+      return true;
+    } catch (e) {
+      console.error(e);
+      showToast('Error actualizando artículo', 'alert');
+      return false;
+    }
   };
 
   return (
@@ -2738,7 +3198,19 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         isUserProfileOpen,
         setIsUserProfileOpen,
         updateProfile,
-        changePassword
+        changePassword,
+        // Inventario y Almacén Multisede
+        categoriasArticulos,
+        articulosCatalogo,
+        bodegasSede,
+        inventarioStock,
+        movimientosInventario,
+        trasladosSedes,
+        registrarMovimientoStock,
+        despacharTraslado,
+        recibirTraslado,
+        crearArticuloCatalogo,
+        actualizarArticuloCatalogo
       }}
     >
       {children}

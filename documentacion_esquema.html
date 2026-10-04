@@ -955,6 +955,7 @@ footer {
           <li><a href="#mod-tareas">8. Tareas y Calendario</a></li>
           <li><a href="#mod-suministros">9. Suministros y Gastos</a></li>
           <li><a href="#mod-dotacion" style="color: #6ee7b7; font-weight: 600;">↳ Dotación y Artículos de Ingreso (NUEVO)</a></li>
+          <li><a href="#mod-inventario" style="color: #6ee7b7; font-weight: 600;">↳ Inventario, Bodegas y Kardex (NUEVO)</a></li>
           <li><a href="#mod-consentimientos">10. Consentimientos</a></li>
           <li><a href="#mod-incidentes">11. Incidentes y Calidad</a></li>
           <li><a href="#mod-comunicaciones">12. Chat y Notificaciones</a></li>
@@ -978,9 +979,9 @@ footer {
       </p>
 
       <div class="meta-stats">
-        <div class="stat-pill"><span class="num">94</span><span class="label">Total de Tablas SMY_</span></div>
-        <div class="stat-pill"><span class="num">50</span><span class="label">Catálogos y Maestras</span></div>
-        <div class="stat-pill"><span class="num">44</span><span class="label">Tablas Transaccionales</span></div>
+        <div class="stat-pill"><span class="num">102</span><span class="label">Total de Tablas SMY_</span></div>
+        <div class="stat-pill"><span class="num">51</span><span class="label">Catálogos y Maestras</span></div>
+        <div class="stat-pill"><span class="num">51</span><span class="label">Tablas Transaccionales</span></div>
         <div class="stat-pill"><span class="num">2</span><span class="label">Vistas del Sistema</span></div>
         <div class="stat-pill"><span class="num">100%</span><span class="label">Auditoría Completa</span></div>
         <div class="stat-pill"><span class="num">UTC-5</span><span class="label">Hora Bogotá Colombia</span></div>
@@ -1399,6 +1400,8 @@ erDiagram
               <tr><td class="col-name">SITIO_WEB</td><td class="col-type">VARCHAR2(200)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>URL del portal oficial corporativo.</td></tr>
               <tr><td class="col-name">LOGO_URL</td><td class="col-type">VARCHAR2(500)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>URL del isotipo/logo corporativo para reportes y membretes.</td></tr>
               <tr><td class="col-name">ID_ESTADO_ORGANIZACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>1</td><td>FK hacia SMY_ESTADOS_ORGANIZACIONES(ID).</td></tr>
+              <tr><td class="col-name">MANEJA_INVENTARIO</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Flag maestro: Indica si la organización tiene contratado/habilitado el módulo de inventarios ('S' / 'N').</td></tr>
+              <tr><td class="col-name">MANEJA_COSTOS_INVENTARIO</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Flag maestro: Indica si la organización gestiona costos/precios (S) o solo control físico de cantidades (N).</td></tr>
               <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Auditoría de registro inicial.</td></tr>
               <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que realizó la última modificación.</td></tr>
             </tbody>
@@ -1424,6 +1427,8 @@ erDiagram
               <tr><td class="col-name">EMAIL_CONTACTO</td><td class="col-type">VARCHAR2(100)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Correo para admisiones de la sede.</td></tr>
               <tr><td class="col-name">CAPACIDAD_RESIDENTES</td><td class="col-type">NUMBER(5)</td><td><span class="badge badge-req">No</span></td><td>0</td><td>Cupo máximo de residentes autorizados.</td></tr>
               <tr><td class="col-name">ID_ESTADO_CENTRO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-req">No</span></td><td>1</td><td>Estado operativo de la sede.</td></tr>
+              <tr><td class="col-name">MANEJA_INVENTARIO</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Indica si esta sede maneja inventario físico de insumos y bodegas (S/N). Si es 'N', menús y widgets permanecen ocultos.</td></tr>
+              <tr><td class="col-name">MANEJA_COSTOS_INVENTARIO</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Indica si la sede gestiona precios/costos (S) o si opera solo por cantidades físicas (N).</td></tr>
               <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Auditoría de creación.</td></tr>
               <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que realizó la modificación.</td></tr>
             </tbody>
@@ -2592,6 +2597,213 @@ sequenceDiagram
         </div>
       </div>
 
+      <!-- 4.9.2 INVENTARIO Y ALMACÉN MULTISEDE -->
+      <h3 id="mod-inventario">4.9.2 Módulo de Gestión de Inventario, Bodegas y Kardex Multisede</h3>
+      <p>Control integral de existencias físicas por bodega y sede, catálogo con presentación de empaque comercial y factores de conversión a unidades individuales, comprobantes de kardex con trazabilidad de saldos, donaciones de acudientes y remisiones de traslados inter-sedes.</p>
+
+      <!-- SMY_CATEGORIAS_ARTICULOS -->
+      <div class="card table-block" data-table="SMY_CATEGORIAS_ARTICULOS">
+        <h4>Tabla: SMY_CATEGORIAS_ARTICULOS</h4>
+        <p>Categorías maestras para la clasificación taxonómica de artículos, medicamentos, dotación y suministros generales.</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_CATEGORIAS_ARTICULOS</td><td>Clave primaria autoincremental de la categoría.</td></tr>
+              <tr><td class="col-name">ID_ORGANIZACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_ORGANIZACIONES(ID). Aislamiento Multi-Tenant.</td></tr>
+              <tr><td class="col-name">CODIGO_CATEGORIA</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Código mnemónico de clasificación (ej. INS_MED, FARMACIA, ASEO_PERS).</td></tr>
+              <tr><td class="col-name">NOMBRE_CATEGORIA</td><td class="col-type">VARCHAR2(80)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Nombre descriptivo visible en catálogo y filtros.</td></tr>
+              <tr><td class="col-name">DESCRIPCION</td><td class="col-type">VARCHAR2(250)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Alcance y tipos de insumos comprendidos.</td></tr>
+              <tr><td class="col-name">COLOR_HEX</td><td class="col-type">VARCHAR2(10)</td><td><span class="badge badge-opt">Sí</span></td><td>'#10B981'</td><td>Color distintivo para etiquetas y badges en UI.</td></tr>
+              <tr><td class="col-name">ESTADO</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-req">No</span></td><td>'Activo'</td><td>Estado operativo: 'Activo' o 'Inactivo'.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha y hora oficial de registro.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID). Auditoría.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SMY_ARTICULOS_CATALOGO -->
+      <div class="card table-block" data-table="SMY_ARTICULOS_CATALOGO">
+        <h4>Tabla: SMY_ARTICULOS_CATALOGO</h4>
+        <p>Maestro de productos, medicamentos de botiquín, dotación y materiales con soporte de presentación comercial (paquetes, cajas) y factor multiplicador a unidades físicas individuales.</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_ARTICULOS_CATALOGO</td><td>Identificador único del producto en el catálogo.</td></tr>
+              <tr><td class="col-name">ID_ORGANIZACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_ORGANIZACIONES(ID).</td></tr>
+              <tr><td class="col-name">ID_CATEGORIA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CATEGORIAS_ARTICULOS(ID).</td></tr>
+              <tr><td class="col-name">CODIGO_ARTICULO</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Código de referencia o SKU del producto (ej. INS-PAN-01, INS-GLU-02).</td></tr>
+              <tr><td class="col-name">NOMBRE_ARTICULO</td><td class="col-type">VARCHAR2(120)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Nombre comercial o genérico del artículo.</td></tr>
+              <tr><td class="col-name">DESCRIPCION</td><td class="col-type">VARCHAR2(300)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Ficha técnica, especificaciones o composición.</td></tr>
+              <tr><td class="col-name">UNIDAD_MEDIDA</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-req">No</span></td><td>'UNIDAD'</td><td>Unidad física base de almacenamiento: UNIDAD, FRASCO, LITRO, KILO, PAR.</td></tr>
+              <tr><td class="col-name">TIPO_EMPAQUE</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-req">No</span></td><td>'Unidad'</td><td>Presentación comercial de compra/recepción: Paquete, Caja, Blíster, Frasco.</td></tr>
+              <tr><td class="col-name">UNIDADES_POR_EMPAQUE</td><td class="col-type">NUMBER(8)</td><td><span class="badge badge-req">No</span></td><td>1</td><td>Factor multiplicador a unidades físicas (ej. 30 pañales por paquete, 50 tiras por caja).</td></tr>
+              <tr><td class="col-name">REQUIERE_LOTE_VENCIMIENTO</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'N'</td><td>Exige lote y fecha de expiración obligatoria en recepciones ('S' / 'N').</td></tr>
+              <tr><td class="col-name">ES_DESCONTABLE_POR_RESIDENTE</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Indica si el insumo puede imputarse al consumo de un residente ('S' / 'N').</td></tr>
+              <tr><td class="col-name">COSTO_ESTANDAR</td><td class="col-type">NUMBER(12,2)</td><td><span class="badge badge-req">No</span></td><td>0</td><td>Costo unitario referencial (solo aplica si la sede maneja costos).</td></tr>
+              <tr><td class="col-name">STOCK_MINIMO_SEDE</td><td class="col-type">NUMBER(10,2)</td><td><span class="badge badge-req">No</span></td><td>5</td><td>Umbral mínimo sugerido por sede antes de alerta roja.</td></tr>
+              <tr><td class="col-name">STOCK_MAXIMO_SEDE</td><td class="col-type">NUMBER(10,2)</td><td><span class="badge badge-req">No</span></td><td>50</td><td>Capacidad máxima de almacenamiento aconsejada.</td></tr>
+              <tr><td class="col-name">ESTADO</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-req">No</span></td><td>'Activo'</td><td>Estado: 'Activo' o 'Inactivo'.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de registro en base de datos.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SMY_BODEGAS_SEDE -->
+      <div class="card table-block" data-table="SMY_BODEGAS_SEDE">
+        <h4>Tabla: SMY_BODEGAS_SEDE</h4>
+        <p>Almacenes físicos, bodegas centrales, áreas de lencería y botiquines farmacéuticos independientes por sede asistencial.</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_BODEGAS_SEDE</td><td>Identificador único de la bodega física.</td></tr>
+              <tr><td class="col-name">ID_CENTRO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CENTROS(ID). Sede a la que pertenece el almacén.</td></tr>
+              <tr><td class="col-name">CODIGO_BODEGA</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Código interno dentro del centro (ej. BOD-PRIN, FARM-BOT).</td></tr>
+              <tr><td class="col-name">NOMBRE_BODEGA</td><td class="col-type">VARCHAR2(80)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Nombre descriptivo del área de almacenamiento.</td></tr>
+              <tr><td class="col-name">DESCRIPCION</td><td class="col-type">VARCHAR2(200)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Ubicación física en el predio o notas de acceso.</td></tr>
+              <tr><td class="col-name">ES_BODEGA_PRINCIPAL</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Indica si es el almacén primario de recepción ('S' / 'N').</td></tr>
+              <tr><td class="col-name">ESTADO</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-req">No</span></td><td>'Activo'</td><td>Estado: 'Activo' o 'Inactivo'.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de creación del registro.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SMY_INVENTARIO_STOCK_SEDE -->
+      <div class="card table-block" data-table="SMY_INVENTARIO_STOCK_SEDE">
+        <h4>Tabla: SMY_INVENTARIO_STOCK_SEDE</h4>
+        <p>Existencias reales de inventario registradas estrictamente en unidades físicas para garantizar el control asistencial y la dispensación exacta a residentes.</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_INV_STOCK_SEDE</td><td>Clave primaria de la fila de existencias por bodega.</td></tr>
+              <tr><td class="col-name">ID_CENTRO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CENTROS(ID).</td></tr>
+              <tr><td class="col-name">ID_BODEGA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_BODEGAS_SEDE(ID).</td></tr>
+              <tr><td class="col-name">ID_ARTICULO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_ARTICULOS_CATALOGO(ID).</td></tr>
+              <tr><td class="col-name">NUMERO_LOTE</td><td class="col-type">VARCHAR2(50)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Número de lote del fabricante para trazabilidad INVIMA.</td></tr>
+              <tr><td class="col-name">FECHA_VENCIMIENTO</td><td class="col-type">DATE</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fecha de caducidad física del lote.</td></tr>
+              <tr><td class="col-name">CANTIDAD_DISPONIBLE</td><td class="col-type">NUMBER(12,2)</td><td><span class="badge badge-req">No</span></td><td>0</td><td>Existencia real en unidades físicas disponibles para consumo.</td></tr>
+              <tr><td class="col-name">CANTIDAD_RESERVADA</td><td class="col-type">NUMBER(12,2)</td><td><span class="badge badge-req">No</span></td><td>0</td><td>Unidades reservadas para traslados en tránsito o tratamientos.</td></tr>
+              <tr><td class="col-name">STOCK_MINIMO</td><td class="col-type">NUMBER(10,2)</td><td><span class="badge badge-req">No</span></td><td>5</td><td>Nivel mínimo tolerable para disparo de alerta de desabastecimiento.</td></tr>
+              <tr><td class="col-name">STOCK_MAXIMO</td><td class="col-type">NUMBER(10,2)</td><td><span class="badge badge-req">No</span></td><td>50</td><td>Capacidad máxima de bodega sugerida.</td></tr>
+              <tr><td class="col-name">PUNTO_REORDEN</td><td class="col-type">NUMBER(10,2)</td><td><span class="badge badge-opt">Sí</span></td><td>10</td><td>Nivel preventivo de alerta para compra o solicitud de reposición.</td></tr>
+              <tr><td class="col-name">UBICACION_ESTANTE</td><td class="col-type">VARCHAR2(60)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Referencia física (Pasillo, Estante, Gaveta).</td></tr>
+              <tr><td class="col-name">FECHA_ULTIMO_MOVIMIENTO</td><td class="col-type">DATE</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fecha del último ingreso o egreso de stock.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de registro.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SMY_MOVIMIENTOS_INVENTARIO -->
+      <div class="card table-block" data-table="SMY_MOVIMIENTOS_INVENTARIO">
+        <h4>Tabla: SMY_MOVIMIENTOS_INVENTARIO</h4>
+        <p>Cabecera oficial de comprobantes de almacén, ingresos de donación familiar de insumos para residentes, egresos asistenciales y ajustes.</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_MOV_INVENTARIO</td><td>Identificador único del comprobante de kardex.</td></tr>
+              <tr><td class="col-name">ID_CENTRO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CENTROS(ID). Sede donde ocurre la transacción.</td></tr>
+              <tr><td class="col-name">NUMERO_DOCUMENTO</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Consecutivo único oficial (ej. INV-DON-2026-0001, INV-SAL-2026-0002).</td></tr>
+              <tr><td class="col-name">TIPO_MOVIMIENTO</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Tipo: ENTRADA_COMPRA, ENTRADA_DONACION, SALIDA_ENTREGA_RESIDENTE, etc.</td></tr>
+              <tr><td class="col-name">FECHA_MOVIMIENTO</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha legal en que se efectuó la operación física.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_REGISTRA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID). Funcionario o enfermero que opera el kardex.</td></tr>
+              <tr><td class="col-name">ID_RESIDENTE</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_RESIDENTES(ID). Residente vinculado a la entrega o consumo.</td></tr>
+              <tr><td class="col-name">ID_PROVEEDOR</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Identificador opcional del proveedor en compras formales.</td></tr>
+              <tr><td class="col-name">OBSERVACIONES</td><td class="col-type">VARCHAR2(500)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Detalles, datos de quien entregó o justificante clínico.</td></tr>
+              <tr><td class="col-name">ESTADO</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-req">No</span></td><td>'APLICADO'</td><td>Estado: 'APLICADO' o 'ANULADO'.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de auditoría.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SMY_MOVIMIENTOS_INV_DETALLE -->
+      <div class="card table-block" data-table="SMY_MOVIMIENTOS_INV_DETALLE">
+        <h4>Tabla: SMY_MOVIMIENTOS_INV_DETALLE</h4>
+        <p>Renglones y líneas de comprobante con desglose de empaques comerciales recibidos (ej. 5 paquetes de 30) y total de unidades físicas acreditadas en bodega (150 unidades).</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_MOV_INV_DET</td><td>Identificador único del renglón de kardex.</td></tr>
+              <tr><td class="col-name">ID_MOVIMIENTO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_MOVIMIENTOS_INVENTARIO(ID). Comprobante cabecera.</td></tr>
+              <tr><td class="col-name">ID_BODEGA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_BODEGAS_SEDE(ID). Bodega que incrementa o disminuye stock.</td></tr>
+              <tr><td class="col-name">ID_ARTICULO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_ARTICULOS_CATALOGO(ID).</td></tr>
+              <tr><td class="col-name">NUMERO_LOTE</td><td class="col-type">VARCHAR2(50)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Lote físico del fabricante.</td></tr>
+              <tr><td class="col-name">FECHA_VENCIMIENTO</td><td class="col-type">DATE</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fecha de expiración del lote.</td></tr>
+              <tr><td class="col-name">CANTIDAD_EMPAQUES</td><td class="col-type">NUMBER(10,2)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Número de paquetes/cajas comerciales recibidas (ej. 5 paquetes).</td></tr>
+              <tr><td class="col-name">UNIDADES_POR_EMPAQUE</td><td class="col-type">NUMBER(8)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Unidades contenidas en cada paquete (ej. 30 unidades).</td></tr>
+              <tr><td class="col-name">TIPO_EMPAQUE</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Nombre de la presentación comercial (Paquete, Caja, Frasco).</td></tr>
+              <tr><td class="col-name">CANTIDAD</td><td class="col-type">NUMBER(12,2)</td><td><span class="badge badge-req">No</span></td><td>-</td><td><strong>Cantidad total en unidades físicas acreditadas/debitadas en bodega (ej. 150 unidades).</strong></td></tr>
+              <tr><td class="col-name">COSTO_UNITARIO</td><td class="col-type">NUMBER(12,2)</td><td><span class="badge badge-req">No</span></td><td>0</td><td>Costo por unidad física (si maneja precios).</td></tr>
+              <tr><td class="col-name">COSTO_TOTAL</td><td class="col-type">NUMBER(12,2)</td><td><span class="badge badge-req">No</span></td><td>0</td><td>Valor total de la línea (CANTIDAD * COSTO_UNITARIO).</td></tr>
+              <tr><td class="col-name">SALDO_ANTERIOR</td><td class="col-type">NUMBER(12,2)</td><td><span class="badge badge-req">No</span></td><td>0</td><td>Existencia en unidades físicas en bodega antes de aplicar la transacción.</td></tr>
+              <tr><td class="col-name">SALDO_POSTERIOR</td><td class="col-type">NUMBER(12,2)</td><td><span class="badge badge-req">No</span></td><td>0</td><td>Existencia resultante en unidades físicas tras la transacción.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de auditoría.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SMY_TRASLADOS_SEDES -->
+      <div class="card table-block" data-table="SMY_TRASLADOS_SEDES">
+        <h4>Tabla: SMY_TRASLADOS_SEDES</h4>
+        <p>Remisiones formales de despacho y recepción de insumos entre sedes asistenciales de la organización.</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_TRASLADOS_SEDES</td><td>Clave primaria del traslado.</td></tr>
+              <tr><td class="col-name">CODIGO_TRASLADO</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Código de guía de remisión (ej. TRS-2026-0001).</td></tr>
+              <tr><td class="col-name">ID_CENTRO_ORIGEN</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CENTROS(ID). Sede emisora que despacha.</td></tr>
+              <tr><td class="col-name">ID_CENTRO_DESTINO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CENTROS(ID). Sede receptora.</td></tr>
+              <tr><td class="col-name">FECHA_ENVIO</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha y hora de salida de la carga.</td></tr>
+              <tr><td class="col-name">FECHA_RECEPCION</td><td class="col-type">DATE</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fecha y hora de llegada y verificación física en destino.</td></tr>
+              <tr><td class="col-name">ESTADO_TRASLADO</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-req">No</span></td><td>'EN_TRANSITO'</td><td>EN_TRANSITO, RECIBIDO_CONFORME, RECIBIDO_CON_NOVEDAD, CANCELADO.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_DESPACHA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID). Responsable de salida.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_RECIBE</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID). Responsable de recepción en destino.</td></tr>
+              <tr><td class="col-name">NOTAS_DESPACHO</td><td class="col-type">VARCHAR2(400)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Observaciones de embalaje, conductor o vehículo.</td></tr>
+              <tr><td class="col-name">NOTAS_RECEPCION</td><td class="col-type">VARCHAR2(400)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Verificación de precintos o novedades en destino.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de registro.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID).</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <!-- SMY_TRASLADOS_SEDES_DETALLE -->
+      <div class="card table-block" data-table="SMY_TRASLADOS_SEDES_DETALLE">
+        <h4>Tabla: SMY_TRASLADOS_SEDES_DETALLE</h4>
+        <p>Líneas de insumos y cantidades individuales enviadas y recibidas en un traslado inter-sedes.</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_TRAS_SEDES_DET</td><td>Clave primaria del renglón de remisión.</td></tr>
+              <tr><td class="col-name">ID_TRASLADO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_TRASLADOS_SEDES(ID). Guía de remisión cabecera.</td></tr>
+              <tr><td class="col-name">ID_ARTICULO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_ARTICULOS_CATALOGO(ID).</td></tr>
+              <tr><td class="col-name">NUMERO_LOTE</td><td class="col-type">VARCHAR2(50)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Lote despachado.</td></tr>
+              <tr><td class="col-name">FECHA_VENCIMIENTO</td><td class="col-type">DATE</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fecha de caducidad.</td></tr>
+              <tr><td class="col-name">CANTIDAD_ENVIADA</td><td class="col-type">NUMBER(12,2)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Unidades físicas despachadas desde el origen.</td></tr>
+              <tr><td class="col-name">CANTIDAD_RECIBIDA</td><td class="col-type">NUMBER(12,2)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Unidades físicas efectivas verificadas al recibir en destino.</td></tr>
+              <tr><td class="col-name">ESTADO_ITEM</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-req">No</span></td><td>'EN_TRANSITO'</td><td>EN_TRANSITO, RECIBIDO_OK, RECIBIDO_DIFERENCIA, AVERIADO.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de auditoría.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
       <!-- 4.10 CONSENTIMIENTOS -->
       <h3 id="mod-consentimientos">4.10 Módulo de Consentimientos Informados y Firmas</h3>
 
@@ -3022,7 +3234,17 @@ const initialNodesData = [
   /* Módulo de Dotación y Reposición a Residentes */
   { id: 43, label: "SMY_DOTACION_CATALOGO", group: "dotacion", shape: "box", color: { background: "#0d9488", border: "#0f766e" }, font: { color: "#fff", face: "IBM Plex Mono", size: 13, bold: true } },
   { id: 44, label: "SMY_DOTACION_RESIDENTES", group: "dotacion", shape: "box", color: { background: "#0891b2", border: "#0e7490" }, font: { color: "#fff", face: "IBM Plex Mono", size: 14, bold: true } },
-  { id: 45, label: "SMY_DOTACION_HISTORIAL", group: "dotacion", shape: "box", color: { background: "#14b8a6", border: "#0d9488" }, font: { color: "#fff", face: "IBM Plex Mono", size: 13 } }
+  { id: 45, label: "SMY_DOTACION_HISTORIAL", group: "dotacion", shape: "box", color: { background: "#14b8a6", border: "#0d9488" }, font: { color: "#fff", face: "IBM Plex Mono", size: 13 } },
+
+  /* Módulo de Inventario, Bodegas y Kardex Multisede */
+  { id: 46, label: "SMY_CATEGORIAS_ARTICULOS", group: "inventario", shape: "box", color: { background: "#059669", border: "#047857" }, font: { color: "#fff", face: "IBM Plex Mono", size: 13 } },
+  { id: 47, label: "SMY_ARTICULOS_CATALOGO", group: "inventario", shape: "box", color: { background: "#10b981", border: "#059669" }, font: { color: "#fff", face: "IBM Plex Mono", size: 15, bold: true } },
+  { id: 48, label: "SMY_BODEGAS_SEDE", group: "inventario", shape: "box", color: { background: "#f59e0b", border: "#d97706" }, font: { color: "#fff", face: "IBM Plex Mono", size: 14, bold: true } },
+  { id: 49, label: "SMY_INVENTARIO_STOCK_SEDE", group: "inventario", shape: "box", color: { background: "#10b981", border: "#047857" }, font: { color: "#fff", face: "IBM Plex Mono", size: 14, bold: true } },
+  { id: 50, label: "SMY_MOVIMIENTOS_INVENTARIO", group: "inventario", shape: "box", color: { background: "#6366f1", border: "#4f46e5" }, font: { color: "#fff", face: "IBM Plex Mono", size: 14, bold: true } },
+  { id: 51, label: "SMY_MOVIMIENTOS_INV_DETALLE", group: "inventario", shape: "box", color: { background: "#818cf8", border: "#6366f1" }, font: { color: "#000", face: "IBM Plex Mono", size: 13 } },
+  { id: 52, label: "SMY_TRASLADOS_SEDES", group: "inventario", shape: "box", color: { background: "#d97706", border: "#b45309" }, font: { color: "#fff", face: "IBM Plex Mono", size: 14, bold: true } },
+  { id: 53, label: "SMY_TRASLADOS_SEDES_DETALLE", group: "inventario", shape: "box", color: { background: "#f59e0b", border: "#d97706" }, font: { color: "#fff", face: "IBM Plex Mono", size: 13 } }
 ];
 
 const initialEdgesData = [
@@ -3093,7 +3315,27 @@ const initialEdgesData = [
   { from: 43, to: 44, label: "ID_ELEMENTO_CAT", arrows: "to", color: { color: "#0891b2" } },
   { from: 2, to: 44, label: "ID_USUARIO_ENTREGA", arrows: "to", dashes: true, color: { color: "#2c7a6b" } },
   { from: 44, to: 45, label: "ID_DOTACION_RES", arrows: "to", color: { color: "#14b8a6" } },
-  { from: 2, to: 45, label: "ID_USUARIO_REG", arrows: "to", dashes: true, color: { color: "#2c7a6b" } }
+  { from: 2, to: 45, label: "ID_USUARIO_REG", arrows: "to", dashes: true, color: { color: "#2c7a6b" } },
+
+  /* Relaciones Módulo Inventario */
+  { from: 39, to: 46, label: "ID_ORGANIZACION", arrows: "to", color: { color: "#059669" } },
+  { from: 39, to: 47, label: "ID_ORGANIZACION", arrows: "to", color: { color: "#059669" } },
+  { from: 46, to: 47, label: "ID_CATEGORIA", arrows: "to", color: { color: "#10b981" } },
+  { from: 36, to: 48, label: "ID_CENTRO", arrows: "to", color: { color: "#f59e0b" } },
+  { from: 36, to: 49, label: "ID_CENTRO", arrows: "to", color: { color: "#10b981" } },
+  { from: 48, to: 49, label: "ID_BODEGA", arrows: "to", color: { color: "#f59e0b" } },
+  { from: 47, to: 49, label: "ID_ARTICULO", arrows: "to", color: { color: "#10b981" } },
+  { from: 36, to: 50, label: "ID_CENTRO", arrows: "to", color: { color: "#6366f1" } },
+  { from: 2, to: 50, label: "ID_USUARIO_REGISTRA", arrows: "to", color: { color: "#2c7a6b" } },
+  { from: 7, to: 50, label: "ID_RESIDENTE", arrows: "to", dashes: true, color: { color: "#b3803f" } },
+  { from: 50, to: 51, label: "ID_MOVIMIENTO", arrows: "to", color: { color: "#6366f1" } },
+  { from: 48, to: 51, label: "ID_BODEGA", arrows: "to", color: { color: "#f59e0b" } },
+  { from: 47, to: 51, label: "ID_ARTICULO", arrows: "to", color: { color: "#10b981" } },
+  { from: 36, to: 52, label: "ID_CENTRO_ORIGEN", arrows: "to", color: { color: "#d97706" } },
+  { from: 36, to: 52, label: "ID_CENTRO_DESTINO", arrows: "to", color: { color: "#d97706" } },
+  { from: 2, to: 52, label: "ID_USUARIO_DESPACHA", arrows: "to", color: { color: "#2c7a6b" } },
+  { from: 52, to: 53, label: "ID_TRASLADO", arrows: "to", color: { color: "#d97706" } },
+  { from: 47, to: 53, label: "ID_ARTICULO", arrows: "to", color: { color: "#10b981" } }
 ];
 
 function getCustomPositions() {
@@ -3302,6 +3544,7 @@ function initVisNetwork(layoutType, edgeType) {
 
 const DIAGRAM_MODULE_GROUPS = [
   { id: 'todas', label: 'Todas' },
+  { id: 'inventario', label: '📦 Inventario (8)' },
   { id: 'dotacion', label: '🎁 Dotación (3)' },
   { id: 'clinico', label: 'Clínico' },
   { id: 'seguridad', label: 'Seguridad' },
@@ -3316,6 +3559,8 @@ const DIAGRAM_MODULE_GROUPS = [
 
 function getGroupBadgeStyle(group) {
   switch (group) {
+    case 'inventario':
+      return { bg: '#d1fae5', color: '#047857', border: '#a7f3d0' };
     case 'dotacion':
       return { bg: '#ccfbf1', color: '#0f766e', border: '#99f6e4' };
     case 'clinico':

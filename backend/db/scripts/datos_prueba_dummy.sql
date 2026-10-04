@@ -92,26 +92,35 @@ MERGE INTO SMY_ORGANIZACIONES dest
 USING (
     SELECT 1 AS ID, 'ORG-SAMANYA' AS CODIGO_ORGANIZACION, 'Samanya Wellness Care S.A.S.' AS RAZON_SOCIAL,
            'Samanya Senior Living' AS NOMBRE_COMERCIAL, '901.452.883-1' AS NUMERO_IDENTIFICACION_TRIB,
-           1 AS ID_TIPO_IDENTIFICACION, 'contacto@samanya.com' AS EMAIL_CORPORATIVO, '+57 310 445 5667' AS TELEFONO_CONTACTO, 1 AS ID_ESTADO_ORGANIZACION FROM DUAL
+           1 AS ID_TIPO_IDENTIFICACION, 'contacto@samanya.com' AS EMAIL_CORPORATIVO, '+57 310 445 5667' AS TELEFONO_CONTACTO, 1 AS ID_ESTADO_ORGANIZACION,
+           'S' AS MANEJA_INVENTARIO, 'S' AS MANEJA_COSTOS_INVENTARIO FROM DUAL
     UNION ALL
-    SELECT 2, 'ORG-VITALIA', 'Vitalia Senior Care S.A.S.', 'Vitalia Hogares', '900.871.220-4', 1, 'info@vitalia.com', '+57 320 889 1234', 1 FROM DUAL
+    SELECT 2, 'ORG-VITALIA', 'Vitalia Senior Care S.A.S.', 'Vitalia Hogares', '900.871.220-4', 1, 'info@vitalia.com', '+57 320 889 1234', 1,
+           'S', 'S' FROM DUAL
 ) src ON (dest.ID = src.ID)
+WHEN MATCHED THEN
+UPDATE SET dest.MANEJA_INVENTARIO = src.MANEJA_INVENTARIO, dest.MANEJA_COSTOS_INVENTARIO = src.MANEJA_COSTOS_INVENTARIO
 WHEN NOT MATCHED THEN
-INSERT (ID, CODIGO_ORGANIZACION, RAZON_SOCIAL, NOMBRE_COMERCIAL, NUMERO_IDENTIFICACION_TRIB, ID_TIPO_IDENTIFICACION, EMAIL_CORPORATIVO, TELEFONO_CONTACTO, ID_ESTADO_ORGANIZACION)
-VALUES (src.ID, src.CODIGO_ORGANIZACION, src.RAZON_SOCIAL, src.NOMBRE_COMERCIAL, src.NUMERO_IDENTIFICACION_TRIB, src.ID_TIPO_IDENTIFICACION, src.EMAIL_CORPORATIVO, src.TELEFONO_CONTACTO, src.ID_ESTADO_ORGANIZACION);
+INSERT (ID, CODIGO_ORGANIZACION, RAZON_SOCIAL, NOMBRE_COMERCIAL, NUMERO_IDENTIFICACION_TRIB, ID_TIPO_IDENTIFICACION, EMAIL_CORPORATIVO, TELEFONO_CONTACTO, ID_ESTADO_ORGANIZACION, MANEJA_INVENTARIO, MANEJA_COSTOS_INVENTARIO)
+VALUES (src.ID, src.CODIGO_ORGANIZACION, src.RAZON_SOCIAL, src.NOMBRE_COMERCIAL, src.NUMERO_IDENTIFICACION_TRIB, src.ID_TIPO_IDENTIFICACION, src.EMAIL_CORPORATIVO, src.TELEFONO_CONTACTO, src.ID_ESTADO_ORGANIZACION, src.MANEJA_INVENTARIO, src.MANEJA_COSTOS_INVENTARIO);
 
 MERGE INTO SMY_CENTROS dest
 USING (
     SELECT 1 AS ID, 1 AS ID_ORGANIZACION, 'SEDE-CENTRAL' AS CODIGO_CENTRO, 'Sede Central Bogotá' AS NOMBRE_CENTRO,
-           'sede_central_bogota' AS SLUG_DIRECTORIO, 'Bogotá D.C.' AS CIUDAD, 'Calle 127 # 19-45, Usaquén' AS DIRECCION, 60 AS CAPACIDAD_RESIDENTES FROM DUAL
+           'sede_central_bogota' AS SLUG_DIRECTORIO, 'Bogotá D.C.' AS CIUDAD, 'Calle 127 # 19-45, Usaquén' AS DIRECCION, 60 AS CAPACIDAD_RESIDENTES,
+           'S' AS MANEJA_INVENTARIO, 'S' AS MANEJA_COSTOS_INVENTARIO FROM DUAL
     UNION ALL
-    SELECT 2, 1, 'SEDE-NORTE', 'Sede Campestre La Calera', 'sede_campestre_calera', 'La Calera', 'Km 4 Vía La Calera', 45 FROM DUAL
+    SELECT 2, 1, 'SEDE-NORTE', 'Sede Campestre La Calera', 'sede_campestre_calera', 'La Calera', 'Km 4 Vía La Calera', 45,
+           'S', 'S' FROM DUAL
     UNION ALL
-    SELECT 3, 2, 'SEDE-VITALIA-MEDELLIN', 'Sede Poblado Medellín', 'sede_poblado_medellin', 'Medellín', 'Carrera 43A # 1-50, El Poblado', 50 FROM DUAL
+    SELECT 3, 2, 'SEDE-VITALIA-MEDELLIN', 'Sede Poblado Medellín', 'sede_poblado_medellin', 'Medellín', 'Carrera 43A # 1-50, El Poblado', 50,
+           'S', 'N' FROM DUAL
 ) src ON (dest.ID = src.ID)
+WHEN MATCHED THEN
+UPDATE SET dest.MANEJA_INVENTARIO = src.MANEJA_INVENTARIO, dest.MANEJA_COSTOS_INVENTARIO = src.MANEJA_COSTOS_INVENTARIO
 WHEN NOT MATCHED THEN
-INSERT (ID, ID_ORGANIZACION, CODIGO_CENTRO, NOMBRE_CENTRO, SLUG_DIRECTORIO, CIUDAD, DIRECCION, CAPACIDAD_RESIDENTES)
-VALUES (src.ID, src.ID_ORGANIZACION, src.CODIGO_CENTRO, src.NOMBRE_CENTRO, src.SLUG_DIRECTORIO, src.CIUDAD, src.DIRECCION, src.CAPACIDAD_RESIDENTES);
+INSERT (ID, ID_ORGANIZACION, CODIGO_CENTRO, NOMBRE_CENTRO, SLUG_DIRECTORIO, CIUDAD, DIRECCION, CAPACIDAD_RESIDENTES, MANEJA_INVENTARIO, MANEJA_COSTOS_INVENTARIO)
+VALUES (src.ID, src.ID_ORGANIZACION, src.CODIGO_CENTRO, src.NOMBRE_CENTRO, src.SLUG_DIRECTORIO, src.CIUDAD, src.DIRECCION, src.CAPACIDAD_RESIDENTES, src.MANEJA_INVENTARIO, src.MANEJA_COSTOS_INVENTARIO);
 
 COMMIT;
 
@@ -2254,6 +2263,160 @@ VALUES (src.ID, src.ID_DOTACION_RESIDENTE, src.FECHA_CAMBIO, src.MOTIVO, src.CON
 COMMIT;
 
 -- =============================================================================
+-- 18.4 MÓDULO DE INVENTARIO Y ALMACÉN MULTISEDE (DATOS REALISTAS)
+--      Catálogo de artículos con presentación de empaque comercial y conversión
+--      a unidades físicas, existencias por bodega, kardex y traslados.
+-- =============================================================================
+PROMPT 18.4 Insertando Datos de Prueba para Inventarios y Almacenes...
+
+-- Categorías de Artículos
+MERGE INTO SMY_CATEGORIAS_ARTICULOS dest
+USING (
+    SELECT 1 AS ID, 1 AS ID_ORGANIZACION, 'INS_MED' AS CODIGO_CATEGORIA, 'Insumos Médicos y Asistenciales' AS NOMBRE_CATEGORIA, 'Material fungible, apósitos, sondas y jeringas' AS DESCRIPCION, '#10B981' AS COLOR_HEX, 'Activo' AS ESTADO FROM DUAL
+    UNION ALL
+    SELECT 2, 1, 'FARMACIA', 'Farmacia y Medicación Stock', 'Medicamentos de botiquín, ampollas y sueros', '#3B82F6', 'Activo' FROM DUAL
+    UNION ALL
+    SELECT 3, 1, 'ASEO_PERS', 'Aseo y Cuidado Personal', 'Pañales de adulto, toallitas húmedas y protectores cutáneos', '#8B5CF6', 'Activo' FROM DUAL
+    UNION ALL
+    SELECT 4, 1, 'LENCERIA', 'Lencería y Ropa de Cama', 'Sábanas hospitalarias, almohadas y cobijas térmicas', '#F59E0B', 'Activo' FROM DUAL
+    UNION ALL
+    SELECT 5, 1, 'NUTRICION', 'Nutrición y Alimentos Despensa', 'Suplementos nutricionales orales y espesantes', '#EC4899', 'Activo' FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN NOT MATCHED THEN
+INSERT (ID, ID_ORGANIZACION, CODIGO_CATEGORIA, NOMBRE_CATEGORIA, DESCRIPCION, COLOR_HEX, ESTADO)
+VALUES (src.ID, src.ID_ORGANIZACION, src.CODIGO_CATEGORIA, src.NOMBRE_CATEGORIA, src.DESCRIPCION, src.COLOR_HEX, src.ESTADO);
+
+-- Catálogo Maestro de Artículos (Con empaques comerciales y factores de conversión)
+MERGE INTO SMY_ARTICULOS_CATALOGO dest
+USING (
+    SELECT 1 AS ID, 1 AS ID_ORGANIZACION, 3 AS ID_CATEGORIA, 'INS-PAN-01' AS CODIGO_ARTICULO,
+           'Pañal Adulto Anatómico Talla G' AS NOMBRE_ARTICULO, 'Pañales para incontinencia severa con barreras antiescurrimiento' AS DESCRIPCION,
+           'UNIDAD' AS UNIDAD_MEDIDA, 'Paquete' AS TIPO_EMPAQUE, 30 AS UNIDADES_POR_EMPAQUE,
+           'N' AS REQUIERE_LOTE_VENCIMIENTO, 'S' AS ES_DESCONTABLE_POR_RESIDENTE, 2800.00 AS COSTO_ESTANDAR,
+           20 AS STOCK_MINIMO_SEDE, 200 AS STOCK_MAXIMO_SEDE, 'Activo' AS ESTADO FROM DUAL
+    UNION ALL
+    SELECT 2, 1, 1, 'INS-GLU-02', 'Tiras Reactivas Glucómetro Accu-Chek', 'Tiras para medición capilar de glucosa en sangre',
+           'UNIDAD', 'Caja', 50, 'S', 'S', 1600.00, 15, 150, 'Activo' FROM DUAL
+    UNION ALL
+    SELECT 3, 1, 2, 'MED-SS-03', 'Solución Salina 0.9% Frasco 500ml', 'Solución isotónica estéril para lavado y perfusión',
+           'UNIDAD', 'Frasco', 1, 'S', 'N', 4200.00, 10, 80, 'Activo' FROM DUAL
+    UNION ALL
+    SELECT 4, 1, 1, 'INS-GUA-04', 'Guantes de Nitrilo Talla M', 'Guantes desechables de examen libres de látex y talco',
+           'UNIDAD', 'Caja', 100, 'N', 'N', 280.00, 50, 400, 'Activo' FROM DUAL
+    UNION ALL
+    SELECT 5, 1, 2, 'FAR-CRM-05', 'Crema Antipañalitis con Óxido de Zinc 40%', 'Crema protectora tópica para prevención de UPP',
+           'UNIDAD', 'Tubo', 1, 'S', 'S', 18500.00, 5, 30, 'Activo' FROM DUAL
+    UNION ALL
+    SELECT 6, 1, 3, 'ASE-TOA-06', 'Toallitas Húmedas para Adulto con Aloe Vera', 'Toallas hipoalergénicas para higiene en cama',
+           'UNIDAD', 'Paquete', 80, 'N', 'S', 120.00, 30, 240, 'Activo' FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN NOT MATCHED THEN
+INSERT (ID, ID_ORGANIZACION, ID_CATEGORIA, CODIGO_ARTICULO, NOMBRE_ARTICULO, DESCRIPCION, UNIDAD_MEDIDA, TIPO_EMPAQUE, UNIDADES_POR_EMPAQUE, REQUIERE_LOTE_VENCIMIENTO, ES_DESCONTABLE_POR_RESIDENTE, COSTO_ESTANDAR, STOCK_MINIMO_SEDE, STOCK_MAXIMO_SEDE, ESTADO)
+VALUES (src.ID, src.ID_ORGANIZACION, src.ID_CATEGORIA, src.CODIGO_ARTICULO, src.NOMBRE_ARTICULO, src.DESCRIPCION, src.UNIDAD_MEDIDA, src.TIPO_EMPAQUE, src.UNIDADES_POR_EMPAQUE, src.REQUIERE_LOTE_VENCIMIENTO, src.ES_DESCONTABLE_POR_RESIDENTE, src.COSTO_ESTANDAR, src.STOCK_MINIMO_SEDE, src.STOCK_MAXIMO_SEDE, src.ESTADO);
+
+-- Bodegas Físicas
+MERGE INTO SMY_BODEGAS_SEDE dest
+USING (
+    SELECT 1 AS ID, 1 AS ID_CENTRO, 'BOD-PRIN-CEN' AS CODIGO_BODEGA, 'Bodega Principal Sede Central' AS NOMBRE_BODEGA, 'Almacén general de insumos asistenciales' AS DESCRIPCION, 'S' AS ES_BODEGA_PRINCIPAL, 'Activo' AS ESTADO FROM DUAL
+    UNION ALL
+    SELECT 2, 1, 'FARM-BOT-CEN', 'Farmacia y Botiquín Central', 'Almacén de medicación controlada y botiquín de urgencias', 'N', 'Activo' FROM DUAL
+    UNION ALL
+    SELECT 3, 2, 'BOD-PRIN-CAM', 'Bodega General Sede Campestre', 'Almacén principal sede La Calera', 'S', 'Activo' FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN NOT MATCHED THEN
+INSERT (ID, ID_CENTRO, CODIGO_BODEGA, NOMBRE_BODEGA, DESCRIPCION, ES_BODEGA_PRINCIPAL, ESTADO)
+VALUES (src.ID, src.ID_CENTRO, src.CODIGO_BODEGA, src.NOMBRE_BODEGA, src.DESCRIPCION, src.ES_BODEGA_PRINCIPAL, src.ESTADO);
+
+-- Existencias Físicas en Unidades (Stock Inicial por Bodega)
+MERGE INTO SMY_INVENTARIO_STOCK_SEDE dest
+USING (
+    -- Sede Central - Bodega Principal
+    SELECT 1 AS ID, 1 AS ID_CENTRO, 1 AS ID_BODEGA, 1 AS ID_ARTICULO, 'LOTE-PAN-2026A' AS NUMERO_LOTE, TO_DATE('2028-12-31', 'YYYY-MM-DD') AS FECHA_VENCIMIENTO, 180 AS CANTIDAD_DISPONIBLE, 0 AS CANTIDAD_RESERVADA, 30 AS STOCK_MINIMO, 300 AS STOCK_MAXIMO, 60 AS PUNTO_REORDEN, 'Estante A-1' AS UBICACION_ESTANTE, TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE)) AS FECHA_ULTIMO_MOVIMIENTO FROM DUAL
+    UNION ALL
+    SELECT 2, 1, 1, 2, 'LOT-GLU-9941', TO_DATE('2027-06-30', 'YYYY-MM-DD'), 100, 0, 20, 200, 40, 'Estante B-2', TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE)) FROM DUAL
+    UNION ALL
+    SELECT 3, 1, 1, 3, 'LOT-SS-4412', TO_DATE('2027-10-15', 'YYYY-MM-DD'), 45, 0, 10, 80, 20, 'Estante C-1', TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE)) FROM DUAL
+    UNION ALL
+    SELECT 4, 1, 1, 4, 'LOT-GUA-002', TO_DATE('2029-01-01', 'YYYY-MM-DD'), 250, 0, 50, 500, 100, 'Estante A-3', TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE)) FROM DUAL
+    UNION ALL
+    SELECT 5, 1, 1, 5, 'LOT-CRM-551', TO_DATE('2027-04-30', 'YYYY-MM-DD'), 18, 0, 5, 40, 10, 'Estante B-1', TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE)) FROM DUAL
+    -- Sede Campestre - Bodega Principal
+    UNION ALL
+    SELECT 6, 2, 3, 1, 'LOTE-PAN-2026B', TO_DATE('2028-12-31', 'YYYY-MM-DD'), 90, 0, 20, 150, 40, 'Bodega 1', TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE)) FROM DUAL
+    UNION ALL
+    SELECT 7, 2, 3, 2, 'LOT-GLU-9941', TO_DATE('2027-06-30', 'YYYY-MM-DD'), 50, 0, 15, 100, 30, 'Bodega 1', TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE)) FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN NOT MATCHED THEN
+INSERT (ID, ID_CENTRO, ID_BODEGA, ID_ARTICULO, NUMERO_LOTE, FECHA_VENCIMIENTO, CANTIDAD_DISPONIBLE, CANTIDAD_RESERVADA, STOCK_MINIMO, STOCK_MAXIMO, PUNTO_REORDEN, UBICACION_ESTANTE, FECHA_ULTIMO_MOVIMIENTO)
+VALUES (src.ID, src.ID_CENTRO, src.ID_BODEGA, src.ID_ARTICULO, src.NUMERO_LOTE, src.FECHA_VENCIMIENTO, src.CANTIDAD_DISPONIBLE, src.CANTIDAD_RESERVADA, src.STOCK_MINIMO, src.STOCK_MAXIMO, src.PUNTO_REORDEN, src.UBICACION_ESTANTE, src.FECHA_ULTIMO_MOVIMIENTO);
+
+-- Movimientos de Inventario (Kardex)
+-- 1. Recepción de Donación Familiar: 5 paquetes de 30 pañales = 150 unidades físicas para Residente 1 (Álvaro Delgado)
+MERGE INTO SMY_MOVIMIENTOS_INVENTARIO dest
+USING (
+    SELECT 1 AS ID, 1 AS ID_CENTRO, 'INV-DON-2026-0001' AS NUMERO_DOCUMENTO, 'ENTRADA_DONACION' AS TIPO_MOVIMIENTO,
+           TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE)) - 2 AS FECHA_MOVIMIENTO,
+           1 AS ID_USUARIO_REGISTRA, 1 AS ID_RESIDENTE, NULL AS ID_PROVEEDOR,
+           'Entrega de insumos por familiar acudiente (Lucía Delgado). Se recibieron 5 paquetes de 30 pañales adultos.' AS OBSERVACIONES,
+           'APLICADO' AS ESTADO FROM DUAL
+    UNION ALL
+    SELECT 2, 1, 'INV-SAL-2026-0001', 'SALIDA_ENTREGA_RESIDENTE',
+           TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE)) - 1,
+           2, 1, NULL,
+           'Dispensación asistencial de 20 pañales para uso en habitación de Don Álvaro Delgado.', 'APLICADO' FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN NOT MATCHED THEN
+INSERT (ID, ID_CENTRO, NUMERO_DOCUMENTO, TIPO_MOVIMIENTO, FECHA_MOVIMIENTO, ID_USUARIO_REGISTRA, ID_RESIDENTE, ID_PROVEEDOR, OBSERVACIONES, ESTADO)
+VALUES (src.ID, src.ID_CENTRO, src.NUMERO_DOCUMENTO, src.TIPO_MOVIMIENTO, src.FECHA_MOVIMIENTO, src.ID_USUARIO_REGISTRA, src.ID_RESIDENTE, src.ID_PROVEEDOR, src.OBSERVACIONES, src.ESTADO);
+
+-- Detalle de Movimientos de Inventario
+MERGE INTO SMY_MOVIMIENTOS_INV_DETALLE dest
+USING (
+    -- Entrada de 5 paquetes x 30 unidades = 150 unidades físicas
+    SELECT 1 AS ID, 1 AS ID_MOVIMIENTO, 1 AS ID_BODEGA, 1 AS ID_ARTICULO,
+           'LOTE-PAN-2026A' AS NUMERO_LOTE, TO_DATE('2028-12-31', 'YYYY-MM-DD') AS FECHA_VENCIMIENTO,
+           5 AS CANTIDAD_EMPAQUES, 30 AS UNIDADES_POR_EMPAQUE, 'Paquete' AS TIPO_EMPAQUE,
+           150 AS CANTIDAD, 2800.00 AS COSTO_UNITARIO, 420000.00 AS COSTO_TOTAL,
+           50 AS SALDO_ANTERIOR, 200 AS SALDO_POSTERIOR FROM DUAL
+    UNION ALL
+    -- Salida de 20 unidades físicas
+    SELECT 2, 2, 1, 1,
+           'LOTE-PAN-2026A', TO_DATE('2028-12-31', 'YYYY-MM-DD'),
+           NULL, 1, 'Unidad',
+           20, 2800.00, 56000.00,
+           200, 180 FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN NOT MATCHED THEN
+INSERT (ID, ID_MOVIMIENTO, ID_BODEGA, ID_ARTICULO, NUMERO_LOTE, FECHA_VENCIMIENTO, CANTIDAD_EMPAQUES, UNIDADES_POR_EMPAQUE, TIPO_EMPAQUE, CANTIDAD, COSTO_UNITARIO, COSTO_TOTAL, SALDO_ANTERIOR, SALDO_POSTERIOR)
+VALUES (src.ID, src.ID_MOVIMIENTO, src.ID_BODEGA, src.ID_ARTICULO, src.NUMERO_LOTE, src.FECHA_VENCIMIENTO, src.CANTIDAD_EMPAQUES, src.UNIDADES_POR_EMPAQUE, src.TIPO_EMPAQUE, src.CANTIDAD, src.COSTO_UNITARIO, src.COSTO_TOTAL, src.SALDO_ANTERIOR, src.SALDO_POSTERIOR);
+
+-- Traslados Inter-Sedes de Prueba
+MERGE INTO SMY_TRASLADOS_SEDES dest
+USING (
+    SELECT 1 AS ID, 'TRS-2026-0001' AS CODIGO_TRASLADO, 1 AS ID_CENTRO_ORIGEN, 2 AS ID_CENTRO_DESTINO,
+           TRUNC(CAST(SYSTIMESTAMP AT TIME ZONE 'America/Bogota' AS DATE)) - 1 AS FECHA_ENVIO,
+           NULL AS FECHA_RECEPCION, 'EN_TRANSITO' AS ESTADO_TRASLADO,
+           1 AS ID_USUARIO_DESPACHA, NULL AS ID_USUARIO_RECIBE,
+           'Despacho de reposición semanal hacia Sede Campestre La Calera en vehículo institucional.' AS NOTAS_DESPACHO,
+           NULL AS NOTAS_RECEPCION FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN NOT MATCHED THEN
+INSERT (ID, CODIGO_TRASLADO, ID_CENTRO_ORIGEN, ID_CENTRO_DESTINO, FECHA_ENVIO, FECHA_RECEPCION, ESTADO_TRASLADO, ID_USUARIO_DESPACHA, ID_USUARIO_RECIBE, NOTAS_DESPACHO, NOTAS_RECEPCION)
+VALUES (src.ID, src.CODIGO_TRASLADO, src.ID_CENTRO_ORIGEN, src.ID_CENTRO_DESTINO, src.FECHA_ENVIO, src.FECHA_RECEPCION, src.ESTADO_TRASLADO, src.ID_USUARIO_DESPACHA, src.ID_USUARIO_RECIBE, src.NOTAS_DESPACHO, src.NOTAS_RECEPCION);
+
+MERGE INTO SMY_TRASLADOS_SEDES_DETALLE dest
+USING (
+    SELECT 1 AS ID, 1 AS ID_TRASLADO, 1 AS ID_ARTICULO, 'LOTE-PAN-2026A' AS NUMERO_LOTE, TO_DATE('2028-12-31', 'YYYY-MM-DD') AS FECHA_VENCIMIENTO, 30 AS CANTIDAD_ENVIADA, NULL AS CANTIDAD_RECIBIDA, 'EN_TRANSITO' AS ESTADO_ITEM FROM DUAL
+    UNION ALL
+    SELECT 2, 1, 2, 'LOT-GLU-9941', TO_DATE('2027-06-30', 'YYYY-MM-DD'), 50, NULL, 'EN_TRANSITO' FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN NOT MATCHED THEN
+INSERT (ID, ID_TRASLADO, ID_ARTICULO, NUMERO_LOTE, FECHA_VENCIMIENTO, CANTIDAD_ENVIADA, CANTIDAD_RECIBIDA, ESTADO_ITEM)
+VALUES (src.ID, src.ID_TRASLADO, src.ID_ARTICULO, src.NUMERO_LOTE, src.FECHA_VENCIMIENTO, src.CANTIDAD_ENVIADA, src.CANTIDAD_RECIBIDA, src.ESTADO_ITEM);
+
+COMMIT;
+
+-- =============================================================================
 -- 19. SINCRONIZACIÓN DE SECUENCIAS ORACLE (AUTO-INCREMENT)
 -- Garantiza que las secuencias queden posicionadas por encima del ID máximo
 -- insertado manualmente para que nuevos INSERTs automáticos desde la app no fallen.
@@ -2312,7 +2475,8 @@ PROMPT     - 14 Familiares / Acudientes creados con usuarios
 PROMPT     - 2 Residentes con 3 familiares cada uno vinculados
 PROMPT     - Turnos, Signos, Medicamentos, Bitácoras y Consentimientos activos
 PROMPT     - Dotación de ingreso: Catálogo configurado, entregas físicas y alertas de recambio
-PROMPT     - 33 Secuencias Oracle sincronizadas (incluye SEQ_SMY_ARCHIVOS)
+PROMPT     - Módulo de Inventario: Catálogo con empaque comercial, existencias físicas, donaciones de residentes y traslados
+PROMPT     - 41 Secuencias Oracle sincronizadas (incluye inventario y SEQ_SMY_ARCHIVOS)
 PROMPT     - 17 Parámetros del sistema y credenciales Google Drive configurados
 PROMPT     - Contraseña universal para todos los usuarios: Samanya2026*
 PROMPT ============================================================================
