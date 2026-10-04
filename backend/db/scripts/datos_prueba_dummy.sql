@@ -703,9 +703,20 @@ COMMIT;
 
 -- =============================================================================
 -- 2. EMPLEADOS DEL CENTRO GERIÁTRICO (SMY_EMPLEADOS)
--- Total: 4 Empleados asistenciales
+-- Total: 5 Empleados (1 Administrador General + 4 Asistenciales)
 -- =============================================================================
 PROMPT 2. Insertando Empleados (SMY_EMPLEADOS)...
+
+-- 2.0 Administrador General del Centro
+INSERT INTO SMY_EMPLEADOS (
+    ID, ID_CENTRO, ID_USUARIO, ID_TIPO_IDENTIFICACION, IDENTIFICACION, NOMBRES, APELLIDOS,
+    ID_CARGO_EMPLEADO, ID_AREA_EMPLEADO, UNIDAD_ASIGNADA, TELEFONO, EMAIL_CORP,
+    FECHA_CONTRATACION, ID_ESTADO_EMPLEADO
+) VALUES (
+    100, 1, 1, 1, '19452883', 'Orlando Arturo', 'Valverde',
+    NULL, NULL, 'Dirección General & Operaciones', '+57 310 123 4567', 'admin@samanya.com.co',
+    TO_DATE('2022-01-10', 'YYYY-MM-DD'), 1
+);
 
 INSERT INTO SMY_EMPLEADOS (
     ID, ID_CENTRO, ID_USUARIO, ID_TIPO_IDENTIFICACION, IDENTIFICACION, NOMBRES, APELLIDOS,

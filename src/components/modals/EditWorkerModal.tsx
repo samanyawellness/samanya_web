@@ -14,7 +14,8 @@ export const EditWorkerModal: React.FC = () => {
     setIsEditTrabajadorOpen,
     actualizarTrabajador,
     activeSede,
-    showToast
+    showToast,
+    currentUser
   } = useAdmin();
 
   const [formData, setFormData] = useState<Partial<TrabajadorEmpleado>>({});
@@ -24,6 +25,17 @@ export const EditWorkerModal: React.FC = () => {
 
   useEffect(() => {
     if (editingTrabajador) {
+      const esAdmin =
+        editingTrabajador.id === 1 ||
+        editingTrabajador.id === currentUser?.id ||
+        editingTrabajador.area === 'Administrativo' ||
+        (currentUser && editingTrabajador.email?.toLowerCase() === currentUser.email?.toLowerCase());
+
+      const avatarFinal =
+        esAdmin && currentUser?.avatarUrl
+          ? currentUser.avatarUrl
+          : editingTrabajador.avatarUrl;
+
       setFormData({
         nombres: editingTrabajador.nombres,
         apellidos: editingTrabajador.apellidos,
@@ -39,12 +51,12 @@ export const EditWorkerModal: React.FC = () => {
         arl: editingTrabajador.arl,
         turnoHabitual: editingTrabajador.turnoHabitual || 'Rotativo',
         estado: editingTrabajador.estado,
-        avatarUrl: editingTrabajador.avatarUrl
+        avatarUrl: avatarFinal
       });
-      setFotoPreview(editingTrabajador.avatarUrl);
+      setFotoPreview(avatarFinal);
       setSelectedFile(null);
     }
-  }, [editingTrabajador]);
+  }, [editingTrabajador, currentUser]);
 
   if (!isEditTrabajadorOpen || !editingTrabajador) return null;
 

@@ -1,7 +1,7 @@
 # Graph Report - SAMANYA_WEB  (2026-10-04)
 
 ## Corpus Check
-- 440 files · ~1,105,073 words
+- 440 files · ~1,106,384 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 13 file(s) not represented in the graph (top: .pkb 4, .pks 4, (none) 3)
 
@@ -11,7 +11,7 @@
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `f54c07eb`
+- Built from commit: `aacb6137`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 

@@ -371,7 +371,66 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [trabajadores, setTrabajadores] = useState<TrabajadorEmpleado[]>(() => {
     const saved = localStorage.getItem('samanya_admin_trabajadores');
-    return saved ? JSON.parse(saved) : [];
+    let lista: TrabajadorEmpleado[] = [];
+    if (saved) {
+      try {
+        const parsed = JSON.parse(saved);
+        if (Array.isArray(parsed) && parsed.length > 0) {
+          lista = parsed;
+        }
+      } catch {}
+    }
+    if (lista.length === 0) {
+      lista = [...SEED_TRABAJADORES];
+    }
+    // Asegurar que el Administrador siempre forme parte de la nómina con su foto real de perfil
+    let userAvatar = '/uploads/usuarios/usuario_1.jpg';
+    try {
+      const savedAuth = localStorage.getItem('samanya_auth_user');
+      if (savedAuth) {
+        const parsedAuth = JSON.parse(savedAuth);
+        if (parsedAuth?.avatarUrl) userAvatar = parsedAuth.avatarUrl;
+      }
+    } catch {}
+
+    const adminIndex = lista.findIndex(
+      (t) => t.id === 1 || t.area === 'Administrativo' || (t.email && t.email.toLowerCase().includes('admin'))
+    );
+
+    if (adminIndex === -1) {
+      const adminWorker = SEED_TRABAJADORES.find((t) => t.id === 1) || {
+        id: 1,
+        idCentro: 1,
+        tipoIdentificacion: 'CC',
+        identificacion: '1010123456',
+        nombres: 'Orlando Arturo',
+        apellidos: 'Valverde',
+        nombreCompleto: 'Orlando Arturo Valverde',
+        cargo: 'Administrador General del Centro',
+        area: 'Administrativo',
+        unidadAsignada: 'Dirección General & Operaciones',
+        telefono: '310 123 4567',
+        email: 'admin@samanya.com.co',
+        fechaContratacion: '2022-01-15',
+        tipoContrato: 'Término Indefinido',
+        eps: 'Sura EPS',
+        arl: 'Sura ARL',
+        estado: 'Activo',
+        avatarUrl: userAvatar,
+        turnoHabitual: 'Jornada Administrativa (08:00 - 17:00)'
+      };
+      lista = [adminWorker, ...lista];
+    } else {
+      // Si el administrador existente en caché local tiene una foto desactualizada o de prueba, sincronizarla
+      const currentAdmin = lista[adminIndex];
+      if (
+        !currentAdmin.avatarUrl ||
+        currentAdmin.avatarUrl.includes('photo-1534528741775-53994a69daeb')
+      ) {
+        lista[adminIndex] = { ...currentAdmin, avatarUrl: userAvatar };
+      }
+    }
+    return lista;
   });
 
   const [turnos, setTurnos] = useState<TurnoAsignado[]>(() => {
@@ -639,6 +698,38 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             avatarUrl: w.avatar_url
           };
         });
+
+        // Garantizar que el Administrador no sea removido al sincronizar con Oracle
+        const tieneAdmin = mapped.some(
+          (t) => t.id === 1 || t.area === 'Administrativo' || (currentUser && t.id === currentUser.id)
+        );
+        if (!tieneAdmin) {
+          const adminExistente = trabajadores.find(
+            (t) => t.id === 1 || t.area === 'Administrativo' || (currentUser && t.id === currentUser.id)
+          ) || {
+            id: currentUser?.id || 1,
+            idCentro: activeSede.id,
+            tipoIdentificacion: 'CC',
+            identificacion: '1010123456',
+            nombres: currentUser?.nombreCompleto?.split(' ')[0] || 'Orlando Arturo',
+            apellidos: currentUser?.nombreCompleto?.split(' ').slice(1).join(' ') || 'Valverde',
+            nombreCompleto: currentUser?.nombreCompleto || 'Orlando Arturo Valverde',
+            cargo: currentUser?.nombreRol || 'Administrador General del Centro',
+            area: 'Administrativo',
+            unidadAsignada: 'Dirección General & Operaciones',
+            telefono: currentUser?.telefono || '310 123 4567',
+            email: currentUser?.email || 'admin@samanya.com.co',
+            fechaContratacion: '2022-01-15',
+            tipoContrato: 'Término Indefinido',
+            eps: 'Sura EPS',
+            arl: 'Sura ARL',
+            estado: 'Activo',
+            avatarUrl: currentUser?.avatarUrl || '/uploads/usuarios/usuario_1.jpg',
+            turnoHabitual: 'Jornada Administrativa (08:00 - 17:00)'
+          };
+          mapped.unshift(adminExistente);
+        }
+
         setTrabajadores(mapped);
         localStorage.setItem('samanya_admin_trabajadores', JSON.stringify(mapped));
         if (!silencioso) {
@@ -928,6 +1019,79 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const isAuthenticated = !!currentUser && currentUser.rol === 'ADMIN';
 
+  // Mantener al Administrador en la lista de Talento Humano sincronizado con currentUser
+  useEffect(() => {
+    if (currentUser) {
+      setTrabajadores((prev) => {
+        const index = prev.findIndex(
+          (t) =>
+            t.id === currentUser.id ||
+            t.id === 1 ||
+            t.area === 'Administrativo' ||
+            (t.email && t.email.toLowerCase() === currentUser.email.toLowerCase())
+        );
+
+        if (index === -1) {
+          const parts = (currentUser.nombreCompleto || 'Orlando Arturo Valverde').trim().split(' ');
+          const nombres = parts.length > 1 ? parts.slice(0, Math.ceil(parts.length / 2)).join(' ') : parts[0];
+          const apellidos = parts.length > 1 ? parts.slice(Math.ceil(parts.length / 2)).join(' ') : '';
+          const nuevoAdmin: TrabajadorEmpleado = {
+            id: currentUser.id || 1,
+            idCentro: activeSedeId,
+            tipoIdentificacion: 'CC',
+            identificacion: '1010123456',
+            nombres,
+            apellidos,
+            nombreCompleto: currentUser.nombreCompleto || 'Orlando Arturo Valverde',
+            cargo: currentUser.nombreRol || 'Administrador General del Centro',
+            area: 'Administrativo',
+            unidadAsignada: 'Dirección General & Operaciones',
+            telefono: currentUser.telefono || '310 123 4567',
+            email: currentUser.email || 'admin@samanya.com.co',
+            fechaContratacion: '2022-01-15',
+            tipoContrato: 'Término Indefinido',
+            eps: 'Sura EPS',
+            arl: 'Sura ARL',
+            estado: 'Activo',
+            avatarUrl: currentUser.avatarUrl || '/uploads/usuarios/usuario_1.jpg',
+            turnoHabitual: 'Jornada Administrativa (08:00 - 17:00)'
+          };
+          return [nuevoAdmin, ...prev];
+        } else {
+          const t = prev[index];
+          const targetAvatar = currentUser.avatarUrl || t.avatarUrl || '/uploads/usuarios/usuario_1.jpg';
+          const diff =
+            t.nombreCompleto !== currentUser.nombreCompleto ||
+            t.email !== currentUser.email ||
+            (currentUser.telefono && t.telefono !== currentUser.telefono) ||
+            (currentUser.avatarUrl && t.avatarUrl !== currentUser.avatarUrl) ||
+            (t.avatarUrl && t.avatarUrl.includes('photo-1534528741775-53994a69daeb'));
+
+          if (diff) {
+            const updated = [...prev];
+            const parts = (currentUser.nombreCompleto || t.nombreCompleto).trim().split(' ');
+            const nombres = parts.length > 1 ? parts.slice(0, Math.ceil(parts.length / 2)).join(' ') : parts[0];
+            const apellidos = parts.length > 1 ? parts.slice(Math.ceil(parts.length / 2)).join(' ') : '';
+            updated[index] = {
+              ...t,
+              nombres,
+              apellidos,
+              nombreCompleto: currentUser.nombreCompleto || t.nombreCompleto,
+              email: currentUser.email || t.email,
+              telefono: currentUser.telefono || t.telefono,
+              avatarUrl: targetAvatar
+            };
+            try {
+              localStorage.setItem('samanya_admin_trabajadores', JSON.stringify(updated));
+            } catch {}
+            return updated;
+          }
+        }
+        return prev;
+      });
+    }
+  }, [currentUser, activeSedeId]);
+
   const login = async (usuario: string, password?: string): Promise<{ success: boolean; error?: string }> => {
     try {
       const resp = await adminApi.auth.login({ usuario, password });
@@ -1006,6 +1170,33 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         };
         setCurrentUser(updatedUser);
         localStorage.setItem('samanya_auth_user', JSON.stringify(updatedUser));
+
+        // Sincronizar de inmediato el registro en Talento Humano
+        setTrabajadores((prev) =>
+          prev.map((t) => {
+            if (
+              t.id === currentUser.id ||
+              t.id === 1 ||
+              t.area === 'Administrativo' ||
+              (t.email && t.email.toLowerCase() === currentUser.email.toLowerCase())
+            ) {
+              const parts = datos.nombreCompleto.trim().split(' ');
+              const nombres = parts.length > 1 ? parts.slice(0, Math.ceil(parts.length / 2)).join(' ') : parts[0];
+              const apellidos = parts.length > 1 ? parts.slice(Math.ceil(parts.length / 2)).join(' ') : '';
+              return {
+                ...t,
+                nombres,
+                apellidos,
+                nombreCompleto: datos.nombreCompleto,
+                email: datos.email,
+                telefono: datos.telefono || t.telefono,
+                avatarUrl: finalAvatar !== undefined ? finalAvatar : t.avatarUrl
+              };
+            }
+            return t;
+          })
+        );
+
         showToast('Perfil actualizado correctamente', 'success');
         return true;
       } else {
@@ -2468,6 +2659,34 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         })
       }))
     );
+
+    // Si el colaborador editado es el Administrador, sincronizar automáticamente su perfil y sesión
+    const esAdmin =
+      idTrabajador === 1 ||
+      (currentUser && idTrabajador === currentUser.id) ||
+      data.area === 'Administrativo' ||
+      (editingTrabajador && editingTrabajador.area === 'Administrativo');
+
+    if (esAdmin && currentUser) {
+      const nuevoNombreCompleto = updatedNombreCompleto || currentUser.nombreCompleto;
+      const userActualizado: AuthUser = {
+        ...currentUser,
+        nombreCompleto: nuevoNombreCompleto,
+        email: data.email || currentUser.email,
+        telefono: data.telefono || currentUser.telefono,
+        avatarUrl: data.avatarUrl !== undefined ? data.avatarUrl : currentUser.avatarUrl
+      };
+      setCurrentUser(userActualizado);
+      localStorage.setItem('samanya_auth_user', JSON.stringify(userActualizado));
+
+      adminApi.auth.actualizarPerfil({
+        idUsuario: currentUser.id,
+        nombreCompleto: nuevoNombreCompleto,
+        email: data.email || currentUser.email,
+        telefono: data.telefono || currentUser.telefono,
+        avatarUrl: data.avatarUrl !== undefined ? data.avatarUrl : currentUser.avatarUrl
+      }).catch(() => null);
+    }
 
     showToast('Información del colaborador actualizada exitosamente', 'success');
   };

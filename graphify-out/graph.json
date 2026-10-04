@@ -9029,7 +9029,7 @@
       "file_type": "code",
       "norm_label": "useadmin()",
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L3360"
+      "source_location": "L3579"
     },
     {
       "id": "src_utils_avatarutils_generaravatarinicialessvg",
@@ -36205,7 +36205,7 @@
       "file_type": "code",
       "norm_label": "seed_articulos_catalogo",
       "source_file": "src/data/seedData.ts",
-      "source_location": "L1059"
+      "source_location": "L1080"
     },
     {
       "id": "src_data_seeddata_seed_bodegas_sede",
@@ -36216,7 +36216,7 @@
       "file_type": "code",
       "norm_label": "seed_bodegas_sede",
       "source_file": "src/data/seedData.ts",
-      "source_location": "L1156"
+      "source_location": "L1177"
     },
     {
       "id": "src_data_seeddata_seed_catalogo_dotacion",
@@ -36227,7 +36227,7 @@
       "file_type": "code",
       "norm_label": "seed_catalogo_dotacion",
       "source_file": "src/data/seedData.ts",
-      "source_location": "L791"
+      "source_location": "L812"
     },
     {
       "id": "src_data_seeddata_seed_categorias_articulos",
@@ -36238,7 +36238,7 @@
       "file_type": "code",
       "norm_label": "seed_categorias_articulos",
       "source_file": "src/data/seedData.ts",
-      "source_location": "L1002"
+      "source_location": "L1023"
     },
     {
       "id": "src_data_seeddata_seed_dotaciones_residentes",
@@ -36249,7 +36249,7 @@
       "file_type": "code",
       "norm_label": "seed_dotaciones_residentes",
       "source_file": "src/data/seedData.ts",
-      "source_location": "L871"
+      "source_location": "L892"
     },
     {
       "id": "src_data_seeddata_seed_familiares",
@@ -36271,7 +36271,7 @@
       "file_type": "code",
       "norm_label": "seed_incidentes",
       "source_file": "src/data/seedData.ts",
-      "source_location": "L758"
+      "source_location": "L779"
     },
     {
       "id": "src_data_seeddata_seed_inventario_stock",
@@ -36282,7 +36282,7 @@
       "file_type": "code",
       "norm_label": "seed_inventario_stock",
       "source_file": "src/data/seedData.ts",
-      "source_location": "L1177"
+      "source_location": "L1198"
     },
     {
       "id": "src_data_seeddata_seed_movimientos_inventario",
@@ -36293,7 +36293,7 @@
       "file_type": "code",
       "norm_label": "seed_movimientos_inventario",
       "source_file": "src/data/seedData.ts",
-      "source_location": "L1380"
+      "source_location": "L1401"
     },
     {
       "id": "src_data_seeddata_seed_permisos",
@@ -36304,7 +36304,7 @@
       "file_type": "code",
       "norm_label": "seed_permisos",
       "source_file": "src/data/seedData.ts",
-      "source_location": "L724"
+      "source_location": "L745"
     },
     {
       "id": "src_data_seeddata_seed_residentes",
@@ -36348,7 +36348,7 @@
       "file_type": "code",
       "norm_label": "seed_traslados_sedes",
       "source_file": "src/data/seedData.ts",
-      "source_location": "L1567"
+      "source_location": "L1588"
     },
     {
       "id": "src_data_seeddata_seed_turnos",
@@ -36359,7 +36359,7 @@
       "file_type": "code",
       "norm_label": "seed_turnos",
       "source_file": "src/data/seedData.ts",
-      "source_location": "L649"
+      "source_location": "L670"
     },
     {
       "id": "src_services_aiservice",
@@ -64231,7 +64231,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/modals/EditWorkerModal.tsx",
-      "source_location": "L150",
+      "source_location": "L162",
       "weight": 1.0
     },
     {
@@ -64243,7 +64243,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/modals/EditWorkerModal.tsx",
-      "source_location": "L18",
+      "source_location": "L19",
       "weight": 1.0
     },
     {
@@ -64255,7 +64255,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/modals/EditWorkerModal.tsx",
-      "source_location": "L31",
+      "source_location": "L43",
       "weight": 1.0
     },
     {
@@ -64267,7 +64267,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/modals/EditWorkerModal.tsx",
-      "source_location": "L80",
+      "source_location": "L92",
       "weight": 1.0
     },
     {
@@ -64783,7 +64783,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/views/WorkersView.tsx",
-      "source_location": "L185",
+      "source_location": "L197",
       "weight": 1.0
     },
     {
@@ -64795,7 +64795,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/components/views/WorkersView.tsx",
-      "source_location": "L31",
+      "source_location": "L32",
       "weight": 1.0
     },
     {
@@ -64807,7 +64807,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L1305",
+      "source_location": "L1496",
       "weight": 1.0
     },
     {
@@ -64819,7 +64819,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L1306",
+      "source_location": "L1497",
       "weight": 1.0
     },
     {
@@ -64831,7 +64831,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L1312",
+      "source_location": "L1503",
       "weight": 1.0
     },
     {
@@ -64843,7 +64843,7 @@
       "confidence_score": 1.0,
       "context": "call",
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L565",
+      "source_location": "L624",
       "weight": 1.0
     },
     {
@@ -124340,7 +124340,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/context/AdminContext.tsx",
-      "source_location": "L3360",
+      "source_location": "L3579",
       "weight": 1.0
     },
     {
@@ -124406,7 +124406,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/seedData.ts",
-      "source_location": "L1002",
+      "source_location": "L1023",
       "weight": 1.0
     },
     {
@@ -124417,7 +124417,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/seedData.ts",
-      "source_location": "L1059",
+      "source_location": "L1080",
       "weight": 1.0
     },
     {
@@ -124428,7 +124428,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/seedData.ts",
-      "source_location": "L1156",
+      "source_location": "L1177",
       "weight": 1.0
     },
     {
@@ -124439,7 +124439,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/seedData.ts",
-      "source_location": "L1177",
+      "source_location": "L1198",
       "weight": 1.0
     },
     {
@@ -124450,7 +124450,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/seedData.ts",
-      "source_location": "L1380",
+      "source_location": "L1401",
       "weight": 1.0
     },
     {
@@ -124461,7 +124461,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/seedData.ts",
-      "source_location": "L1567",
+      "source_location": "L1588",
       "weight": 1.0
     },
     {
@@ -124516,7 +124516,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/seedData.ts",
-      "source_location": "L649",
+      "source_location": "L670",
       "weight": 1.0
     },
     {
@@ -124527,7 +124527,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/seedData.ts",
-      "source_location": "L724",
+      "source_location": "L745",
       "weight": 1.0
     },
     {
@@ -124538,7 +124538,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/seedData.ts",
-      "source_location": "L758",
+      "source_location": "L779",
       "weight": 1.0
     },
     {
@@ -124549,7 +124549,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/seedData.ts",
-      "source_location": "L791",
+      "source_location": "L812",
       "weight": 1.0
     },
     {
@@ -124560,7 +124560,7 @@
       "confidence": "EXTRACTED",
       "confidence_score": 1.0,
       "source_file": "src/data/seedData.ts",
-      "source_location": "L871",
+      "source_location": "L892",
       "weight": 1.0
     },
     {
@@ -127665,5 +127665,5 @@
     }
   ],
   "hyperedges": [],
-  "built_at_commit": "f54c07ebfa5037cd5122390f8af137fc6dc4ece9"
+  "built_at_commit": "aacb61377ee7076de0a1787d1ad027636f2a1cb3"
 }

@@ -519,6 +519,27 @@ export const SEED_RESIDENTES: Residente[] = [
 
 export const SEED_TRABAJADORES: TrabajadorEmpleado[] = [
   {
+    id: 1,
+    idCentro: 1,
+    tipoIdentificacion: 'CC',
+    identificacion: '1010123456',
+    nombres: 'Orlando Arturo',
+    apellidos: 'Valverde',
+    nombreCompleto: 'Orlando Arturo Valverde',
+    cargo: 'Administrador General del Centro',
+    area: 'Administrativo',
+    unidadAsignada: 'Dirección General & Operaciones',
+    telefono: '310 123 4567',
+    email: 'admin@samanya.com.co',
+    fechaContratacion: '2022-01-15',
+    tipoContrato: 'Término Indefinido',
+    eps: 'Sura EPS',
+    arl: 'Sura ARL',
+    estado: 'Activo',
+    avatarUrl: '/uploads/usuarios/usuario_1.jpg',
+    turnoHabitual: 'Jornada Administrativa (08:00 - 17:00)'
+  },
+  {
     id: 201,
     idCentro: 1,
     tipoIdentificacion: 'CC',

@@ -22,6 +22,7 @@ import { PaginadorTabla } from '../common/PaginadorTabla';
 export const WorkersView: React.FC = () => {
   const {
     trabajadores,
+    currentUser,
     searchQuery,
     setIsRegisterWorkerOpen,
     actualizarEstadoTrabajador,
@@ -172,165 +173,55 @@ export const WorkersView: React.FC = () => {
       {/* ========================================================================= */}
       {viewMode === 'grid' && (
         <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-4">
-          {paginados.map((worker) => (
-            <div
-              key={worker.id}
-              className="admin-card p-5 space-y-4 hover:border-[#274A3F] transition-all flex flex-col justify-between"
-            >
-              <div>
-                {/* Cabecera */}
-                <div className="flex items-start justify-between gap-3">
-                  <div className="flex items-center gap-3">
-                    <img
-                      src={resolverAvatarUrl(worker.avatarUrl)}
-                      alt={worker.nombreCompleto}
-                      onError={(e) => {
-                        e.currentTarget.onerror = null;
-                        e.currentTarget.src = DEFAULT_AVATAR;
-                      }}
-                      className="w-12 h-12 rounded-xl object-cover border border-[#274A3F]/20 shrink-0"
-                    />
-                    <div>
-                      <h4 className="font-serif font-bold text-base text-[#182F28] leading-snug">
-                        {worker.nombreCompleto}
-                      </h4>
-                      <div className="text-xs text-[#B3803F] font-semibold">
-                        {worker.cargo}
+          {paginados.map((worker) => {
+            const esAdmin =
+              worker.id === 1 ||
+              worker.area === 'Administrativo' ||
+              (currentUser && (worker.id === currentUser.id || worker.email === currentUser.email));
+            const workerAvatar = esAdmin && currentUser?.avatarUrl ? currentUser.avatarUrl : worker.avatarUrl;
+
+            return (
+              <div
+                key={worker.id}
+                className={`admin-card p-5 space-y-4 hover:border-[#274A3F] transition-all flex flex-col justify-between ${
+                  esAdmin
+                    ? 'border-[#B3803F]/60 bg-linear-to-b from-[#FAF7F0] via-white to-white shadow-xs ring-1 ring-[#DCB87F]/30'
+                    : ''
+                }`}
+              >
+                <div>
+                  {/* Cabecera */}
+                  <div className="flex items-start justify-between gap-3">
+                    <div className="flex items-center gap-3">
+                      <img
+                        src={resolverAvatarUrl(workerAvatar)}
+                        alt={worker.nombreCompleto}
+                        onError={(e) => {
+                          e.currentTarget.onerror = null;
+                          e.currentTarget.src = DEFAULT_AVATAR;
+                        }}
+                        className={`w-12 h-12 rounded-xl object-cover shrink-0 border ${
+                          esAdmin ? 'border-[#B3803F] ring-2 ring-[#DCB87F]/40' : 'border-[#274A3F]/20'
+                        }`}
+                      />
+                      <div>
+                        <div className="flex items-center gap-1.5 flex-wrap">
+                          <h4 className="font-serif font-bold text-base text-[#182F28] leading-snug">
+                            {worker.nombreCompleto}
+                          </h4>
+                          {esAdmin && (
+                            <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#7A531A] bg-[#FEF7EE] border border-[#DCB87F] px-1.5 py-0.2 rounded-full">
+                              <Shield className="w-2.5 h-2.5 text-[#B3803F]" />
+                              Admin
+                            </span>
+                          )}
+                        </div>
+                        <div className="text-xs text-[#B3803F] font-semibold">
+                          {worker.cargo}
+                        </div>
                       </div>
                     </div>
-                  </div>
 
-                  <span
-                    className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                      worker.estado === 'Activo'
-                        ? 'bg-[#DFF3E7] text-[#1E7A4C]'
-                        : worker.estado === 'En Permiso'
-                        ? 'bg-[#FEF7EE] text-[#9A5B12]'
-                        : 'bg-[#FBE8E6] text-[#A4453A]'
-                    }`}
-                  >
-                    {worker.estado}
-                  </span>
-                </div>
-
-                {/* Área y Contrato */}
-                <div className="mt-4 pt-3 border-t border-[#DEDBD1]/60 space-y-2 text-xs text-[#4B4636]">
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#7A745F]">Área:</span>
-                    <span className="font-bold text-[#182F28] bg-[#F7F6F2] px-2 py-0.5 rounded-md border border-[#DEDBD1]">
-                      {worker.area}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#7A745F]">Contrato:</span>
-                    <span className="font-semibold text-[#182F28]">{worker.tipoContrato}</span>
-                  </div>
-
-                  <div className="flex items-center justify-between">
-                    <span className="text-[#7A745F]">Turno Habitual:</span>
-                    <span className="font-semibold text-[#075158] bg-[#D9F0F1] px-2 py-0.5 rounded-md text-[11px]">
-                      {worker.turnoHabitual || 'Rotativo'}
-                    </span>
-                  </div>
-
-                  <div className="flex items-center justify-between text-[11px] text-[#7A745F] pt-1">
-                    <span>EPS: {worker.eps}</span>
-                    <span>ARL: {worker.arl}</span>
-                  </div>
-                </div>
-
-                {/* Contacto */}
-                <div className="mt-3 pt-2 border-t border-[#DEDBD1]/40 space-y-1 text-xs text-[#5C6058]">
-                  <div className="flex items-center gap-2">
-                    <Phone className="w-3.5 h-3.5 text-[#274A3F]" />
-                    <span>{worker.telefono}</span>
-                  </div>
-                  {worker.email && (
-                    <div className="flex items-center gap-2">
-                      <Mail className="w-3.5 h-3.5 text-[#7A745F]" />
-                      <span className="truncate">{worker.email}</span>
-                    </div>
-                  )}
-                </div>
-              </div>
-
-              {/* Acciones Editar y Cambiar Estado */}
-              <div className="pt-3 border-t border-[#DEDBD1]/60 mt-3 flex items-center justify-between gap-2">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingTrabajador(worker);
-                    setIsEditTrabajadorOpen(true);
-                  }}
-                  className="py-1.5 px-3 bg-[#F7F6F2] hover:bg-[#ECE7DB] text-[#182F28] font-bold rounded-lg text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-[#DEDBD1]"
-                  title="Editar colaborador"
-                >
-                  <Edit3 className="w-3.5 h-3.5 text-[#274A3F]" />
-                  <span>Editar</span>
-                </button>
-
-                <div className="flex items-center gap-2">
-                  <span className="text-[11px] text-[#7A745F] font-mono hidden sm:inline">
-                    {worker.tipoIdentificacion} {worker.identificacion}
-                  </span>
-
-                  {worker.estado === 'Activo' ? (
-                    <button
-                      type="button"
-                      onClick={() => actualizarEstadoTrabajador(worker.id, 'Inactivo')}
-                      className="text-xs font-bold text-[#A4453A] hover:underline cursor-pointer"
-                    >
-                      Inactivar
-                    </button>
-                  ) : (
-                    <button
-                      type="button"
-                      onClick={() => actualizarEstadoTrabajador(worker.id, 'Activo')}
-                      className="text-xs font-bold text-[#1E7A4C] hover:underline cursor-pointer"
-                    >
-                      Activar
-                    </button>
-                  )}
-                </div>
-              </div>
-            </div>
-          ))}
-        </div>
-      )}
-
-      {/* ========================================================================= */}
-      {/* VISTA 2: MODO LISTA COMPACTA */}
-      {/* ========================================================================= */}
-      {viewMode === 'list' && (
-        <div className="space-y-3">
-          {paginados.map((worker) => (
-            <div
-              key={worker.id}
-              className="bg-white rounded-2xl border border-[#DEDBD1] p-4 hover:border-[#274A3F] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs"
-            >
-              <div className="flex items-start gap-4 flex-1">
-                <img
-                  src={resolverAvatarUrl(worker.avatarUrl)}
-                  alt={worker.nombreCompleto}
-                  onError={(e) => {
-                    e.currentTarget.onerror = null;
-                    e.currentTarget.src = DEFAULT_AVATAR;
-                  }}
-                  className="w-12 h-12 rounded-xl object-cover border border-[#274A3F]/20 shrink-0"
-                />
-
-                <div className="space-y-1 flex-1 min-w-[200px]">
-                  <div className="flex flex-wrap items-center gap-2">
-                    <h4 className="font-serif font-bold text-base text-[#182F28]">
-                      {worker.nombreCompleto}
-                    </h4>
-                    <span className="text-xs text-[#B3803F] font-semibold">
-                      • {worker.cargo}
-                    </span>
-                    <span className="font-bold text-[#182F28] bg-[#F7F6F2] px-2 py-0.5 rounded-md border border-[#DEDBD1] text-[11px]">
-                      {worker.area}
-                    </span>
                     <span
                       className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
                         worker.estado === 'Activo'
@@ -344,65 +235,233 @@ export const WorkersView: React.FC = () => {
                     </span>
                   </div>
 
-                  <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#5C6058]">
-                    <span className="font-mono text-[#7A745F]">
+                  {/* Área y Contrato */}
+                  <div className="mt-4 pt-3 border-t border-[#DEDBD1]/60 space-y-2 text-xs text-[#4B4636]">
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#7A745F]">Área:</span>
+                      <span className="font-bold text-[#182F28] bg-[#F7F6F2] px-2 py-0.5 rounded-md border border-[#DEDBD1]">
+                        {worker.area}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#7A745F]">Contrato:</span>
+                      <span className="font-semibold text-[#182F28]">{worker.tipoContrato}</span>
+                    </div>
+
+                    <div className="flex items-center justify-between">
+                      <span className="text-[#7A745F]">Turno Habitual:</span>
+                      <span className="font-semibold text-[#075158] bg-[#D9F0F1] px-2 py-0.5 rounded-md text-[11px]">
+                        {worker.turnoHabitual || 'Rotativo'}
+                      </span>
+                    </div>
+
+                    <div className="flex items-center justify-between text-[11px] text-[#7A745F] pt-1">
+                      <span>EPS: {worker.eps}</span>
+                      <span>ARL: {worker.arl}</span>
+                    </div>
+                  </div>
+
+                  {/* Contacto */}
+                  <div className="mt-3 pt-2 border-t border-[#DEDBD1]/40 space-y-1 text-xs text-[#5C6058]">
+                    <div className="flex items-center gap-2">
+                      <Phone className="w-3.5 h-3.5 text-[#274A3F]" />
+                      <span>{worker.telefono}</span>
+                    </div>
+                    {worker.email && (
+                      <div className="flex items-center gap-2">
+                        <Mail className="w-3.5 h-3.5 text-[#7A745F]" />
+                        <span className="truncate">{worker.email}</span>
+                      </div>
+                    )}
+                  </div>
+                </div>
+
+                {/* Acciones Editar y Cambiar Estado */}
+                <div className="pt-3 border-t border-[#DEDBD1]/60 mt-3 flex items-center justify-between gap-2">
+                  <button
+                    type="button"
+                    onClick={() => {
+                      setEditingTrabajador(worker);
+                      setIsEditTrabajadorOpen(true);
+                    }}
+                    className={`py-1.5 px-3 font-bold rounded-lg text-xs flex items-center gap-1.5 transition-colors cursor-pointer border ${
+                      esAdmin
+                        ? 'bg-[#182F28] hover:bg-[#274A3F] text-white border-[#182F28] shadow-xs'
+                        : 'bg-[#F7F6F2] hover:bg-[#ECE7DB] text-[#182F28] border-[#DEDBD1]'
+                    }`}
+                    title="Editar colaborador"
+                  >
+                    <Edit3 className={`w-3.5 h-3.5 ${esAdmin ? 'text-[#DCB87F]' : 'text-[#274A3F]'}`} />
+                    <span>Editar</span>
+                  </button>
+
+                  <div className="flex items-center gap-2">
+                    <span className="text-[11px] text-[#7A745F] font-mono hidden sm:inline">
                       {worker.tipoIdentificacion} {worker.identificacion}
                     </span>
-                    <span className="flex items-center gap-1 text-[#182F28] font-medium">
-                      <Phone className="w-3 h-3 text-[#274A3F]" />
-                      {worker.telefono}
-                    </span>
-                    {worker.email && (
-                      <span className="flex items-center gap-1 text-[#7A745F]">
-                        <Mail className="w-3 h-3 text-[#7A745F]" />
-                        {worker.email}
+
+                    {esAdmin && worker.id === 1 ? (
+                      <span className="text-[11px] font-bold text-[#7A745F] bg-[#F7F6F2] px-2 py-0.5 rounded-md border border-[#DEDBD1]">
+                        Cuenta Principal
                       </span>
+                    ) : worker.estado === 'Activo' ? (
+                      <button
+                        type="button"
+                        onClick={() => actualizarEstadoTrabajador(worker.id, 'Inactivo')}
+                        className="text-xs font-bold text-[#A4453A] hover:underline cursor-pointer"
+                      >
+                        Inactivar
+                      </button>
+                    ) : (
+                      <button
+                        type="button"
+                        onClick={() => actualizarEstadoTrabajador(worker.id, 'Activo')}
+                        className="text-xs font-bold text-[#1E7A4C] hover:underline cursor-pointer"
+                      >
+                        Activar
+                      </button>
                     )}
-                    <span className="text-[#075158] font-semibold bg-[#D9F0F1] px-1.5 py-0.2 rounded text-[11px]">
-                      {worker.turnoHabitual || 'Rotativo'}
-                    </span>
-                    <span className="text-[11px] text-[#7A745F]">
-                      {worker.tipoContrato}
-                    </span>
                   </div>
                 </div>
               </div>
+            );
+          })}
+        </div>
+      )}
 
-              {/* Botones de acción compactos */}
-              <div className="flex items-center gap-2 shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-[#DEDBD1]">
-                <button
-                  type="button"
-                  onClick={() => {
-                    setEditingTrabajador(worker);
-                    setIsEditTrabajadorOpen(true);
-                  }}
-                  className="p-2 bg-[#F7F6F2] hover:bg-[#ECE7DB] text-[#182F28] font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer border border-[#DEDBD1]"
-                  title="Editar colaborador"
-                >
-                  <Edit3 className="w-4 h-4 text-[#274A3F]" />
-                  <span className="hidden sm:inline">Editar</span>
-                </button>
+      {/* ========================================================================= */}
+      {/* VISTA 2: MODO LISTA COMPACTA */}
+      {/* ========================================================================= */}
+      {viewMode === 'list' && (
+        <div className="space-y-3">
+          {paginados.map((worker) => {
+            const esAdmin =
+              worker.id === 1 ||
+              worker.area === 'Administrativo' ||
+              (currentUser && (worker.id === currentUser.id || worker.email === currentUser.email));
+            const workerAvatar = esAdmin && currentUser?.avatarUrl ? currentUser.avatarUrl : worker.avatarUrl;
 
-                {worker.estado === 'Activo' ? (
+            return (
+              <div
+                key={worker.id}
+                className={`bg-white rounded-2xl border p-4 hover:border-[#274A3F] transition-all flex flex-col md:flex-row md:items-center justify-between gap-4 shadow-xs ${
+                  esAdmin
+                    ? 'border-[#B3803F]/60 bg-linear-to-r from-[#FAF7F0] via-white to-white ring-1 ring-[#DCB87F]/30'
+                    : 'border-[#DEDBD1]'
+                }`}
+              >
+                <div className="flex items-start gap-4 flex-1">
+                  <img
+                    src={resolverAvatarUrl(workerAvatar)}
+                    alt={worker.nombreCompleto}
+                    onError={(e) => {
+                      e.currentTarget.onerror = null;
+                      e.currentTarget.src = DEFAULT_AVATAR;
+                    }}
+                    className={`w-12 h-12 rounded-xl object-cover shrink-0 border ${
+                      esAdmin ? 'border-[#B3803F] ring-2 ring-[#DCB87F]/40' : 'border-[#274A3F]/20'
+                    }`}
+                  />
+
+                  <div className="space-y-1 flex-1 min-w-[200px]">
+                    <div className="flex flex-wrap items-center gap-2">
+                      <h4 className="font-serif font-bold text-base text-[#182F28]">
+                        {worker.nombreCompleto}
+                      </h4>
+                      {esAdmin && (
+                        <span className="inline-flex items-center gap-1 text-[10px] font-bold text-[#7A531A] bg-[#FEF7EE] border border-[#DCB87F] px-1.5 py-0.2 rounded-full">
+                          <Shield className="w-2.5 h-2.5 text-[#B3803F]" />
+                          Admin
+                        </span>
+                      )}
+                      <span className="text-xs text-[#B3803F] font-semibold">
+                        • {worker.cargo}
+                      </span>
+                      <span className="font-bold text-[#182F28] bg-[#F7F6F2] px-2 py-0.5 rounded-md border border-[#DEDBD1] text-[11px]">
+                        {worker.area}
+                      </span>
+                      <span
+                        className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                          worker.estado === 'Activo'
+                            ? 'bg-[#DFF3E7] text-[#1E7A4C]'
+                            : worker.estado === 'En Permiso'
+                            ? 'bg-[#FEF7EE] text-[#9A5B12]'
+                            : 'bg-[#FBE8E6] text-[#A4453A]'
+                        }`}
+                      >
+                        {worker.estado}
+                      </span>
+                    </div>
+
+                    <div className="flex flex-wrap items-center gap-x-4 gap-y-1 text-xs text-[#5C6058]">
+                      <span className="font-mono text-[#7A745F]">
+                        {worker.tipoIdentificacion} {worker.identificacion}
+                      </span>
+                      <span className="flex items-center gap-1 text-[#182F28] font-medium">
+                        <Phone className="w-3 h-3 text-[#274A3F]" />
+                        {worker.telefono}
+                      </span>
+                      {worker.email && (
+                        <span className="flex items-center gap-1 text-[#7A745F]">
+                          <Mail className="w-3 h-3 text-[#7A745F]" />
+                          {worker.email}
+                        </span>
+                      )}
+                      <span className="text-[#075158] font-semibold bg-[#D9F0F1] px-1.5 py-0.2 rounded text-[11px]">
+                        {worker.turnoHabitual || 'Rotativo'}
+                      </span>
+                      <span className="text-[11px] text-[#7A745F]">
+                        {worker.tipoContrato}
+                      </span>
+                    </div>
+                  </div>
+                </div>
+
+                {/* Botones de acción compactos */}
+                <div className="flex items-center gap-2 shrink-0 border-t md:border-t-0 pt-2 md:pt-0 border-[#DEDBD1]">
                   <button
                     type="button"
-                    onClick={() => actualizarEstadoTrabajador(worker.id, 'Inactivo')}
-                    className="px-3 py-2 bg-[#FBE8E6] hover:bg-[#f7d6d3] text-[#A4453A] font-bold rounded-xl text-xs transition-colors cursor-pointer"
+                    onClick={() => {
+                      setEditingTrabajador(worker);
+                      setIsEditTrabajadorOpen(true);
+                    }}
+                    className={`p-2 font-bold rounded-xl text-xs flex items-center gap-1.5 transition-colors cursor-pointer border ${
+                      esAdmin
+                        ? 'bg-[#182F28] hover:bg-[#274A3F] text-white border-[#182F28] shadow-xs'
+                        : 'bg-[#F7F6F2] hover:bg-[#ECE7DB] text-[#182F28] border-[#DEDBD1]'
+                    }`}
+                    title="Editar colaborador"
                   >
-                    Inactivar
+                    <Edit3 className={`w-4 h-4 ${esAdmin ? 'text-[#DCB87F]' : 'text-[#274A3F]'}`} />
+                    <span className="hidden sm:inline">Editar</span>
                   </button>
-                ) : (
-                  <button
-                    type="button"
-                    onClick={() => actualizarEstadoTrabajador(worker.id, 'Activo')}
-                    className="px-3 py-2 bg-[#DFF3E7] hover:bg-[#d0ebd9] text-[#1E7A4C] font-bold rounded-xl text-xs transition-colors cursor-pointer"
-                  >
-                    Activar
-                  </button>
-                )}
+
+                  {esAdmin && worker.id === 1 ? (
+                    <span className="text-[11px] font-bold text-[#7A745F] bg-[#F7F6F2] px-2.5 py-2 rounded-xl border border-[#DEDBD1]">
+                      Cuenta Principal
+                    </span>
+                  ) : worker.estado === 'Activo' ? (
+                    <button
+                      type="button"
+                      onClick={() => actualizarEstadoTrabajador(worker.id, 'Inactivo')}
+                      className="px-3 py-2 bg-[#FBE8E6] hover:bg-[#f7d6d3] text-[#A4453A] font-bold rounded-xl text-xs transition-colors cursor-pointer"
+                    >
+                      Inactivar
+                    </button>
+                  ) : (
+                    <button
+                      type="button"
+                      onClick={() => actualizarEstadoTrabajador(worker.id, 'Activo')}
+                      className="px-3 py-2 bg-[#DFF3E7] hover:bg-[#d0ebd9] text-[#1E7A4C] font-bold rounded-xl text-xs transition-colors cursor-pointer"
+                    >
+                      Activar
+                    </button>
+                  )}
+                </div>
               </div>
-            </div>
-          ))}
+            );
+          })}
         </div>
       )}
 
@@ -442,115 +501,146 @@ export const WorkersView: React.FC = () => {
                 </tr>
               </thead>
               <tbody className="divide-y divide-[#DEDBD1]/60">
-                {paginados.map((worker) => (
-                  <tr key={worker.id} className="hover:bg-[#F7F6F2]/70 transition-colors">
-                    {/* Colaborador */}
-                    <td className="py-3 px-4 font-semibold text-[#182F28]">
-                      <div className="flex items-center gap-2.5">
-                        <img
-                          src={resolverAvatarUrl(worker.avatarUrl)}
-                          alt={worker.nombreCompleto}
-                          onError={(e) => {
-                            e.currentTarget.onerror = null;
-                            e.currentTarget.src = DEFAULT_AVATAR;
-                          }}
-                          className="w-9 h-9 rounded-xl object-cover border border-[#274A3F]/20 shrink-0"
-                        />
-                        <div>
-                          <div className="font-bold text-[#182F28]">{worker.nombreCompleto}</div>
+                {paginados.map((worker) => {
+                  const esAdmin =
+                    worker.id === 1 ||
+                    worker.area === 'Administrativo' ||
+                    (currentUser && (worker.id === currentUser.id || worker.email === currentUser.email));
+                  const workerAvatar = esAdmin && currentUser?.avatarUrl ? currentUser.avatarUrl : worker.avatarUrl;
+
+                  return (
+                    <tr
+                      key={worker.id}
+                      className={`hover:bg-[#F7F6F2]/70 transition-colors ${
+                        esAdmin ? 'bg-[#FAF7F0]/40' : ''
+                      }`}
+                    >
+                      {/* Colaborador */}
+                      <td className="py-3 px-4 font-semibold text-[#182F28]">
+                        <div className="flex items-center gap-2.5">
+                          <img
+                            src={resolverAvatarUrl(workerAvatar)}
+                            alt={worker.nombreCompleto}
+                            onError={(e) => {
+                              e.currentTarget.onerror = null;
+                              e.currentTarget.src = DEFAULT_AVATAR;
+                            }}
+                            className={`w-9 h-9 rounded-xl object-cover shrink-0 border ${
+                              esAdmin ? 'border-[#B3803F]' : 'border-[#274A3F]/20'
+                            }`}
+                          />
+                          <div>
+                            <div className="font-bold text-[#182F28] flex items-center gap-1.5">
+                              <span>{worker.nombreCompleto}</span>
+                              {esAdmin && (
+                                <span className="inline-flex items-center gap-0.5 text-[9px] font-bold text-[#7A531A] bg-[#FEF7EE] border border-[#DCB87F] px-1.5 py-0.2 rounded-full">
+                                  <Shield className="w-2.5 h-2.5 text-[#B3803F]" />
+                                  Admin
+                                </span>
+                              )}
+                            </div>
+                          </div>
                         </div>
-                      </div>
-                    </td>
+                      </td>
 
-                    {/* Identificación */}
-                    <td className="py-3 px-4 font-mono text-[#5C6058] whitespace-nowrap">
-                      {worker.tipoIdentificacion} {worker.identificacion}
-                    </td>
+                      {/* Identificación */}
+                      <td className="py-3 px-4 font-mono text-[#5C6058] whitespace-nowrap">
+                        {worker.tipoIdentificacion} {worker.identificacion}
+                      </td>
 
-                    {/* Cargo & Área */}
-                    <td className="py-3 px-4">
-                      <div className="font-bold text-[#182F28]">{worker.cargo}</div>
-                      <div className="text-[11px] text-[#7A745F]">{worker.area}</div>
-                    </td>
+                      {/* Cargo & Área */}
+                      <td className="py-3 px-4">
+                        <div className="font-bold text-[#182F28]">{worker.cargo}</div>
+                        <div className="text-[11px] text-[#7A745F]">{worker.area}</div>
+                      </td>
 
-                    {/* Contacto */}
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <div className="flex items-center gap-1.5">
-                        <Phone className="w-3 h-3 text-[#274A3F]" />
-                        <span className="font-bold text-[#182F28]">{worker.telefono}</span>
-                      </div>
-                      {worker.email && (
-                        <div className="text-[10px] text-[#7A745F] truncate max-w-[150px]">
-                          {worker.email}
+                      {/* Contacto */}
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <div className="flex items-center gap-1.5">
+                          <Phone className="w-3 h-3 text-[#274A3F]" />
+                          <span className="font-bold text-[#182F28]">{worker.telefono}</span>
                         </div>
-                      )}
-                    </td>
-
-                    {/* Turno / Contrato */}
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <span className="text-[10px] font-semibold text-[#075158] bg-[#D9F0F1] px-2 py-0.5 rounded">
-                        {worker.turnoHabitual || 'Rotativo'}
-                      </span>
-                      <div className="text-[10px] text-[#7A745F] mt-0.5">{worker.tipoContrato}</div>
-                    </td>
-
-                    {/* Seguridad Social */}
-                    <td className="py-3 px-4 whitespace-nowrap text-[11px] text-[#5C6058]">
-                      <div>EPS: {worker.eps}</div>
-                      <div>ARL: {worker.arl}</div>
-                    </td>
-
-                    {/* Estado */}
-                    <td className="py-3 px-4 whitespace-nowrap">
-                      <span
-                        className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
-                          worker.estado === 'Activo'
-                            ? 'bg-[#DFF3E7] text-[#1E7A4C]'
-                            : worker.estado === 'En Permiso'
-                            ? 'bg-[#FEF7EE] text-[#9A5B12]'
-                            : 'bg-[#FBE8E6] text-[#A4453A]'
-                        }`}
-                      >
-                        {worker.estado}
-                      </span>
-                    </td>
-
-                    {/* Acciones */}
-                    <td className="py-3 px-4 text-center whitespace-nowrap">
-                      <div className="flex items-center justify-center gap-2">
-                        <button
-                          type="button"
-                          onClick={() => {
-                            setEditingTrabajador(worker);
-                            setIsEditTrabajadorOpen(true);
-                          }}
-                          className="p-1.5 bg-[#F7F6F2] hover:bg-[#ECE7DB] text-[#182F28] rounded-lg border border-[#DEDBD1] transition-colors"
-                          title="Editar colaborador"
-                        >
-                          <Edit3 className="w-3.5 h-3.5 text-[#274A3F]" />
-                        </button>
-
-                        {worker.estado === 'Activo' ? (
-                          <button
-                            type="button"
-                            onClick={() => actualizarEstadoTrabajador(worker.id, 'Inactivo')}
-                            className="px-2 py-1 bg-[#FBE8E6] hover:bg-[#f7d6d3] text-[#A4453A] font-bold rounded-lg text-[10px] transition-colors cursor-pointer"
-                          >
-                            Inactivar
-                          </button>
-                        ) : (
-                          <button
-                            type="button"
-                            onClick={() => actualizarEstadoTrabajador(worker.id, 'Activo')}
-                            className="px-2 py-1 bg-[#DFF3E7] hover:bg-[#d0ebd9] text-[#1E7A4C] font-bold rounded-lg text-[10px] transition-colors cursor-pointer"
-                          >
-                            Activar
-                          </button>
+                        {worker.email && (
+                          <div className="text-[10px] text-[#7A745F] truncate max-w-[150px]">
+                            {worker.email}
+                          </div>
                         )}
-                      </div>
-                    </td>
-                  </tr>
-                ))}
+                      </td>
+
+                      {/* Turno / Contrato */}
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <span className="text-[10px] font-semibold text-[#075158] bg-[#D9F0F1] px-2 py-0.5 rounded">
+                          {worker.turnoHabitual || 'Rotativo'}
+                        </span>
+                        <div className="text-[10px] text-[#7A745F] mt-0.5">{worker.tipoContrato}</div>
+                      </td>
+
+                      {/* Seguridad Social */}
+                      <td className="py-3 px-4 whitespace-nowrap text-[11px] text-[#5C6058]">
+                        <div>EPS: {worker.eps}</div>
+                        <div>ARL: {worker.arl}</div>
+                      </td>
+
+                      {/* Estado */}
+                      <td className="py-3 px-4 whitespace-nowrap">
+                        <span
+                          className={`text-[10px] font-bold uppercase px-2 py-0.5 rounded-full ${
+                            worker.estado === 'Activo'
+                              ? 'bg-[#DFF3E7] text-[#1E7A4C]'
+                              : worker.estado === 'En Permiso'
+                              ? 'bg-[#FEF7EE] text-[#9A5B12]'
+                              : 'bg-[#FBE8E6] text-[#A4453A]'
+                          }`}
+                        >
+                          {worker.estado}
+                        </span>
+                      </td>
+
+                      {/* Acciones */}
+                      <td className="py-3 px-4 text-center whitespace-nowrap">
+                        <div className="flex items-center justify-center gap-2">
+                          <button
+                            type="button"
+                            onClick={() => {
+                              setEditingTrabajador(worker);
+                              setIsEditTrabajadorOpen(true);
+                            }}
+                            className={`p-1.5 rounded-lg border transition-colors ${
+                              esAdmin
+                                ? 'bg-[#182F28] hover:bg-[#274A3F] text-white border-[#182F28]'
+                                : 'bg-[#F7F6F2] hover:bg-[#ECE7DB] text-[#182F28] border-[#DEDBD1]'
+                            }`}
+                            title="Editar colaborador"
+                          >
+                            <Edit3 className={`w-3.5 h-3.5 ${esAdmin ? 'text-[#DCB87F]' : 'text-[#274A3F]'}`} />
+                          </button>
+
+                          {esAdmin && worker.id === 1 ? (
+                            <span className="text-[9px] font-bold text-[#7A745F] bg-[#F7F6F2] px-1.5 py-1 rounded border border-[#DEDBD1]">
+                              Principal
+                            </span>
+                          ) : worker.estado === 'Activo' ? (
+                            <button
+                              type="button"
+                              onClick={() => actualizarEstadoTrabajador(worker.id, 'Inactivo')}
+                              className="px-2 py-1 bg-[#FBE8E6] hover:bg-[#f7d6d3] text-[#A4453A] font-bold rounded-lg text-[10px] transition-colors cursor-pointer"
+                            >
+                              Inactivar
+                            </button>
+                          ) : (
+                            <button
+                              type="button"
+                              onClick={() => actualizarEstadoTrabajador(worker.id, 'Activo')}
+                              className="px-2 py-1 bg-[#DFF3E7] hover:bg-[#d0ebd9] text-[#1E7A4C] font-bold rounded-lg text-[10px] transition-colors cursor-pointer"
+                            >
+                              Activar
+                            </button>
+                          )}
+                        </div>
+                      </td>
+                    </tr>
+                  );
+                })}
               </tbody>
             </table>
           </div>
