@@ -28,6 +28,7 @@ import { GestionDotacionModal } from './components/modals/GestionDotacionModal';
 import { SolicitarDotacionModal } from './components/modals/SolicitarDotacionModal';
 import { ProgramarTurnosModal } from './components/modals/ProgramarTurnosModal';
 import { UserProfileModal } from './components/modals/UserProfileModal';
+import { FichaTecnicaIngresoModal } from './components/modals/FichaTecnicaIngresoModal';
 import { SamanyaAiChat } from './components/chat/SamanyaAiChat';
 import { LoginView } from './components/views/LoginView';
 
@@ -60,6 +61,7 @@ const AdminLayout: React.FC = () => {
       <RegisterWorkerModal />
       <RegisterLeaveModal />
       <ResidentDetailModal />
+      <FichaTecnicaIngresoModal />
       <GestionDotacionModal />
       <SolicitarDotacionModal />
       <ProgramarTurnosModal />

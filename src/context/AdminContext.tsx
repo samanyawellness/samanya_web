@@ -14,7 +14,9 @@ import {
   SolicitudDotacionPayload,
   ProgramarTurnosRangoPayload,
   AuthUser,
-  BitacoraResidente
+  BitacoraResidente,
+  ValoracionIngreso,
+  EstadoCivil
 } from '../types';
 import {
   SEED_SEDES,
@@ -120,6 +122,17 @@ interface AdminContextType {
   solicitarDotacionResidentePreseleccionado: Residente | null;
   setSolicitarDotacionResidentePreseleccionado: (res: Residente | null) => void;
   abrirSolicitarDotacion: (residente?: Residente | null) => void;
+
+  // Ficha Técnica de Ingreso y Valoración Multidimensional
+  isFichaIngresoOpen: boolean;
+  setIsFichaIngresoOpen: (open: boolean) => void;
+  selectedResidenteParaFicha: Residente | null;
+  setSelectedResidenteParaFicha: (res: Residente | null) => void;
+  abrirFichaIngreso: (residente: Residente) => void;
+  cerrarFichaIngreso: () => void;
+  guardarFichaIngreso: (payload: Record<string, any>) => Promise<void>;
+  cargarFichaIngreso: (idResidente: number) => Promise<any>;
+  estadosCiviles: EstadoCivil[];
 
   // Dotación e Inventario
   catalogoDotacion: ElementoDotacionCatalogo[];
@@ -699,6 +712,71 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [turnoModalFechaInicial, setTurnoModalFechaInicial] = useState<string | undefined>(undefined);
   const [selectedResidente, setSelectedResidente] = useState<Residente | null>(null);
   const [isResidenteDetailOpen, setIsResidenteDetailOpen] = useState(false);
+
+  // Ficha Técnica de Ingreso y Valoración Multidimensional
+  const [isFichaIngresoOpen, setIsFichaIngresoOpen] = useState(false);
+  const [selectedResidenteParaFicha, setSelectedResidenteParaFicha] = useState<Residente | null>(null);
+  const [estadosCiviles, setEstadosCiviles] = useState<EstadoCivil[]>([
+    { id: 1, codigo: 'SOLTERO', nombre: 'Soltero(a)' },
+    { id: 2, codigo: 'CASADO', nombre: 'Casado(a)' },
+    { id: 3, codigo: 'UNION_LIBRE', nombre: 'Unión Libre / Compañero(a) Permanente' },
+    { id: 4, codigo: 'VIUDO', nombre: 'Viudo(a)' },
+    { id: 5, codigo: 'DIVORCIADO', nombre: 'Divorciado(a)' },
+    { id: 6, codigo: 'SEPARADO', nombre: 'Separado(a)' },
+    { id: 7, codigo: 'RELIGIOSO', nombre: 'Sacerdote / Religioso(a)' }
+  ]);
+
+  // Cargar catálogo de estados civiles desde Oracle al iniciar
+  useEffect(() => {
+    adminApi.residentes.consultarEstadosCiviles()
+      .then((res) => {
+        if (res && res.success && Array.isArray(res.data) && res.data.length > 0) {
+          setEstadosCiviles(res.data);
+        }
+      })
+      .catch((err) => console.warn('[AdminContext] Usando catálogo local de estados civiles:', err));
+  }, []);
+
+  const abrirFichaIngreso = (residente: Residente) => {
+    setSelectedResidenteParaFicha(residente);
+    setIsFichaIngresoOpen(true);
+  };
+
+  const cerrarFichaIngreso = () => {
+    setIsFichaIngresoOpen(false);
+    setSelectedResidenteParaFicha(null);
+  };
+
+  const cargarFichaIngreso = async (idResidente: number) => {
+    try {
+      const resp = await adminApi.residentes.consultarFichaIngreso(idResidente);
+      if (resp && resp.data) {
+        return resp.data;
+      }
+      return null;
+    } catch (err) {
+      console.warn('[AdminContext] Error al consultar ficha de ingreso:', err);
+      return null;
+    }
+  };
+
+  const guardarFichaIngreso = async (payload: Record<string, any>) => {
+    try {
+      const resp = await adminApi.residentes.guardarFichaIngreso(payload);
+      if (resp && resp.success) {
+        showToast('✅ Ficha Técnica y Valoración de Ingreso guardada exitosamente en Oracle', 'success');
+        if (payload.idResidente) {
+          await sincronizarResidentes(true);
+        }
+      } else {
+        throw new Error(resp?.message || 'Error al guardar la ficha técnica');
+      }
+    } catch (err: any) {
+      console.error('[AdminContext] Error en guardarFichaIngreso:', err);
+      showToast(`❌ Error al guardar valoración: ${err.message || 'Error en base de datos'}`, 'alert');
+      throw err;
+    }
+  };
 
   // Modales de Edición
   const [editingResidente, setEditingResidente] = useState<Residente | null>(null);
@@ -2630,6 +2708,15 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         solicitarDotacionResidentePreseleccionado,
         setSolicitarDotacionResidentePreseleccionado,
         abrirSolicitarDotacion,
+        isFichaIngresoOpen,
+        setIsFichaIngresoOpen,
+        selectedResidenteParaFicha,
+        setSelectedResidenteParaFicha,
+        abrirFichaIngreso,
+        cerrarFichaIngreso,
+        guardarFichaIngreso,
+        cargarFichaIngreso,
+        estadosCiviles,
         registrarSolicitudDotacion,
         entregarDotacionSolicitada,
         guardarElementoCatalogo,

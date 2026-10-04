@@ -74,6 +74,12 @@ export type Residente = {
   alertasClinicas?: string;
   estado: 'Activo' | 'En Observación' | 'Hospitalizado' | 'Egresado';
   fechaIngreso: string;
+  lugarNacimiento?: string;
+  idEstadoCivil?: number;
+  estadoCivil?: string;
+  ocupacionHistorica?: string;
+  nivelEducativo?: string;
+  religionCreencia?: string;
   medicamentos?: MedicamentoPrescrito[];
   acudientes: Array<{
     id: number;
@@ -82,6 +88,13 @@ export type Residente = {
     telefono: string;
     email: string;
     esPrincipal: boolean;
+    esCercaniaAfectiva?: boolean;
+    asumeAcompanamiento?: boolean;
+    frecuenciaContacto?: string;
+    autorizadoInfoMedica?: boolean;
+    autorizadoAcompanarCitas?: boolean;
+    autorizadoTramites?: boolean;
+    relacionNotas?: string;
   }>;
   archivosAdjuntos?: ArchivoAdjuntoResidente[];
   observaciones?: string;
@@ -323,3 +336,129 @@ export type AuthUser = {
   rol: 'ADMIN';
   nombreRol: string;
 };
+
+export type EstadoCivil = {
+  id: number;
+  codigo: string;
+  nombre: string;
+  descripcion?: string;
+  esVigente?: string;
+};
+
+export type SignosVitalesIngreso = {
+  tensionArterialSistolica?: number;
+  tensionArterialDiastolica?: number;
+  frecuenciaCardiaca?: number;
+  frecuenciaRespiratoria?: number;
+  temperatura?: number;
+  saturacionOxigeno?: number;
+  pesoKg?: number;
+  tallaCm?: number;
+  imc?: number;
+  clasificacionImc?: string;
+  glucometria?: number;
+  observacionesSignos?: string;
+};
+
+export type NodoGenograma = {
+  id: string;
+  nombre: string;
+  parentesco: string;
+  genero: 'M' | 'F';
+  edad?: number;
+  fallecido?: boolean;
+  esCercaniaAfectiva?: boolean;
+  asumeCuidado?: boolean;
+  relacionConResidente?: 'Muy Buena' | 'Normal' | 'Distante' | 'Conflictiva';
+  notas?: string;
+};
+
+export type EnlaceGenograma = {
+  origenId: string;
+  destinoId: string;
+  tipo: 'pareja' | 'padre_hijo' | 'hermano';
+};
+
+export type DatosGenograma = {
+  nodos: NodoGenograma[];
+  enlaces?: EnlaceGenograma[];
+  observacionesDinamicaFamiliar?: string;
+  situacionesRelevantes?: string;
+};
+
+export type ValoracionIngreso = {
+  id?: number;
+  idResidente: number;
+  idCentro?: number;
+  codigoFicha?: string;
+  fechaValoracion?: string;
+  fechaCreacion?: string;
+  idUsuarioEvaluador?: number;
+  nombreEvaluador?: string;
+  cargoEvaluador?: string;
+
+  // Historia Personal y de Vida
+  lugarNacimiento?: string;
+  lugarCrecimiento?: string;
+  idEstadoCivil?: number;
+  estadoCivil?: string;
+  ocupacionHistorica?: string;
+  nivelEducativo?: string;
+  religionCreencia?: string;
+  acontecimientosImportantes?: string;
+  perdidasDuelosSignificativos?: string;
+  costumbresTradiciones?: string;
+  gustosPasatiemposMusica?: string;
+  aspectosTranquilidad?: string;
+  aspectosTemorIncomodidad?: string;
+  rasgosPersonalidad?: string;
+  rutinasHabitosDiarios?: string;
+
+  // Ingreso y Adaptación
+  motivoIngreso?: string;
+  expectativasIngreso?: string;
+  disposicionAdaptacion?: 'Muy Favorable' | 'Favorable' | 'Reservada' | 'Reticente / Oposición';
+
+  // Valoración Multidimensional
+  estadoGeneralIngreso?: string;
+  signosVitales?: SignosVitalesIngreso;
+  signosVitalesJson?: string;
+  cognitivoOrientacion?: string;
+  emocionalConductual?: string;
+  movilidadFuncional?: string;
+  nutricionAlimentacion?: string;
+  eliminacionContinencia?: string;
+  higieneAutocuidado?: string;
+  patronSueno?: string;
+  terapiasApoyosExternos?: string;
+  ayudasTecnicas?: string;
+
+  // Matriz de Riesgos
+  riesgoCaidas?: 'BAJO' | 'MEDIO' | 'ALTO';
+  riesgoUlcerasPresion?: 'BAJO' | 'MEDIO' | 'ALTO';
+  riesgoFuga?: 'BAJO' | 'MEDIO' | 'ALTO';
+  riesgoBroncoaspiracion?: 'BAJO' | 'MEDIO' | 'ALTO';
+  gradoDependenciaGlobal?: 'INDEPENDIENTE' | 'DEPENDENCIA_LEVE' | 'DEPENDENCIA_MODERADA' | 'DEPENDENCIA_SEVERA' | 'DEPENDENCIA_TOTAL';
+  condicionesFisicasPiel?: string;
+
+  // Red Familiar y Genograma
+  redApoyoNoFamiliar?: string;
+  datosGenograma?: DatosGenograma;
+  datosGenogramaJson?: string;
+  idArchivoGenograma?: number | null;
+  urlArchivoGenograma?: string;
+
+  // Concepto Integral y Cuidados
+  conceptoGeneralIngreso?: string;
+  recomendacionesPlanCuidados?: string;
+
+  // Entrega y Formalización
+  nombreEntregaResponsable?: string;
+  identificacionEntrega?: string;
+  parentescoEntrega?: string;
+  telefonoEntrega?: string;
+  aceptacionTerminos?: 'S' | 'N';
+  idArchivoFirmaEntrega?: number | null;
+  firmaEntregaBase64?: string;
+};
+

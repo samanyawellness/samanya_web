@@ -1,4 +1,4 @@
-import { MedicamentoPrescrito } from '../types';
+import { MedicamentoPrescrito, ValoracionIngreso, EstadoCivil } from '../types';
 
 /**
  * Capa de Servicios API para el Portal de Administradores
@@ -186,6 +186,18 @@ export const adminApi = {
 
     async consultarCenso(idCentro?: number): Promise<{ success: boolean; data?: any[]; count?: number }> {
       return postToPackage('/pkgca_residentes/p_consultar_censo', { idCentro });
+    },
+
+    async consultarFichaIngreso(idResidente: number): Promise<{ success: boolean; data?: any }> {
+      return postToPackage('/pkgca_smy_valoraciones_ingreso/f_traer_ultima_ficha_json', { idResidente });
+    },
+
+    async guardarFichaIngreso(payload: Record<string, any>): Promise<{ success: boolean; message?: string }> {
+      return postToPackage('/pkgln_admision_residente/pr_guardar_valoracion_ingreso', payload);
+    },
+
+    async consultarEstadosCiviles(): Promise<{ success: boolean; data?: EstadoCivil[] }> {
+      return postToPackage('/pkgca_smy_estados_civiles/p_consultar_vigentes', {});
     }
   },
 

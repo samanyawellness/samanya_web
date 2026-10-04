@@ -15,7 +15,8 @@ import {
   Activity,
   Pill,
   Package,
-  ClipboardList
+  ClipboardList,
+  FileText
 } from 'lucide-react';
 import { ResidentAvatar } from '../common/ResidentAvatar';
 
@@ -28,6 +29,7 @@ export const ResidentsView: React.FC = () => {
     setIsRegisterResidentOpen,
     setSelectedResidente,
     setIsResidenteDetailOpen,
+    abrirFichaIngreso,
     setEditingResidente,
     setIsEditResidenteOpen,
     setEditingFamiliar,
@@ -368,36 +370,51 @@ export const ResidentsView: React.FC = () => {
                 })()}
               </div>
 
-              {/* Botones Ficha, Solicitar y Editar */}
-              <div className="pt-3 border-t border-[#DEDBD1]/60 mt-3 flex items-center gap-2">
-                <button
-                  type="button"
-                  onClick={() => handleOpenDetail(res)}
-                  className="flex-1 py-2 px-3 bg-[#F7F6F2] hover:bg-[#ECE7DB] text-[#182F28] font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[#DEDBD1]"
-                >
-                  <Eye className="w-3.5 h-3.5 text-[#B3803F]" />
-                  <span>Ver Ficha</span>
-                </button>
+              {/* Botones de Acción del Residente */}
+              <div className="pt-3 border-t border-[#DEDBD1]/60 mt-3 space-y-2">
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => handleOpenDetail(res)}
+                    className="py-2 px-3 bg-[#F7F6F2] hover:bg-[#ECE7DB] text-[#182F28] font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[#DEDBD1]"
+                    title="Ver expediente clínico y bitácora diaria"
+                  >
+                    <Eye className="w-3.5 h-3.5 text-[#B3803F]" />
+                    <span>Expediente</span>
+                  </button>
 
-                <button
-                  type="button"
-                  onClick={() => abrirSolicitarDotacion(res)}
-                  className="py-2 px-2.5 bg-white hover:bg-[#F2EFE9] text-[#182F28] font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer border border-[#DEDBD1]"
-                  title="Solicitar dotación para este residente"
-                >
-                  <ClipboardList className="w-3.5 h-3.5 text-[#B3803F]" />
-                  <span className="hidden sm:inline">Solicitar</span>
-                </button>
+                  <button
+                    type="button"
+                    onClick={() => abrirFichaIngreso(res)}
+                    className="py-2 px-3 bg-[#F0F8F4] hover:bg-[#d9eee3] text-[#1E7A4C] font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[#BDE0D0]"
+                    title="Ficha Técnica de Ingreso y Valoración Multidimensional"
+                  >
+                    <FileText className="w-3.5 h-3.5 text-[#1E7A4C]" />
+                    <span>Valoración</span>
+                  </button>
+                </div>
 
-                <button
-                  type="button"
-                  onClick={() => handleEditResident(res)}
-                  className="py-2 px-3 bg-[#FEF7EE] hover:bg-[#fcecd7] text-[#9A5B12] font-bold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[#DCB87F]"
-                  title="Editar información del residente"
-                >
-                  <Edit3 className="w-3.5 h-3.5" />
-                  <span>Editar</span>
-                </button>
+                <div className="grid grid-cols-2 gap-2">
+                  <button
+                    type="button"
+                    onClick={() => abrirSolicitarDotacion(res)}
+                    className="py-1.5 px-2.5 bg-white hover:bg-[#F2EFE9] text-[#4B4636] font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[#DEDBD1]"
+                    title="Solicitar dotación para este residente"
+                  >
+                    <ClipboardList className="w-3.5 h-3.5 text-[#B3803F]" />
+                    <span>Solicitar</span>
+                  </button>
+
+                  <button
+                    type="button"
+                    onClick={() => handleEditResident(res)}
+                    className="py-1.5 px-2.5 bg-[#FEF7EE] hover:bg-[#fcecd7] text-[#9A5B12] font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[#DCB87F]"
+                    title="Editar información del residente"
+                  >
+                    <Edit3 className="w-3.5 h-3.5 text-[#9A5B12]" />
+                    <span>Editar</span>
+                  </button>
+                </div>
               </div>
             </div>
           );

@@ -1182,15 +1182,15 @@
     "semantic_hash": "b03454a5e38fe63cb9689f922148ae21"
   },
   "backend/db/scripts/build_all.sql": {
-    "mtime": 1790910491.31495,
-    "seen": 1790910754.169615,
-    "ast_hash": "605ecda71c72c1d7dbf48496a730aaed",
+    "mtime": 1791075587.3633835,
+    "seen": 1791075655.9474852,
+    "ast_hash": "410a7b4e5ce6ab784064688d06e351ae",
     "semantic_hash": ""
   },
   "backend/db/scripts/datos_prueba_dummy.sql": {
-    "mtime": 1790911155.0952916,
-    "seen": 1790911296.6112535,
-    "ast_hash": "13cbd7e13bebd959fe75ec6cf535a520",
+    "mtime": 1791075575.5014467,
+    "seen": 1791075655.9474962,
+    "ast_hash": "9c865bead7eb6ddbacfcc59c035f9f5c",
     "semantic_hash": ""
   },
   "backend/db/scripts/f_fecha_actual.sql": {
@@ -1854,9 +1854,9 @@
     "semantic_hash": "cbb25f9314d7994543575432aeb7511a"
   },
   "creacion_modelo_relacional.sql": {
-    "mtime": 1790913852.98272,
-    "seen": 1790914039.49861,
-    "ast_hash": "4ceac14ebaa7060847888cc9c087a45f",
+    "mtime": 1791075527.4282298,
+    "seen": 1791075655.9478805,
+    "ast_hash": "0ac7520c256b7a6439c3f0a45fca096f",
     "semantic_hash": ""
   },
   "docs/diagrams/samanya.architecture.json": {
@@ -2166,9 +2166,9 @@
     "semantic_hash": ""
   },
   "documentacion_esquema.html": {
-    "mtime": 1790460781.9629533,
-    "seen": 1790461370.8822854,
-    "ast_hash": "3ab8088002d50c34837cbff0269f3ad5",
+    "mtime": 1791075538.9576328,
+    "seen": 1791075655.948173,
+    "ast_hash": "cb1514ce24902dabc0c0ce15e4e4bf41",
     "semantic_hash": ""
   },
   "estilos.txt": {
@@ -2202,9 +2202,9 @@
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_admision_residente.sql": {
-    "mtime": 1790913841.394841,
-    "seen": 1790914039.498144,
-    "ast_hash": "5b1cbca01e3db9a318989ee6d94465d4",
+    "mtime": 1791074598.7536128,
+    "seen": 1791074915.4221387,
+    "ast_hash": "0556b1130f267475728c23dfa891819c",
     "semantic_hash": ""
   },
   "backend/db/scripts/pkgln_cuadrantes_turnos.sql": {
@@ -2238,9 +2238,9 @@
     "semantic_hash": ""
   },
   "src/App.tsx": {
-    "mtime": 1790476696.1595392,
-    "seen": 1790476756.1378837,
-    "ast_hash": "7454a50a6011f6405745232fe7afd7f5",
+    "mtime": 1791073584.7970948,
+    "seen": 1791073724.272869,
+    "ast_hash": "fb08b4f7bcf11babca94bf464adf0506",
     "semantic_hash": ""
   },
   "src/components/common/ToastNotification.tsx": {
@@ -2280,9 +2280,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/ResidentDetailModal.tsx": {
-    "mtime": 1790914836.8370097,
-    "seen": 1790914981.748829,
-    "ast_hash": "500c38a5eb4ff693a66438202ab3fa66",
+    "mtime": 1791073638.6011276,
+    "seen": 1791073724.2730064,
+    "ast_hash": "02aedec9ceab175605b8dd99dd30f4a2",
     "semantic_hash": ""
   },
   "src/components/views/ClinicalSupervisionView.tsx": {
@@ -2310,9 +2310,9 @@
     "semantic_hash": ""
   },
   "src/components/views/ResidentsView.tsx": {
-    "mtime": 1790914777.877381,
-    "seen": 1790914981.7488968,
-    "ast_hash": "911c79164c3a74fd6c62ee077f44ea28",
+    "mtime": 1791074332.5499437,
+    "seen": 1791074433.716184,
+    "ast_hash": "d21cfc4130d9abfcd765e8f4c5488719",
     "semantic_hash": ""
   },
   "src/components/views/ShiftsView.tsx": {
@@ -2328,9 +2328,9 @@
     "semantic_hash": ""
   },
   "src/context/AdminContext.tsx": {
-    "mtime": 1790914749.0527315,
-    "seen": 1790914981.7489183,
-    "ast_hash": "0ba510695e98afaba76395f01a2d3964",
+    "mtime": 1791073473.6659088,
+    "seen": 1791073724.2730799,
+    "ast_hash": "8a81693263822a6a8b0d840f82bb835c",
     "semantic_hash": ""
   },
   "src/data/seedData.ts": {
@@ -2346,15 +2346,15 @@
     "semantic_hash": ""
   },
   "src/services/api.ts": {
-    "mtime": 1790914883.0366924,
-    "seen": 1790914981.7490652,
-    "ast_hash": "29e0bba95a1ab786406cdf91896bf76e",
+    "mtime": 1791073395.5838807,
+    "seen": 1791073724.2731056,
+    "ast_hash": "3a095853095cb85dd4746648c0c82e8b",
     "semantic_hash": ""
   },
   "src/types/index.ts": {
-    "mtime": 1790910505.376909,
-    "seen": 1790910754.1699898,
-    "ast_hash": "b09ee45ed691fc04987050968de5d7e2",
+    "mtime": 1791073375.2297425,
+    "seen": 1791073724.2731183,
+    "ast_hash": "6448eea4fe084289a94b1743fafa1562",
     "semantic_hash": ""
   },
   "src/vite-env.d.ts": {
@@ -2592,9 +2592,9 @@
     "semantic_hash": ""
   },
   "build_all.sql": {
-    "mtime": 1790462985.1966326,
-    "seen": 1790463061.6239395,
-    "ast_hash": "e7ccd1459a5675af2eae0aa90a86767a",
+    "mtime": 1791075597.2965994,
+    "seen": 1791075655.947865,
+    "ast_hash": "410a7b4e5ce6ab784064688d06e351ae",
     "semantic_hash": ""
   },
   "backend/db/scripts/sincronizar_secuencias.sql": {
@@ -2616,9 +2616,9 @@
     "semantic_hash": ""
   },
   "api/index.py": {
-    "mtime": 1790482167.96776,
-    "seen": 1790910754.1696117,
-    "ast_hash": "dc0820bcbb59b306b99f9d0b9549135a",
+    "mtime": 1790999792.1350436,
+    "seen": 1791072162.7912626,
+    "ast_hash": "b84ad761d488727f17774d2ae380d8bd",
     "semantic_hash": ""
   },
   "api/requirements.txt": {
@@ -2637,6 +2637,54 @@
     "mtime": 1790914616.6756732,
     "seen": 1790914981.7468452,
     "ast_hash": "ff58aa76a41558307acadc21afe318c3",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/cambios_bd_ficha.sql": {
+    "mtime": 1791074723.1742163,
+    "seen": 1791074915.4220731,
+    "ast_hash": "ba2daafd276367ad6ee3b17f7c244789",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgca_smy_valoraciones_ingreso.sql": {
+    "mtime": 1791074663.4833121,
+    "seen": 1791074915.4221196,
+    "ast_hash": "e80453fb4a7c20019116c1dcedf4926d",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgsmy_estados_civiles_dao.sql": {
+    "mtime": 1791072507.273593,
+    "seen": 1791072590.9950342,
+    "ast_hash": "5506430e1561f9aae5f2edb0dbe59da1",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgsmy_valoraciones_ingreso_dao.sql": {
+    "mtime": 1791072517.2448194,
+    "seen": 1791072590.9955504,
+    "ast_hash": "6eda8bc2188ab85e3278c76502927c21",
+    "semantic_hash": ""
+  },
+  "cambios_bd_ficha.sql": {
+    "mtime": 1791074723.1712992,
+    "seen": 1791074915.4224286,
+    "ast_hash": "ba2daafd276367ad6ee3b17f7c244789",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/compilar_invalidos.sql": {
+    "mtime": 1791072714.3096642,
+    "seen": 1791073724.2717953,
+    "ast_hash": "5ceb159bffee0e61943bdf20b920ca1a",
+    "semantic_hash": ""
+  },
+  "compilar_invalidos.sql": {
+    "mtime": 1791072692.4383543,
+    "seen": 1791073724.2727795,
+    "ast_hash": "5ceb159bffee0e61943bdf20b920ca1a",
+    "semantic_hash": ""
+  },
+  "src/components/modals/FichaTecnicaIngresoModal.tsx": {
+    "mtime": 1791074831.0442224,
+    "seen": 1791074915.4224894,
+    "ast_hash": "90a64ed093bb3d976c2f338357ff1b5d",
     "semantic_hash": ""
   }
 }

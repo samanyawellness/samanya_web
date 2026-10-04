@@ -744,6 +744,24 @@ COMMIT;
 -- 3. RESIDENTES DEL CENTRO GERIÁTRICO (SMY_RESIDENTES)
 -- Total: 10 Residentes con información clínica, habitaciones y alertas
 -- =============================================================================
+-- =============================================================================
+-- 2.1 ESTADOS CIVILES (SMY_ESTADOS_CIVILES)
+-- =============================================================================
+PROMPT 2.1 Insertando Estados Civiles (SMY_ESTADOS_CIVILES)...
+
+MERGE INTO SMY_ESTADOS_CIVILES dest
+USING (
+    SELECT 1 AS ID, 'SOLTERO(A)' AS NOMBRE_ESTADO_CIVIL, 'Persona que no ha contraído matrimonio ni convive en unión libre.' AS DESCRIPCION FROM DUAL UNION ALL
+    SELECT 2, 'CASADO(A)', 'Persona unida legalmente en matrimonio.' FROM DUAL UNION ALL
+    SELECT 3, 'UNION_LIBRE', 'Persona que convive en unión marital de hecho.' FROM DUAL UNION ALL
+    SELECT 4, 'VIUDO(A)', 'Persona cuyo cónyuge o compañero ha fallecido.' FROM DUAL UNION ALL
+    SELECT 5, 'DIVORCIADO(A)', 'Persona que ha disuelto legalmente su vínculo matrimonial.' FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN NOT MATCHED THEN
+INSERT (ID, NOMBRE_ESTADO_CIVIL, DESCRIPCION) VALUES (src.ID, src.NOMBRE_ESTADO_CIVIL, src.DESCRIPCION);
+
+COMMIT;
+
 PROMPT 3. Insertando Residentes (SMY_RESIDENTES)...
 
 INSERT INTO SMY_RESIDENTES (
@@ -998,6 +1016,108 @@ COMMIT;
 -- 5. ACUDIENTES / FAMILIARES (SMY_ACUDIENTES)
 -- Total: 14 Acudientes vinculados a sus respectivos usuarios
 -- =============================================================================
+
+-- =============================================================================
+-- 4.1 FICHAS TÉCNICAS DE INGRESO Y VALORACIÓN INTEGRAL (SMY_VALORACIONES_INGRESO)
+-- =============================================================================
+PROMPT 4.1 Insertando Fichas Técnicas de Ingreso (SMY_VALORACIONES_INGRESO)...
+
+INSERT INTO SMY_VALORACIONES_INGRESO (
+    ID, ID_RESIDENTE, ID_CENTRO, CODIGO_FICHA, FECHA_VALORACION, ID_USUARIO_EVALUADOR, NOMBRE_EVALUADOR, CARGO_EVALUADOR,
+    LUGAR_CRECIMIENTO, ACONTECIMIENTOS_IMPORTANTES, PERDIDAS_DUELOS_SIGNIFICATIVOS, COSTUMBRES_TRADICIONES,
+    GUSTOS_PASATIEMPOS_MUSICA, ASPECTOS_TRANQUILIDAD, ASPECTOS_TEMOR_INCOMODIDAD, RASGOS_PERSONALIDAD, RUTINAS_HABITOS_DIARIOS,
+    MOTIVO_INGRESO, EXPECTATIVAS_INGRESO, DISPOSICION_ADAPTACION,
+    ESTADO_GENERAL_INGRESO, SIGNOS_VITALES_JSON, COGNITIVO_ORIENTACION, EMOCIONAL_CONDUCTUAL, MOVILIDAD_FUNCIONAL,
+    NUTRICION_ALIMENTACION, ELIMINACION_CONTINENCIA, HIGIENE_AUTOCUIDADO, PATRON_SUENO, TERAPIAS_APOYOS_EXTERNOS, AYUDAS_TECNICAS,
+    RIESGO_CAIDAS, RIESGO_ULCERAS_PRESION, RIESGO_FUGA, RIESGO_BRONCOASPIRACION, GRADO_DEPENDENCIA_GLOBAL, CONDICIONES_FISICAS_PIEL,
+    RED_APOYO_NO_FAMILIAR, DATOS_GENOGRAMA_JSON,
+    CONCEPTO_GENERAL_INGRESO, RECOMENDACIONES_PLAN_CUIDADOS,
+    NOMBRE_ENTREGA_RESPONSABLE, IDENTIFICACION_ENTREGA, PARENTESCO_ENTREGA, TELEFONO_ENTREGA, ACEPTACION_TERMINOS,
+    FIRMA_ENTREGA_BASE64
+) VALUES (
+    1, 1, 1, 'VAL-2024-001', TO_DATE('2024-01-10 10:30:00', 'YYYY-MM-DD HH24:MI:SS'), 2, 'Martha Cecilia Rodríguez Peña', 'Enfermera Jefe de Sede',
+    'Barrio La Candelaria y Teusaquillo, Bogotá D.C.',
+    'Graduado con honores en la Universidad Nacional. Ejerció docencia por más de 35 años formando a generaciones de contadores. Viajes familiares a Villa de Leyva y Boyacá.',
+    'Fallecimiento de su esposa Carmen hace 3 años; generó profunda tristeza y período de duelo que superó con el apoyo incondicional de sus hijos y nieta Sofía.',
+    'Costumbre de rezar el rosario en las mañanas, escuchar la misa dominical y compartir café con pan caliente a las 4 de la tarde.',
+    'Pasión por la música clásica, boleros de Los Panchos y música andina colombiana. Lectura del periódico matutino y crucigramas.',
+    'El orden, el trato respetuoso y pausado, la compañía de su nieta Sofía y la música suave en las tardes.',
+    'Ruidos estridentes o repentinos, cambios bruscos de temperatura y el desorden en su mesa de noche.',
+    'Hombre reflexivo, educado, meticuloso y de trato afable. Expresa sus opiniones con respeto y suele ser muy colaborador.',
+    'Despierta a las 6:00 AM, ducha asistida a las 7:00 AM, desayuno 7:45 AM. Siesta corta de 30 minutos a las 2:00 PM. Retiro a la cama a las 8:30 PM.',
+    'Ingreso acordado en consenso familiar para garantizar acompañamiento 24/7, monitoreo estricto de hipertensión y rehabilitación física.',
+    'Mantenerse activo intelectualmente, hacer nuevas amistades entre los residentes y conservar su independencia en la medida de lo posible.',
+    'Receptivo, tranquilo y con muy buena actitud hacia el equipo de cuidadores y compañeros de piso.',
+    'Adulto mayor alerta, orientado en tiempo, espacio y persona. Facies tranquila, marcha lenta con bastón de apoyo.',
+    '{"tensionArterial":"135/85","frecuenciaCardiaca":72,"frecuenciaRespiratoria":17,"temperatura":36.5,"saturacionOxigeno":96,"peso":68.5,"talla":168,"imc":24.3}',
+    'Puntaje Pfeiffer 10/10 (Sin deterioro cognitivo). Memoria a largo plazo intacta, memoria de trabajo adecuada.',
+    'Estado anímico estable. Colaborador, muestra gratitud hacia el personal de ingreso. Sin signos de depresión activa.',
+    'Deambulación funcional con bastón de 1 punto de apoyo. Requiere asistencia leve para transferencias desde sillón bajo.',
+    'Alimentación normal, dieta hiposódica por HTA. Buena masticación con prótesis dental superior. Apetito conservado.',
+    'Continencia urinaria y fecal conservada. No requiere absorbente durante el día. Usa pañal preventivo nocturno.',
+    'Independiente para aseo facial y dental. Requiere asistencia leve para el ingreso y salida de la ducha y calzado.',
+    'Duerme 7 horas nocturnas continuas. Sin antecedentes de insomnio refractario.',
+    'Plan de fisioterapia 3 veces por semana para fortalecimiento de tren inferior y equilibrio.',
+    'Lentes bifocales para lectura, bastón canadiense ortopédico y prótesis dental parcial superior.',
+    'MEDIO', 'BAJO', 'BAJO', 'BAJO', 'ASISTENCIA_LEVE',
+    'Piel íntegra, normohidratada. Sin cicatrices quirúrgicas recientes ni signos de úlceras por presión.',
+    'Amigo entrañable de infancia Roberto Gómez (contacto esporádico telefónico) y comunidad de la parroquia San Diego.',
+    '{"nodos":[{"id":1,"nombre":"Álvaro Delgado","edad":81,"rol":"Residente"},{"id":2,"nombre":"Carmen Mora (QEPD)","rol":"Cónyuge"},{"id":3,"nombre":"Lucía Delgado","edad":52,"rol":"Hija"},{"id":4,"nombre":"Carlos Delgado","edad":48,"rol":"Hijo"},{"id":5,"nombre":"Sofía Delgado","edad":24,"rol":"Nieta"}],"enlaces":[{"de":1,"a":2,"tipo":"Matrimonio"},{"de":1,"a":3,"tipo":"Padre-Hija"},{"de":1,"a":4,"tipo":"Padre-Hijo"},{"de":3,"a":5,"tipo":"Madre-Hija"}]}',
+    'Residente ingresa en condiciones generales óptimas con excelente soporte afectivo de su red familiar.',
+    '1. Monitoreo diario de TA cada mañana. 2. Acompañamiento en deambulación por pasillos. 3. Incentivar participación en club de lectura y crucigramas.',
+    'Lucía Delgado Mora', '52890123', 'Hija', '+57 310 987 6543', 'S',
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+);
+
+INSERT INTO SMY_VALORACIONES_INGRESO (
+    ID, ID_RESIDENTE, ID_CENTRO, CODIGO_FICHA, FECHA_VALORACION, ID_USUARIO_EVALUADOR, NOMBRE_EVALUADOR, CARGO_EVALUADOR,
+    LUGAR_CRECIMIENTO, ACONTECIMIENTOS_IMPORTANTES, PERDIDAS_DUELOS_SIGNIFICATIVOS, COSTUMBRES_TRADICIONES,
+    GUSTOS_PASATIEMPOS_MUSICA, ASPECTOS_TRANQUILIDAD, ASPECTOS_TEMOR_INCOMODIDAD, RASGOS_PERSONALIDAD, RUTINAS_HABITOS_DIARIOS,
+    MOTIVO_INGRESO, EXPECTATIVAS_INGRESO, DISPOSICION_ADAPTACION,
+    ESTADO_GENERAL_INGRESO, SIGNOS_VITALES_JSON, COGNITIVO_ORIENTACION, EMOCIONAL_CONDUCTUAL, MOVILIDAD_FUNCIONAL,
+    NUTRICION_ALIMENTACION, ELIMINACION_CONTINENCIA, HIGIENE_AUTOCUIDADO, PATRON_SUENO, TERAPIAS_APOYOS_EXTERNOS, AYUDAS_TECNICAS,
+    RIESGO_CAIDAS, RIESGO_ULCERAS_PRESION, RIESGO_FUGA, RIESGO_BRONCOASPIRACION, GRADO_DEPENDENCIA_GLOBAL, CONDICIONES_FISICAS_PIEL,
+    RED_APOYO_NO_FAMILIAR, DATOS_GENOGRAMA_JSON,
+    CONCEPTO_GENERAL_INGRESO, RECOMENDACIONES_PLAN_CUIDADOS,
+    NOMBRE_ENTREGA_RESPONSABLE, IDENTIFICACION_ENTREGA, PARENTESCO_ENTREGA, TELEFONO_ENTREGA, ACEPTACION_TERMINOS,
+    FIRMA_ENTREGA_BASE64
+) VALUES (
+    2, 2, 1, 'VAL-2024-002', TO_DATE('2024-01-15 11:15:00', 'YYYY-MM-DD HH24:MI:SS'), 2, 'Martha Cecilia Rodríguez Peña', 'Enfermera Jefe de Sede',
+    'Envigado y Medellín, Antioquia.',
+    'Dedicó 40 años a la pedagogía en colegios públicos y privados. Condecorada con la medalla al mérito educativo. Amante de la botánica y jardinería.',
+    'Viudez hace 5 años; sus hijos Javier y Beatriz han sido su soporte permanente.',
+    'Cuidado de plantas matutino, café con arepa antioqueña, rezo de la novena de la Milagrosa.',
+    'Música de cuerdas, tangos de Gardel, villancicos en época decembrina, jardinería y tejido en crochet.',
+    'Estar rodeada de flores y plantas, la luz natural y el té caliente al atardecer.',
+    'La oscuridad total en su habitación (prefiere luz de noche tenue) y retrasos en sus horarios de comida.',
+    'Mujer carismática, afectuosa, con fuerte sentido del orden y gran facilidad para socializar.',
+    'Despertar a las 6:30 AM, control de glucometría a las 7:00 AM, paseo por jardín 10:00 AM. Descanso nocturno a las 9:00 PM.',
+    'Control nutricional y médico especializado de Diabetes Mellitus Tipo 2 y prevención de aislamiento social.',
+    'Participar en talleres de manualidades y mantener controlado su nivel de azúcar en sangre.',
+    'Muy motivada y complacida con las zonas verdes y el jardín interior de la sede.',
+    'Buen estado general, alegre, comunicativa. Marcha independiente con buen equilibrio postural.',
+    '{"tensionArterial":"120/75","frecuenciaCardiaca":68,"frecuenciaRespiratoria":16,"temperatura":36.4,"saturacionOxigeno":97,"peso":62.0,"talla":156,"imc":25.5}',
+    'Orientada en las 3 esferas. Excelente memoria autobiográfica.',
+    'Ánimo jovial y optimista. Muestra empatía con el personal y residentes.',
+    'Marcha independiente sin aditamentos. Subida y bajada de escaleras con baranda de apoyo.',
+    'Dieta diabética fraccionada (5 tomas diarias). Buena tolerancia gástrica.',
+    'Continencia urinaria y fecal normal.',
+    'Totalmente independiente en autocuidado, baño y vestido.',
+    'Sueño reparador de 7 a 8 horas con apoyo de infusión de manzanilla.',
+    'Terapia ocupacional para destreza motriz fina (tejido y pintura).',
+    'Gafas para lectura.',
+    'BAJO', 'BAJO', 'BAJO', 'BAJO', 'INDEPENDIENTE',
+    'Piel hidratada con buena turgencia. Examen podológico sin lesiones ni callosidades de riesgo diabético.',
+    'Grupo de oración de la parroquia y exalumnas de bachillerato.',
+    '{"nodos":[{"id":1,"nombre":"Elena Pérez","edad":84,"rol":"Residente"},{"id":2,"nombre":"Roberto Gómez (QEPD)","rol":"Cónyuge"},{"id":3,"nombre":"Javier Pérez","edad":55,"rol":"Hijo"},{"id":4,"nombre":"Beatriz Pérez","edad":51,"rol":"Hija"},{"id":5,"nombre":"Valentina Pérez","edad":26,"rol":"Nieta"}],"enlaces":[{"de":1,"a":2,"tipo":"Matrimonio"},{"de":1,"a":3,"tipo":"Padre-Hijo"},{"de":1,"a":4,"tipo":"Padre-Hija"},{"de":3,"a":5,"tipo":"Padre-Hija"}]}',
+    'Ingreso exitoso de adulta mayor autónoma con excelente red familiar y apego al autocuidado.',
+    '1. Monitoreo estricto de glucometría preprandial. 2. Vinculación al taller de jardinería y botánica de la sede.',
+    'Javier Pérez Gómez', '80234567', 'Hijo', '+57 311 876 5432', 'S',
+    'data:image/png;base64,iVBORw0KGgoAAAANSUhEUgAAAAEAAAABCAYAAAAfFcSJAAAADUlEQVR42mNk+M9QDwADhgGAWjR9awAAAABJRU5ErkJggg=='
+);
+
+COMMIT;
+
 PROMPT 5. Insertando Acudientes (SMY_ACUDIENTES)...
 
 INSERT INTO SMY_ACUDIENTES (

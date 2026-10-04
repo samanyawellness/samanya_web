@@ -38,6 +38,7 @@ export const ResidentDetailModal: React.FC = () => {
     selectedResidente,
     residentes,
     activeSede,
+    abrirFichaIngreso,
     setEditingResidente,
     setIsEditResidenteOpen,
     familiares,
@@ -165,14 +166,28 @@ export const ResidentDetailModal: React.FC = () => {
             </div>
           </div>
 
-          <button
-            type="button"
-            onClick={() => setIsResidenteDetailOpen(false)}
-            className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-[#CFC9B8] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
-            title="Cerrar ventana"
-          >
-            <X className="w-4 h-4" />
-          </button>
+          <div className="flex items-center gap-2">
+            <button
+              type="button"
+              onClick={() => {
+                if (resident) abrirFichaIngreso(resident);
+              }}
+              className="px-3 py-1.5 rounded-xl bg-[#DCB87F]/20 hover:bg-[#DCB87F]/30 text-[#DCB87F] hover:text-white border border-[#DCB87F]/40 font-bold text-xs flex items-center gap-1.5 cursor-pointer transition-all"
+              title="Abrir Ficha Técnica de Ingreso y Valoración Multidimensional"
+            >
+              <FileText className="w-3.5 h-3.5" />
+              <span className="hidden sm:inline">Ficha de Ingreso</span>
+            </button>
+
+            <button
+              type="button"
+              onClick={() => setIsResidenteDetailOpen(false)}
+              className="w-8 h-8 rounded-full bg-white/10 hover:bg-white/20 text-[#CFC9B8] hover:text-white flex items-center justify-center transition-colors cursor-pointer"
+              title="Cerrar ventana"
+            >
+              <X className="w-4 h-4" />
+            </button>
+          </div>
         </div>
 
         {/* Barra de Pestañas (Tabs Navigation) */}

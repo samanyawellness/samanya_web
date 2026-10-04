@@ -1137,6 +1137,10 @@ erDiagram
     SMY_ACUDIENTES ||--|{ SMY_RESIDENTE_ACUDIENTE : "ID_ACUDIENTE"
     
     SMY_RESIDENTES ||--o| SMY_HISTORIAS_CLINICAS : "ID_RESIDENTE"
+    SMY_ESTADOS_CIVILES ||--o{ SMY_RESIDENTES : "ID_ESTADO_CIVIL"
+    SMY_RESIDENTES ||--o{ SMY_VALORACIONES_INGRESO : "ID_RESIDENTE"
+    SMY_CENTROS ||--o{ SMY_VALORACIONES_INGRESO : "ID_CENTRO"
+
     SMY_RESIDENTES ||--o{ SMY_DOCUMENTOS_CLINICOS : "ID_RESIDENTE"
     SMY_RESIDENTES ||--o{ SMY_BITACORA_RESIDENTE : "ID_RESIDENTE"
     SMY_RESIDENTES ||--o{ SMY_SIGNOS_VITALES : "ID_RESIDENTE"
@@ -1711,7 +1715,24 @@ erDiagram
       <!-- 4.3 RESIDENTES -->
       <h3 id="mod-residentes">4.3 Módulo de Residentes, Acudientes y Admisión</h3>
 
-      <div class="card table-block" data-table="SMY_RESIDENTES">
+            <div class="card table-block" data-table="SMY_ESTADOS_CIVILES">
+        <h4>Tabla: SMY_ESTADOS_CIVILES</h4>
+        <p>Catálogo maestro de estados civiles para residentes y personas vinculadas.</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_ESTADOS_CIVILES</td><td>Identificador único del estado civil.</td></tr>
+              <tr><td class="col-name">NOMBRE_ESTADO_CIVIL</td><td class="col-type">VARCHAR2(50)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Nombre descriptivo (SOLTERO(A), CASADO(A), UNION_LIBRE, VIUDO(A), DIVORCIADO(A)).</td></tr>
+              <tr><td class="col-name">DESCRIPCION</td><td class="col-type">VARCHAR2(200)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Descripción operativa del significado del estado civil.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de registro en base de datos.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que realizó la última modificación.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+<div class="card table-block" data-table="SMY_RESIDENTES">
         <h4>Tabla: SMY_RESIDENTES</h4>
         <p>Ficha maestra del adulto mayor ingresado en el centro.</p>
         <div class="table-container">
@@ -1735,6 +1756,11 @@ erDiagram
               <tr><td class="col-name">ID_ESTADO_RESIDENTE</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_ESTADOS_RESIDENTES(ID).</td></tr>
               <tr><td class="col-name">CODIGO_QR_TOKEN</td><td class="col-type">VARCHAR2(64)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>UUID/Token criptográfico único para generación y escaneo seguro de códigos QR.</td></tr>
               <tr><td class="col-name">FECHA_INGRESO</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Fecha de admisión formal.</td></tr>
+                            <tr><td class="col-name">LUGAR_NACIMIENTO</td><td class="col-type">VARCHAR2(100)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Municipio y departamento o país de nacimiento del adulto mayor.</td></tr>
+              <tr><td class="col-name">ID_ESTADO_CIVIL</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_ESTADOS_CIVILES(ID).</td></tr>
+              <tr><td class="col-name">OCUPACION_HISTORICA</td><td class="col-type">VARCHAR2(150)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Oficio, profesión o actividades laborales desempeñadas a lo largo de su vida.</td></tr>
+              <tr><td class="col-name">NIVEL_EDUCATIVO</td><td class="col-type">VARCHAR2(80)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Escolaridad o nivel educativo alcanzado.</td></tr>
+              <tr><td class="col-name">RELIGION_CREENCIA</td><td class="col-type">VARCHAR2(80)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Creencia religiosa o convicción espiritual del residente.</td></tr>
               <tr><td class="col-name">FECHA_EGRESO</td><td class="col-type">DATE</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fecha de egreso (si aplica).</td></tr>
               <tr><td class="col-name">MOTIVO_EGRESO</td><td class="col-type">VARCHAR2(255)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Causa del egreso.</td></tr>
               <tr><td class="col-name">ID_ARCHIVO_FOTO_PERFIL</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_ARCHIVOS(ID). Fotografía oficial del residente gestionada centralizadamente.</td></tr>
@@ -1786,6 +1812,13 @@ erDiagram
               <tr><td class="col-name">ES_RESPONSABLE_ECONOMICO</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'N'</td><td>'S' / 'N'.</td></tr>
               <tr><td class="col-name">PUEDE_RECIBIR_INFORMACION_MEDICA</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>'S' / 'N'.</td></tr>
               <tr><td class="col-name">NOTAS</td><td class="col-type">VARCHAR2(255)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Observaciones.</td></tr>
+                            <tr><td class="col-name">ES_CERCANIA_AFECTIVA</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'N'</td><td>Indica si es la persona de mayor cercanía afectiva identificada (S/N).</td></tr>
+              <tr><td class="col-name">ASUME_ACOMPANAMIENTO</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'N'</td><td>Indica si es la persona que asume principalmente el acompañamiento (S/N).</td></tr>
+              <tr><td class="col-name">FRECUENCIA_CONTACTO</td><td class="col-type">VARCHAR2(40)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Frecuencia esperada de contacto/visita (DIARIO, SEMANAL, etc.).</td></tr>
+              <tr><td class="col-name">AUTORIZADO_INFO_MEDICA</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Autorizado para recibir información médica confidencial (S/N).</td></tr>
+              <tr><td class="col-name">AUTORIZADO_ACOMPANAR_CITAS</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Autorizado para acompañar al residente a citas médicas (S/N).</td></tr>
+              <tr><td class="col-name">AUTORIZADO_TRAMITES</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Autorizado para realizar diligencias y trámites institucionales (S/N).</td></tr>
+              <tr><td class="col-name">RELACION_NOTAS</td><td class="col-type">VARCHAR2(500)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Observaciones sobre la relación o dinámicas familiares relevantes.</td></tr>
               <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de auditoría.</td></tr>
               <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que modificó.</td></tr>
             </tbody>
@@ -1868,6 +1901,69 @@ erDiagram
           </table>
         </div>
       </div>
+      <div class="card table-block" data-table="SMY_VALORACIONES_INGRESO">
+        <h4>Tabla: SMY_VALORACIONES_INGRESO</h4>
+        <p>Ficha Técnica de Ingreso y Valoración Multidimensional Integral del Adulto Mayor (Atención Centrada en la Persona).</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_VALORACIONES_INGRESO</td><td>ID único de la valoración de ingreso.</td></tr>
+              <tr><td class="col-name">ID_RESIDENTE</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_RESIDENTES(ID).</td></tr>
+              <tr><td class="col-name">ID_CENTRO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CENTROS(ID). Sede institucional.</td></tr>
+              <tr><td class="col-name">CODIGO_FICHA</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Código único documental del expediente (ej. VAL-2026-001).</td></tr>
+              <tr><td class="col-name">FECHA_VALORACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha y hora del diligenciamiento del instrumento.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_EVALUADOR</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID) del profesional evaluador.</td></tr>
+              <tr><td class="col-name">NOMBRE_EVALUADOR</td><td class="col-type">VARCHAR2(150)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Nombre del profesional asistencial evaluador.</td></tr>
+              <tr><td class="col-name">CARGO_EVALUADOR</td><td class="col-type">VARCHAR2(100)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Cargo institucional del evaluador.</td></tr>
+              <tr><td class="col-name">LUGAR_CRECIMIENTO</td><td class="col-type">VARCHAR2(150)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Municipio o entorno donde el residente creció en su infancia y juventud.</td></tr>
+              <tr><td class="col-name">ACONTECIMIENTOS_IMPORTANTES</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Hitos de vida, momentos memorables y trayectoria vital.</td></tr>
+              <tr><td class="col-name">PERDIDAS_DUELOS_SIGNIFICATIVOS</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Pérdidas familiares recientes, duelos o experiencias difíciles.</td></tr>
+              <tr><td class="col-name">COSTUMBRES_TRADICIONES</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Prácticas culturales, festividades, espiritualidad y tradiciones.</td></tr>
+              <tr><td class="col-name">GUSTOS_PASATIEMPOS_MUSICA</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Música preferida, lectura, manualidades y actividades de recreación.</td></tr>
+              <tr><td class="col-name">ASPECTOS_TRANQUILIDAD</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Factores y palabras que le generan calma, bienestar y alegría.</td></tr>
+              <tr><td class="col-name">ASPECTOS_TEMOR_INCOMODIDAD</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Disparadores de angustia, temor, frustración o irritabilidad.</td></tr>
+              <tr><td class="col-name">RASGOS_PERSONALIDAD</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Características de personalidad conocidas por la familia.</td></tr>
+              <tr><td class="col-name">RUTINAS_HABITOS_DIARIOS</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Horarios de despertar, siestas, café, paseos y descanso nocturno.</td></tr>
+              <tr><td class="col-name">MOTIVO_INGRESO</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Motivos determinantes para el ingreso al centro geriátrico.</td></tr>
+              <tr><td class="col-name">EXPECTATIVAS_INGRESO</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Expectativas del residente y de su familia.</td></tr>
+              <tr><td class="col-name">DISPOSICION_ADAPTACION</td><td class="col-type">VARCHAR2(500)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Actitud y receptividad del residente frente al ingreso.</td></tr>
+              <tr><td class="col-name">ESTADO_GENERAL_INGRESO</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Descripción clínica y general en el instante de la recepción.</td></tr>
+              <tr><td class="col-name">SIGNOS_VITALES_JSON</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Documento JSON con signos vitales iniciales (TA, FC, FR, Temp, SpO2, Peso, IMC).</td></tr>
+              <tr><td class="col-name">COGNITIVO_ORIENTACION</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Orientación temporo-espacial, memoria y signos de deterioro cognitivo.</td></tr>
+              <tr><td class="col-name">EMOCIONAL_CONDUCTUAL</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Estado anímico, labilidad, signos ansiosos o depresivos y colaboración.</td></tr>
+              <tr><td class="col-name">MOVILIDAD_FUNCIONAL</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Capacidad de marcha, transferencias, equilibrio y caídas previas.</td></tr>
+              <tr><td class="col-name">NUTRICION_ALIMENTACION</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Autonomía para comer, deglución/disfagia, apetito y preferencias.</td></tr>
+              <tr><td class="col-name">ELIMINACION_CONTINENCIA</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Control esfinteriano, uso de pañal absorbente, talla y recambio estimado.</td></tr>
+              <tr><td class="col-name">HIGIENE_AUTOCUIDADO</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Nivel de asistencia requerido para baño, higiene bucal, vestido y peinado.</td></tr>
+              <tr><td class="col-name">PATRON_SUENO</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Calidad del sueño nocturno, despertares, siestas diurnas e inductores.</td></tr>
+              <tr><td class="col-name">TERAPIAS_APOYOS_EXTERNOS</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Requerimiento de terapias física, respiratoria, fonoaudiología o curaciones.</td></tr>
+              <tr><td class="col-name">AYUDAS_TECNICAS</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Dispositivos de apoyo: lentes, bastón, caminador, audífonos, prótesis dental.</td></tr>
+              <tr><td class="col-name">RIESGO_CAIDAS</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Nivel de riesgo de caídas (BAJO, MEDIO, ALTO).</td></tr>
+              <tr><td class="col-name">RIESGO_ULCERAS_PRESION</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Riesgo de lesiones por presión según escala Braden (BAJO, MEDIO, ALTO).</td></tr>
+              <tr><td class="col-name">RIESGO_FUGA</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Riesgo de deambulación errática o fuga del centro (BAJO, MEDIO, ALTO).</td></tr>
+              <tr><td class="col-name">RIESGO_BRONCOASPIRACION</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Riesgo de atragantamiento o broncoaspiración (BAJO, MEDIO, ALTO).</td></tr>
+              <tr><td class="col-name">GRADO_DEPENDENCIA_GLOBAL</td><td class="col-type">VARCHAR2(50)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Clasificación global de dependencia funcional.</td></tr>
+              <tr><td class="col-name">CONDICIONES_FISICAS_PIEL</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Inspección de piel: integridad cutánea, cicatrices, equimosis o úlceras.</td></tr>
+              <tr><td class="col-name">RED_APOYO_NO_FAMILIAR</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Contactos comunitarios, amigos, vecinos o antiguos cuidadores significativos.</td></tr>
+              <tr><td class="col-name">DATOS_GENOGRAMA_JSON</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Estructura JSON con nodos y enlaces familiares para renderizado visual del árbol.</td></tr>
+              <tr><td class="col-name">ID_ARCHIVO_GENOGRAMA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_ARCHIVOS(ID) si se adjunta diagrama escaneado.</td></tr>
+              <tr><td class="col-name">CONCEPTO_GENERAL_INGRESO</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Síntesis diagnóstica y concepto interdisciplinario de ingreso.</td></tr>
+              <tr><td class="col-name">RECOMENDACIONES_PLAN_CUIDADOS</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Indicaciones prioritarias para el plan de atención y cuidados diarios.</td></tr>
+              <tr><td class="col-name">NOMBRE_ENTREGA_RESPONSABLE</td><td class="col-type">VARCHAR2(150)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Nombre del acudiente o responsable que entrega formalmente al adulto mayor.</td></tr>
+              <tr><td class="col-name">IDENTIFICACION_ENTREGA</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Documento de identidad del responsable que entrega.</td></tr>
+              <tr><td class="col-name">PARENTESCO_ENTREGA</td><td class="col-type">VARCHAR2(50)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Parentesco con el residente.</td></tr>
+              <tr><td class="col-name">TELEFONO_ENTREGA</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Teléfono de contacto de quien entrega.</td></tr>
+              <tr><td class="col-name">ACEPTACION_TERMINOS</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Constancia de conocimiento y aceptación de condiciones y consentimientos (S/N).</td></tr>
+              <tr><td class="col-name">ID_ARCHIVO_FIRMA_ENTREGA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_ARCHIVOS(ID) con firma digitalizada o acta suscrita.</td></tr>
+              <tr><td class="col-name">FIRMA_ENTREGA_BASE64</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Firma digitalizada en formato Base64 PNG capturada desde el lienzo interactivo canvas.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de auditoría de registro.</td></tr>
+              <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que realizó la última modificación.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
 
       <div class="card table-block" data-table="SMY_DOCUMENTOS_CLINICOS">
         <h4>Tabla: SMY_DOCUMENTOS_CLINICOS</h4>

@@ -86,6 +86,13 @@ AS
         pcl_json IN CLOB
     );
 
+    /**
+     * Registra o actualiza la Ficha Técnica de Ingreso y Valoración Multidimensional Integral del Adulto Mayor
+     */
+    PROCEDURE pr_guardar_valoracion_ingreso (
+        pcl_json IN CLOB
+    );
+
 END PKGLN_ADMISION_RESIDENTE;
 /
 
@@ -511,6 +518,135 @@ AS
             uti_ge_excepciones_pkg.p_grabar_log(vro_error);
             RAISE_APPLICATION_ERROR(-20000, 'Se presento un error comunicarse con soporte. Número error: ' || vro_error.id || ' - ' || SQLERRM);
     END pr_actualizar_residente;
+
+    PROCEDURE pr_guardar_valoracion_ingreso (
+        pcl_json IN CLOB
+    ) IS
+        v_id_residente      smy_residentes.id%TYPE;
+        v_id_centro         smy_centros.id%TYPE;
+        v_id_valing         smy_valoraciones_ingreso.id%TYPE;
+        vro_valing          smy_valoraciones_ingreso%ROWTYPE;
+        vro_residente       smy_residentes%ROWTYPE;
+        v_existe_residente  BOOLEAN;
+    BEGIN
+        v_id_residente := TO_NUMBER(JSON_VALUE(pcl_json, '$.idResidente'));
+        v_id_centro    := TO_NUMBER(JSON_VALUE(pcl_json, '$.idCentro'));
+        v_id_valing    := TO_NUMBER(JSON_VALUE(pcl_json, '$.id'));
+
+        IF v_id_residente IS NULL THEN
+            RAISE_APPLICATION_ERROR(-20001, 'El identificador del residente es obligatorio para registrar la valoración.');
+        END IF;
+
+        v_existe_residente := PKGSMY_RESIDENTES_DAO.f_existe(v_id_residente, vro_residente);
+        IF NOT v_existe_residente THEN
+            RAISE_APPLICATION_ERROR(-20002, 'El residente especificado no existe en el sistema.');
+        END IF;
+
+        IF v_id_centro IS NULL THEN
+            v_id_centro := vro_residente.id_centro;
+        END IF;
+
+        -- 1. Actualizar datos biográficos permanentes en el residente si vienen en el payload
+        IF JSON_VALUE(pcl_json, '$.lugarNacimiento') IS NOT NULL THEN
+            vro_residente.lugar_nacimiento := TRIM(JSON_VALUE(pcl_json, '$.lugarNacimiento'));
+        END IF;
+        IF JSON_VALUE(pcl_json, '$.idEstadoCivil') IS NOT NULL THEN
+            vro_residente.id_estado_civil := TO_NUMBER(JSON_VALUE(pcl_json, '$.idEstadoCivil'));
+        END IF;
+        IF JSON_VALUE(pcl_json, '$.ocupacionHistorica') IS NOT NULL THEN
+            vro_residente.ocupacion_historica := TRIM(JSON_VALUE(pcl_json, '$.ocupacionHistorica'));
+        END IF;
+        IF JSON_VALUE(pcl_json, '$.nivelEducativo') IS NOT NULL THEN
+            vro_residente.nivel_educativo := TRIM(JSON_VALUE(pcl_json, '$.nivelEducativo'));
+        END IF;
+        IF JSON_VALUE(pcl_json, '$.religionCreencia') IS NOT NULL THEN
+            vro_residente.religion_creencia := TRIM(JSON_VALUE(pcl_json, '$.religionCreencia'));
+        END IF;
+        PKGSMY_RESIDENTES_DAO.p_actualizar(vro_residente);
+
+        -- 2. Poblar registro de valoración de ingreso
+        IF v_id_valing IS NOT NULL AND PKGSMY_VALORACIONES_INGRESO_DAO.f_existe(v_id_valing, vro_valing) THEN
+            -- Actualización de ficha existente
+            NULL;
+        ELSE
+            -- Nueva ficha
+            vro_valing.id                 := SEQ_SMY_VALORACIONES_INGRESO.NEXTVAL;
+            vro_valing.codigo_ficha       := 'VAL-' || TO_CHAR(f_fecha_actual, 'YYYY') || '-' || LPAD(TO_CHAR(vro_valing.id), 4, '0');
+            vro_valing.fecha_creacion     := f_fecha_actual;
+            vro_valing.fecha_valoracion   := f_fecha_actual;
+        END IF;
+
+        vro_valing.id_residente                   := v_id_residente;
+        vro_valing.id_centro                      := v_id_centro;
+        vro_valing.id_usuario_evaluador           := NVL(TO_NUMBER(JSON_VALUE(pcl_json, '$.idUsuarioEvaluador')), 1);
+        vro_valing.nombre_evaluador               := TRIM(JSON_VALUE(pcl_json, '$.nombreEvaluador'));
+        vro_valing.cargo_evaluador                := TRIM(JSON_VALUE(pcl_json, '$.cargoEvaluador'));
+        vro_valing.lugar_crecimiento              := TRIM(JSON_VALUE(pcl_json, '$.lugarCrecimiento'));
+        vro_valing.acontecimientos_importantes    := JSON_VALUE(pcl_json, '$.acontecimientosImportantes');
+        vro_valing.perdidas_duelos_significativos := JSON_VALUE(pcl_json, '$.perdidasDuelosSignificativos');
+        vro_valing.costumbres_tradiciones         := JSON_VALUE(pcl_json, '$.costumbresTradiciones');
+        vro_valing.gustos_pasatiempos_musica      := JSON_VALUE(pcl_json, '$.gustosPasatiemposMusica');
+        vro_valing.aspectos_tranquilidad          := JSON_VALUE(pcl_json, '$.aspectosTranquilidad');
+        vro_valing.aspectos_temor_incomodidad     := JSON_VALUE(pcl_json, '$.aspectosTemorIncomodidad');
+        vro_valing.rasgos_personalidad            := JSON_VALUE(pcl_json, '$.rasgosPersonalidad');
+        vro_valing.rutinas_habitos_diarios        := JSON_VALUE(pcl_json, '$.rutinasHabitosDiarios');
+        vro_valing.motivo_ingreso                 := JSON_VALUE(pcl_json, '$.motivoIngreso');
+        vro_valing.expectativas_ingreso           := JSON_VALUE(pcl_json, '$.expectativasIngreso');
+        vro_valing.disposicion_adaptacion         := TRIM(JSON_VALUE(pcl_json, '$.disposicionAdaptacion'));
+        vro_valing.estado_general_ingreso         := JSON_VALUE(pcl_json, '$.estadoGeneralIngreso');
+        vro_valing.signos_vitales_json            := JSON_VALUE(pcl_json, '$.signosVitalesJson');
+        vro_valing.cognitivo_orientacion          := JSON_VALUE(pcl_json, '$.cognitivoOrientacion');
+        vro_valing.emocional_conductual           := JSON_VALUE(pcl_json, '$.emocionalConductual');
+        vro_valing.movilidad_funcional            := JSON_VALUE(pcl_json, '$.movilidadFuncional');
+        vro_valing.nutricion_alimentacion         := JSON_VALUE(pcl_json, '$.nutricionAlimentacion');
+        vro_valing.eliminacion_continencia        := JSON_VALUE(pcl_json, '$.eliminacionContinencia');
+        vro_valing.higiene_autocuidado            := JSON_VALUE(pcl_json, '$.higieneAutocuidado');
+        vro_valing.patron_sueno                   := JSON_VALUE(pcl_json, '$.patronSueno');
+        vro_valing.terapias_apoyos_externos       := JSON_VALUE(pcl_json, '$.terapiasApoyosExternos');
+        vro_valing.ayudas_tecnicas                := JSON_VALUE(pcl_json, '$.ayudasTecnicas');
+        vro_valing.riesgo_caidas                  := NVL(TRIM(JSON_VALUE(pcl_json, '$.riesgoCaidas')), 'BAJO');
+        vro_valing.riesgo_ulceras_presion         := NVL(TRIM(JSON_VALUE(pcl_json, '$.riesgoUlcerasPresion')), 'BAJO');
+        vro_valing.riesgo_fuga                    := NVL(TRIM(JSON_VALUE(pcl_json, '$.riesgoFuga')), 'BAJO');
+        vro_valing.riesgo_broncoaspiracion        := NVL(TRIM(JSON_VALUE(pcl_json, '$.riesgoBroncoaspiracion')), 'BAJO');
+        vro_valing.grado_dependencia_global       := NVL(TRIM(JSON_VALUE(pcl_json, '$.gradoDependenciaGlobal')), 'INDEPENDIENTE');
+        vro_valing.condiciones_fisicas_piel       := JSON_VALUE(pcl_json, '$.condicionesFisicasPiel');
+        vro_valing.red_apoyo_no_familiar          := JSON_VALUE(pcl_json, '$.redApoyoNoFamiliar');
+        vro_valing.datos_genograma_json           := JSON_VALUE(pcl_json, '$.datosGenogramaJson');
+        vro_valing.id_archivo_genograma           := TO_NUMBER(JSON_VALUE(pcl_json, '$.idArchivoGenograma'));
+        vro_valing.concepto_general_ingreso       := JSON_VALUE(pcl_json, '$.conceptoGeneralIngreso');
+        vro_valing.recomendaciones_plan_cuidados  := JSON_VALUE(pcl_json, '$.recomendacionesPlanCuidados');
+        vro_valing.nombre_entrega_responsable     := TRIM(JSON_VALUE(pcl_json, '$.nombreEntregaResponsable'));
+        vro_valing.identificacion_entrega         := TRIM(JSON_VALUE(pcl_json, '$.identificacionEntrega'));
+        vro_valing.parentesco_entrega             := TRIM(JSON_VALUE(pcl_json, '$.parentescoEntrega'));
+        vro_valing.telefono_entrega               := TRIM(JSON_VALUE(pcl_json, '$.telefonoEntrega'));
+        vro_valing.aceptacion_terminos            := NVL(TRIM(JSON_VALUE(pcl_json, '$.aceptacionTerminos')), 'S');
+        vro_valing.id_archivo_firma_entrega       := TO_NUMBER(JSON_VALUE(pcl_json, '$.idArchivoFirmaEntrega'));
+        IF JSON_VALUE(pcl_json, '$.firmaEntregaBase64') IS NOT NULL THEN
+            vro_valing.firma_entrega_base64       := JSON_VALUE(pcl_json, '$.firmaEntregaBase64' RETURNING CLOB);
+        END IF;
+        vro_valing.id_usuario_ultima_modificacion := vro_valing.id_usuario_evaluador;
+
+        IF v_id_valing IS NOT NULL AND PKGSMY_VALORACIONES_INGRESO_DAO.f_existe(v_id_valing) THEN
+            PKGSMY_VALORACIONES_INGRESO_DAO.p_actualizar(vro_valing);
+        ELSE
+            PKGSMY_VALORACIONES_INGRESO_DAO.p_insertar(vro_valing);
+        END IF;
+
+        -- Commit controlado
+        p_do_commit('pkgln_admision_residente.pr_guardar_valoracion_ingreso');
+
+    EXCEPTION
+        WHEN OTHERS THEN
+            ROLLBACK;
+            IF SQLCODE BETWEEN -20999 AND -20001 THEN
+                RAISE;
+            END IF;
+            vro_error.nombre_programa := 'PKGLN_ADMISION_RESIDENTE';
+            vro_error.nombre_metodo   := 'PR_GUARDAR_VALORACION_INGRESO';
+            vro_error.parametros      := pcl_json;
+            uti_ge_excepciones_pkg.p_grabar_log(vro_error);
+            RAISE_APPLICATION_ERROR(-20000, 'Se presento un error comunicarse con soporte. Número error: ' || vro_error.id || ' - ' || SQLERRM);
+    END pr_guardar_valoracion_ingreso;
 
 END PKGLN_ADMISION_RESIDENTE;
 /
