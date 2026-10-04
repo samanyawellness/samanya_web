@@ -2280,9 +2280,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/ResidentDetailModal.tsx": {
-    "mtime": 1791073638.6011276,
-    "seen": 1791073724.2730064,
-    "ast_hash": "02aedec9ceab175605b8dd99dd30f4a2",
+    "mtime": 1791124454.527737,
+    "seen": 1791125164.519783,
+    "ast_hash": "a48c2b82d19c5452452f548b93607fde",
     "semantic_hash": ""
   },
   "src/components/views/ClinicalSupervisionView.tsx": {
@@ -2310,9 +2310,9 @@
     "semantic_hash": ""
   },
   "src/components/views/ResidentsView.tsx": {
-    "mtime": 1791074332.5499437,
-    "seen": 1791074433.716184,
-    "ast_hash": "d21cfc4130d9abfcd765e8f4c5488719",
+    "mtime": 1791124404.3333938,
+    "seen": 1791125164.5198069,
+    "ast_hash": "388c786967cecc149ad3eb78bc9a4ebb",
     "semantic_hash": ""
   },
   "src/components/views/ShiftsView.tsx": {
@@ -2328,15 +2328,15 @@
     "semantic_hash": ""
   },
   "src/context/AdminContext.tsx": {
-    "mtime": 1791088418.4338603,
-    "seen": 1791088463.4800653,
-    "ast_hash": "a13e9411f3b2fe08f98717815ef57df2",
+    "mtime": 1791123494.0655909,
+    "seen": 1791123823.9226136,
+    "ast_hash": "a0c70b666e8e87122d2d27dd2d5f5244",
     "semantic_hash": ""
   },
   "src/data/seedData.ts": {
-    "mtime": 1791088048.5263705,
-    "seen": 1791088463.4800735,
-    "ast_hash": "328d00e8fadd41b1a0e7b52df4b62a8a",
+    "mtime": 1791123400.823324,
+    "seen": 1791123823.9226155,
+    "ast_hash": "7b1df2a1cdd2d59ee28603e341b80ba1",
     "semantic_hash": ""
   },
   "src/main.tsx": {
@@ -2352,9 +2352,9 @@
     "semantic_hash": ""
   },
   "src/types/index.ts": {
-    "mtime": 1791087975.3467603,
-    "seen": 1791088463.4801173,
-    "ast_hash": "fed7076460551d43a939c1eb0ba40763",
+    "mtime": 1791123380.2791378,
+    "seen": 1791123823.9226253,
+    "ast_hash": "e93c72633eec12479325eb44418476f5",
     "semantic_hash": ""
   },
   "src/vite-env.d.ts": {
@@ -2664,8 +2664,8 @@
     "semantic_hash": ""
   },
   "cambios_bd_ficha.sql": {
-    "mtime": 1791074723.1712992,
-    "seen": 1791074915.4224286,
+    "mtime": 1791122903.7878597,
+    "seen": 1791123823.9225013,
     "ast_hash": "ba2daafd276367ad6ee3b17f7c244789",
     "semantic_hash": ""
   },
@@ -2699,28 +2699,10 @@
     "ast_hash": "60105c183d6b0436c0c60b5de9e6753d",
     "semantic_hash": ""
   },
-  "cambios_inventario.sql": {
-    "mtime": 1791086829.6203923,
-    "seen": 1791086991.8163073,
-    "ast_hash": "5234194c41632e0f21b23feb59067a1d",
-    "semantic_hash": ""
-  },
-  "configurar_sedes_inventario.sql": {
-    "mtime": 1791086854.9304566,
-    "seen": 1791086991.8163195,
-    "ast_hash": "60105c183d6b0436c0c60b5de9e6753d",
-    "semantic_hash": ""
-  },
   "src/components/views/InventoryView.tsx": {
     "mtime": 1791088287.83176,
     "seen": 1791088463.4799845,
     "ast_hash": "f9f6d2cbb2874c91e742aae32b3937c7",
-    "semantic_hash": ""
-  },
-  "agregar_maneja_costos.sql": {
-    "mtime": 1791087025.6438756,
-    "seen": 1791087668.5243824,
-    "ast_hash": "97c56eba926370b5105a8bc9655d89dd",
     "semantic_hash": ""
   },
   "backend/db/scripts/agregar_maneja_costos.sql": {
@@ -2739,6 +2721,24 @@
     "mtime": 1789598044.7331405,
     "seen": 1791090415.4719992,
     "ast_hash": "e8f865b1afb0f1e9ae9832759e01f3aa",
+    "semantic_hash": ""
+  },
+  "src/components/modals/ImprimirConstanciaInventarioModal.tsx": {
+    "mtime": 1791123547.5219176,
+    "seen": 1791123823.9225655,
+    "ast_hash": "a5b36b121e75c5f01a85a6df9a1aa791",
+    "semantic_hash": ""
+  },
+  "src/components/modals/ResidentInventoryModals.tsx": {
+    "mtime": 1791123570.8963542,
+    "seen": 1791123823.9225845,
+    "ast_hash": "c0b7b45bf43be1a353f42007ae7c6696",
+    "semantic_hash": ""
+  },
+  "src/components/modals/ResidentInventoryTabContent.tsx": {
+    "mtime": 1791123599.0573175,
+    "seen": 1791123823.9225867,
+    "ast_hash": "e37b0ca55d46d55139f7b1b48a46025d",
     "semantic_hash": ""
   }
 }

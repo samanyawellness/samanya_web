@@ -23,18 +23,21 @@ import {
   FileText,
   ExternalLink,
   ChevronRight,
-  BookOpen
+  BookOpen,
+  Boxes
 } from 'lucide-react';
 import { ResidentAvatar } from '../common/ResidentAvatar';
 import { DotacionResidente } from '../../types';
 import { ImprimirSolicitudDotacionModal } from './ImprimirSolicitudDotacionModal';
+import { ResidentInventoryTabContent } from './ResidentInventoryTabContent';
 
-type TabFicha = 'general' | 'bitacora' | 'medicamentos' | 'familiares' | 'dotacion' | 'documentos';
+type TabFicha = 'general' | 'bitacora' | 'medicamentos' | 'familiares' | 'dotacion' | 'documentos' | 'inventario';
 
 export const ResidentDetailModal: React.FC = () => {
   const {
     isResidenteDetailOpen,
     setIsResidenteDetailOpen,
+    tabInicialResidenteDetail,
     selectedResidente,
     residentes,
     activeSede,
@@ -50,7 +53,11 @@ export const ResidentDetailModal: React.FC = () => {
     abrirSolicitarDotacion,
     entregarDotacionSolicitada,
     agregarEntradaBitacora,
-    cargarBitacoraResidente
+    cargarBitacoraResidente,
+    movimientosInventario,
+    articulosCatalogo,
+    bodegasSede,
+    registrarMovimientoStock
   } = useAdmin();
 
   const [tabActiva, setTabActiva] = useState<TabFicha>('general');
@@ -81,6 +88,30 @@ export const ResidentDetailModal: React.FC = () => {
       cargarBitacoraResidente(resident.id).finally(() => setCargandoBitacora(false));
     }
   }, [isResidenteDetailOpen, resident?.id]);
+
+  // Sincronizar pestaña inicial si se abrió con una pestaña específica
+  useEffect(() => {
+    if (isResidenteDetailOpen && tabInicialResidenteDetail) {
+      if (tabInicialResidenteDetail === 'inventario' && activeSede?.manejaInventario === false) {
+        setTabActiva('general');
+      } else {
+        setTabActiva(tabInicialResidenteDetail);
+      }
+    }
+  }, [isResidenteDetailOpen, tabInicialResidenteDetail, activeSede?.manejaInventario]);
+
+  // Si la sede no maneja inventario y está en la pestaña inventario, regresar a general
+  useEffect(() => {
+    if (activeSede?.manejaInventario === false && tabActiva === 'inventario') {
+      setTabActiva('general');
+    }
+  }, [activeSede?.manejaInventario, tabActiva]);
+
+  const totalInsumosResidente = useMemo(() => {
+    if (!resident?.id) return 0;
+    const movs = (movimientosInventario || []).filter((m) => m.idResidente === resident.id);
+    return new Set(movs.flatMap((m) => m.detalles.map((d) => d.idArticulo))).size;
+  }, [movimientosInventario, resident?.id]);
 
   const dotacionesResidente = (dotaciones || []).filter((d) => d.idResidente === resident?.id);
   const dotacionesSolicitadas = dotacionesResidente.filter((d) => d.estadoElemento === 'Solicitado');
@@ -272,6 +303,26 @@ export const ResidentDetailModal: React.FC = () => {
               {dotacionesResidente.length}
             </span>
           </button>
+
+          {activeSede?.manejaInventario !== false && (
+            <button
+              type="button"
+              onClick={() => setTabActiva('inventario')}
+              className={`py-3 px-3.5 text-xs font-bold flex items-center gap-2 border-b-2 transition-all cursor-pointer whitespace-nowrap ${
+                tabActiva === 'inventario'
+                  ? 'border-[#182F28] text-[#182F28] bg-white rounded-t-xl shadow-2xs'
+                  : 'border-transparent text-[#7A745F] hover:text-[#182F28] hover:bg-[#EAE7DC]/60'
+              }`}
+            >
+              <Boxes className="w-4 h-4 text-[#1E7A4C]" />
+              <span>Inventario e Insumos</span>
+              {totalInsumosResidente > 0 && (
+                <span className="text-[10px] font-mono font-bold px-1.5 py-0.2 rounded-full bg-emerald-100 text-emerald-800 border border-emerald-300">
+                  {totalInsumosResidente}
+                </span>
+              )}
+            </button>
+          )}
 
           <button
             type="button"
@@ -1327,6 +1378,21 @@ export const ResidentDetailModal: React.FC = () => {
                 </div>
               )}
             </div>
+          )}
+
+          {/* ========================================================================= */}
+          {/* PESTAÑA 7: INVENTARIO & INSUMOS EN CUSTODIA (Condicional a sede) */}
+          {/* ========================================================================= */}
+          {activeSede?.manejaInventario !== false && tabActiva === 'inventario' && (
+            <ResidentInventoryTabContent
+              resident={resident}
+              activeSede={activeSede}
+              familiares={familiares}
+              movimientosInventario={movimientosInventario}
+              articulosCatalogo={articulosCatalogo}
+              bodegasSede={bodegasSede}
+              registrarMovimientoStock={registrarMovimientoStock}
+            />
           )}
         </div>
 

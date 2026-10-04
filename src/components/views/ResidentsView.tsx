@@ -16,7 +16,9 @@ import {
   Pill,
   Package,
   ClipboardList,
-  FileText
+  FileText,
+  Boxes,
+  ChevronRight
 } from 'lucide-react';
 import { ResidentAvatar } from '../common/ResidentAvatar';
 
@@ -38,12 +40,16 @@ export const ResidentsView: React.FC = () => {
     setIsGestionDotacionOpen,
     abrirSolicitarDotacion,
     dotaciones,
-    cargarBitacoraResidente
+    cargarBitacoraResidente,
+    abrirInventarioResidente,
+    movimientosInventario
   } = useAdmin();
 
   const [isSyncing, setIsSyncing] = useState(false);
   const [filterStatus, setFilterStatus] = useState<string>('TODOS');
   const [filterMobility, setFilterMobility] = useState<string>('TODOS');
+
+  const manejaInventarioSede = activeSede?.manejaInventario !== false;
 
   // Filtrado
   const filtered = residentes.filter((r) => {
@@ -368,6 +374,33 @@ export const ResidentsView: React.FC = () => {
                     </div>
                   );
                 })()}
+
+                {/* Resumen Insumos / Inventario en Custodia (Solo si la sede maneja inventario) */}
+                {manejaInventarioSede && (() => {
+                  const movs = (movimientosInventario || []).filter((m) => m.idResidente === res.id);
+                  const totalArticulos = new Set(movs.flatMap((m) => m.detalles.map((d) => d.idArticulo))).size;
+                  if (totalArticulos === 0) return null;
+                  return (
+                    <div className="mt-2 p-2 bg-[#F0FDF4] rounded-xl border border-[#BBF7D0] flex items-center justify-between text-xs">
+                      <div className="flex items-center gap-1.5 text-[#166534] font-semibold">
+                        <Boxes className="w-3.5 h-3.5 text-[#166534]" />
+                        <span>{totalArticulos} insumo(s) en custodia</span>
+                      </div>
+                      <button
+                        type="button"
+                        onClick={(e) => {
+                          e.stopPropagation();
+                          abrirInventarioResidente(res);
+                        }}
+                        className="text-[11px] font-bold text-[#15803D] hover:underline cursor-pointer flex items-center gap-0.5"
+                        title="Ver existencias, donaciones e historial de insumos"
+                      >
+                        <span>Ver Insumos</span>
+                        <ChevronRight className="w-3 h-3" />
+                      </button>
+                    </div>
+                  );
+                })()}
               </div>
 
               {/* Botones de Acción del Residente */}
@@ -394,27 +427,61 @@ export const ResidentsView: React.FC = () => {
                   </button>
                 </div>
 
-                <div className="grid grid-cols-2 gap-2">
-                  <button
-                    type="button"
-                    onClick={() => abrirSolicitarDotacion(res)}
-                    className="py-1.5 px-2.5 bg-white hover:bg-[#F2EFE9] text-[#4B4636] font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[#DEDBD1]"
-                    title="Solicitar dotación para este residente"
-                  >
-                    <ClipboardList className="w-3.5 h-3.5 text-[#B3803F]" />
-                    <span>Solicitar</span>
-                  </button>
+                {manejaInventarioSede ? (
+                  <div className="grid grid-cols-3 gap-1.5">
+                    <button
+                      type="button"
+                      onClick={() => abrirInventarioResidente(res)}
+                      className="py-1.5 px-2 bg-[#F0FDF4] hover:bg-[#DCFCE7] text-[#166534] font-bold rounded-xl text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer border border-[#86EFAC] shadow-2xs"
+                      title="Ver toda la información del inventario y donaciones de este residente"
+                    >
+                      <Boxes className="w-3.5 h-3.5 text-[#166534]" />
+                      <span>Inventario</span>
+                    </button>
 
-                  <button
-                    type="button"
-                    onClick={() => handleEditResident(res)}
-                    className="py-1.5 px-2.5 bg-[#FEF7EE] hover:bg-[#fcecd7] text-[#9A5B12] font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[#DCB87F]"
-                    title="Editar información del residente"
-                  >
-                    <Edit3 className="w-3.5 h-3.5 text-[#9A5B12]" />
-                    <span>Editar</span>
-                  </button>
-                </div>
+                    <button
+                      type="button"
+                      onClick={() => abrirSolicitarDotacion(res)}
+                      className="py-1.5 px-2 bg-white hover:bg-[#F2EFE9] text-[#4B4636] font-semibold rounded-xl text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer border border-[#DEDBD1]"
+                      title="Solicitar dotación para este residente"
+                    >
+                      <ClipboardList className="w-3.5 h-3.5 text-[#B3803F]" />
+                      <span>Solicitar</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleEditResident(res)}
+                      className="py-1.5 px-2 bg-[#FEF7EE] hover:bg-[#fcecd7] text-[#9A5B12] font-semibold rounded-xl text-xs flex items-center justify-center gap-1 transition-colors cursor-pointer border border-[#DCB87F]"
+                      title="Editar información del residente"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-[#9A5B12]" />
+                      <span>Editar</span>
+                    </button>
+                  </div>
+                ) : (
+                  <div className="grid grid-cols-2 gap-2">
+                    <button
+                      type="button"
+                      onClick={() => abrirSolicitarDotacion(res)}
+                      className="py-1.5 px-2.5 bg-white hover:bg-[#F2EFE9] text-[#4B4636] font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[#DEDBD1]"
+                      title="Solicitar dotación para este residente"
+                    >
+                      <ClipboardList className="w-3.5 h-3.5 text-[#B3803F]" />
+                      <span>Solicitar</span>
+                    </button>
+
+                    <button
+                      type="button"
+                      onClick={() => handleEditResident(res)}
+                      className="py-1.5 px-2.5 bg-[#FEF7EE] hover:bg-[#fcecd7] text-[#9A5B12] font-semibold rounded-xl text-xs flex items-center justify-center gap-1.5 transition-colors cursor-pointer border border-[#DCB87F]"
+                      title="Editar información del residente"
+                    >
+                      <Edit3 className="w-3.5 h-3.5 text-[#9A5B12]" />
+                      <span>Editar</span>
+                    </button>
+                  </div>
+                )}
               </div>
             </div>
           );

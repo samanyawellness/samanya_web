@@ -132,6 +132,9 @@ interface AdminContextType {
   setSelectedResidente: (res: Residente | null) => void;
   isResidenteDetailOpen: boolean;
   setIsResidenteDetailOpen: (open: boolean) => void;
+  tabInicialResidenteDetail: 'general' | 'bitacora' | 'medicamentos' | 'familiares' | 'dotacion' | 'documentos' | 'inventario';
+  setTabInicialResidenteDetail: (tab: 'general' | 'bitacora' | 'medicamentos' | 'familiares' | 'dotacion' | 'documentos' | 'inventario') => void;
+  abrirInventarioResidente: (residente: Residente) => void;
   isGestionDotacionOpen: boolean;
   setIsGestionDotacionOpen: (open: boolean) => void;
   isSolicitarDotacionOpen: boolean;
@@ -800,6 +803,15 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [turnoModalFechaInicial, setTurnoModalFechaInicial] = useState<string | undefined>(undefined);
   const [selectedResidente, setSelectedResidente] = useState<Residente | null>(null);
   const [isResidenteDetailOpen, setIsResidenteDetailOpen] = useState(false);
+  const [tabInicialResidenteDetail, setTabInicialResidenteDetail] = useState<
+    'general' | 'bitacora' | 'medicamentos' | 'familiares' | 'dotacion' | 'documentos' | 'inventario'
+  >('general');
+
+  const abrirInventarioResidente = (residente: Residente) => {
+    setSelectedResidente(residente);
+    setTabInicialResidenteDetail('inventario');
+    setIsResidenteDetailOpen(true);
+  };
 
   // Ficha Técnica de Ingreso y Valoración Multidimensional
   const [isFichaIngresoOpen, setIsFichaIngresoOpen] = useState(false);
@@ -2697,7 +2709,10 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
           costoUnitario: costoUnit,
           costoTotal: costoTot,
           saldoAnterior: saldoAnt,
-          saldoPosterior: saldoPost
+          saldoPosterior: saldoPost,
+          cantidadEmpaques: item.cantidadEmpaques,
+          unidadesPorEmpaque: item.unidadesPorEmpaque,
+          tipoEmpaque: item.tipoEmpaque
         });
 
         if (stockItem) {
@@ -3051,6 +3066,9 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setSelectedResidente,
         isResidenteDetailOpen,
         setIsResidenteDetailOpen,
+        tabInicialResidenteDetail,
+        setTabInicialResidenteDetail,
+        abrirInventarioResidente,
         editingResidente,
         setEditingResidente,
         isEditResidenteOpen,

@@ -561,6 +561,9 @@ export type MovimientoInvDetalle = {
   costoTotal: number;
   saldoAnterior: number;
   saldoPosterior: number;
+  cantidadEmpaques?: number;
+  unidadesPorEmpaque?: number;
+  tipoEmpaque?: string;
 };
 
 export type MovimientoInventario = {
