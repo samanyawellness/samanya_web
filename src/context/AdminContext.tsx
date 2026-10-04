@@ -122,6 +122,8 @@ interface AdminContextType {
   setIsRegisterWorkerOpen: (open: boolean) => void;
   isRegisterLeaveOpen: boolean;
   setIsRegisterLeaveOpen: (open: boolean) => void;
+  isRegisterIncidentOpen: boolean;
+  setIsRegisterIncidentOpen: (open: boolean) => void;
   isAssignShiftOpen: boolean;
   setIsAssignShiftOpen: (open: boolean) => void;
   isProgramarTurnosOpen: boolean;
@@ -244,6 +246,20 @@ interface AdminContextType {
   aprobarPermiso: (idPermiso: number, comentarios: string) => Promise<void>;
   rechazarPermiso: (idPermiso: number, comentarios: string) => Promise<void>;
   registrarPermiso: (nuevoPermiso: Omit<PermisoAusencia, 'id' | 'fechaSolicitud'> & { fechaSolicitud?: string }) => Promise<void>;
+
+  registrarIncidente: (datos: {
+    idResidente: number;
+    tipo: 'Caída' | 'Alteración de Signos' | 'Traslado a Urgencias' | 'Comportamiento / Agitación' | 'Otro';
+    severidad: 'Baja' | 'Media' | 'Alta' | 'Crítica';
+    descripcion: string;
+    accionesTomadas: string;
+    reportadoPor?: string;
+    fechaHora?: string;
+    estado?: 'Abierto' | 'En Seguimiento' | 'Cerrado';
+    notificadoFamiliar?: boolean;
+    registrarEnBitacora?: boolean;
+  }) => Promise<void>;
+  actualizarEstadoIncidente: (idIncidente: number, nuevoEstado: 'Abierto' | 'En Seguimiento' | 'Cerrado') => Promise<void>;
 
   // Notificaciones Toast y Alertas con Estilo Samanya
   toast: { message: string; type: 'success' | 'alert' | 'info' } | null;
@@ -370,7 +386,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
 
   const [incidentes, setIncidentes] = useState<IncidenteOperativo[]>(() => {
     const saved = localStorage.getItem('samanya_admin_incidentes');
-    return saved ? JSON.parse(saved) : [];
+    return saved ? JSON.parse(saved) : SEED_INCIDENTES;
   });
 
   // Catálogo y Dotación de Residentes (se sincroniza en vivo desde SMY_DOTACION_CATALOGO)
@@ -798,6 +814,7 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
   const [isRegisterFamilyOpen, setIsRegisterFamilyOpen] = useState(false);
   const [isRegisterWorkerOpen, setIsRegisterWorkerOpen] = useState(false);
   const [isRegisterLeaveOpen, setIsRegisterLeaveOpen] = useState(false);
+  const [isRegisterIncidentOpen, setIsRegisterIncidentOpen] = useState(false);
   const [isAssignShiftOpen, setIsAssignShiftOpen] = useState(false);
   const [isProgramarTurnosOpen, setIsProgramarTurnosOpen] = useState(false);
   const [turnoModalFechaInicial, setTurnoModalFechaInicial] = useState<string | undefined>(undefined);
@@ -3030,6 +3047,106 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  // 13. Métodos de Gestión y Registro de Incidentes
+  const registrarIncidente = async (datos: {
+    idResidente: number;
+    tipo: 'Caída' | 'Alteración de Signos' | 'Traslado a Urgencias' | 'Comportamiento / Agitación' | 'Otro';
+    severidad: 'Baja' | 'Media' | 'Alta' | 'Crítica';
+    descripcion: string;
+    accionesTomadas: string;
+    reportadoPor?: string;
+    fechaHora?: string;
+    estado?: 'Abierto' | 'En Seguimiento' | 'Cerrado';
+    notificadoFamiliar?: boolean;
+    registrarEnBitacora?: boolean;
+  }): Promise<void> => {
+    const res = residentes.find((r) => r.id === datos.idResidente);
+    const newId = Date.now();
+    const fechaHora = datos.fechaHora || `${obtenerFechaBogota()} ${obtenerHoraBogota()}`;
+    const reportadoPor = datos.reportadoPor || currentUser?.nombreCompleto || 'Administrador de Sede';
+    const estado = datos.estado || 'Abierto';
+
+    const nuevoIncidente: IncidenteOperativo = {
+      id: newId,
+      idCentro: res?.idCentro || activeSede.id,
+      idResidente: datos.idResidente,
+      nombreResidente: res?.nombreCompleto || 'Residente no identificado',
+      habitacion: res?.habitacion || 'N/A',
+      tipo: datos.tipo,
+      severidad: datos.severidad,
+      descripcion: datos.descripcion.trim(),
+      accionesTomadas: datos.accionesTomadas.trim(),
+      reportadoPor,
+      fechaHora,
+      estado,
+      notificadoFamiliar: Boolean(datos.notificadoFamiliar)
+    };
+
+    setIncidentes((prev) => [nuevoIncidente, ...prev]);
+
+    if (datos.registrarEnBitacora !== false && res) {
+      const textoNota = `[INCIDENTE REGISTRADO - ${datos.tipo.toUpperCase()} (Severidad: ${datos.severidad})]: ${datos.descripcion.trim()} | Acciones tomadas: ${datos.accionesTomadas.trim()}${datos.notificadoFamiliar ? ' | Acudiente notificado inmediatamente.' : ''}`;
+
+      const nuevaNotaBitacora: BitacoraResidente = {
+        id: Date.now() + 1,
+        idResidente: res.id,
+        nombreResidente: res.nombreCompleto,
+        habitacion: res.habitacion,
+        cama: res.cama,
+        idUsuario: currentUser?.id || 1,
+        nombreUsuario: reportadoPor,
+        fecha: obtenerFechaBogota(),
+        hora: obtenerHoraBogota(),
+        idCategoriaBitacora: 3,
+        categoria: 'Incidente / Evento Adverso',
+        tipoIncidente: datos.tipo,
+        severidadIncidente: datos.severidad,
+        contenido: textoNota,
+        grabadoPorVoz: false,
+        visibleAcudiente: true,
+        fechaCreacion: obtenerIsoBogota()
+      };
+
+      setResidentes((prev) =>
+        prev.map((r) =>
+          r.id === res.id
+            ? { ...r, bitacora: [nuevaNotaBitacora, ...(r.bitacora || [])] }
+            : r
+        )
+      );
+
+      setSelectedResidente((curr) => {
+        if (!curr || curr.id !== res.id) return curr;
+        return {
+          ...curr,
+          bitacora: [nuevaNotaBitacora, ...(curr.bitacora || [])]
+        };
+      });
+
+      try {
+        await adminApi.residentes.actualizarResidente({
+          idResidente: res.id,
+          observaciones: textoNota,
+          idUsuario: currentUser?.id || 1
+        }).catch(() => null);
+      } catch (e) {
+        console.warn('Persistencia en backend de bitácora no completada:', e);
+      }
+    }
+
+    showToast(`⚠️ Incidente "${datos.tipo}" reportado con severidad ${datos.severidad}`, 'alert');
+  };
+
+  const actualizarEstadoIncidente = async (
+    idIncidente: number,
+    nuevoEstado: 'Abierto' | 'En Seguimiento' | 'Cerrado'
+  ): Promise<void> => {
+    setIncidentes((prev) =>
+      prev.map((inc) => (inc.id === idIncidente ? { ...inc, estado: nuevoEstado } : inc))
+    );
+    showToast(`Estado del incidente actualizado a "${nuevoEstado}"`, 'info');
+  };
+
   return (
     <AdminContext.Provider
       value={{
@@ -3056,6 +3173,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         setIsRegisterWorkerOpen,
         isRegisterLeaveOpen,
         setIsRegisterLeaveOpen,
+        isRegisterIncidentOpen,
+        setIsRegisterIncidentOpen,
         isAssignShiftOpen,
         setIsAssignShiftOpen,
         isProgramarTurnosOpen,
@@ -3171,6 +3290,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         aprobarPermiso,
         rechazarPermiso,
         registrarPermiso,
+        registrarIncidente,
+        actualizarEstadoIncidente,
         toast,
         showToast,
         alertModal,

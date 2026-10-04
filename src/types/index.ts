@@ -117,6 +117,8 @@ export type BitacoraResidente = {
   hora: string;
   idCategoriaBitacora: number;
   categoria?: string;
+  tipoIncidente?: string;
+  severidadIncidente?: string;
   contenido: string;
   grabadoPorVoz?: boolean;
   visibleAcudiente?: boolean;

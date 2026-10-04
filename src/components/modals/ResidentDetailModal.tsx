@@ -24,14 +24,34 @@ import {
   ExternalLink,
   ChevronRight,
   BookOpen,
-  Boxes
+  Boxes,
+  Search,
+  CalendarDays,
+  Users
 } from 'lucide-react';
 import { ResidentAvatar } from '../common/ResidentAvatar';
 import { DotacionResidente } from '../../types';
 import { ImprimirSolicitudDotacionModal } from './ImprimirSolicitudDotacionModal';
 import { ResidentInventoryTabContent } from './ResidentInventoryTabContent';
+import { ViewModeSelector, ViewMode } from '../common/ViewModeSelector';
+import { PaginadorTabla } from '../common/PaginadorTabla';
+import { extraerDatosIncidente, obtenerClasesSeveridad } from '../../utils/incidenteUtils';
 
 type TabFicha = 'general' | 'bitacora' | 'medicamentos' | 'familiares' | 'dotacion' | 'documentos' | 'inventario';
+
+// Helper para normalizar fechas para comparaciones de rango
+function normalizarFecha(f: string | undefined): string {
+  if (!f) return '';
+  const trimmed = f.trim();
+  if (/^\d{1,2}\/\d{1,2}\/\d{4}$/.test(trimmed)) {
+    const parts = trimmed.split('/');
+    return `${parts[2]}-${parts[1].padStart(2, '0')}-${parts[0].padStart(2, '0')}`;
+  }
+  if (trimmed.length >= 10 && trimmed[4] === '-' && trimmed[7] === '-') {
+    return trimmed.substring(0, 10);
+  }
+  return trimmed;
+}
 
 export const ResidentDetailModal: React.FC = () => {
   const {
@@ -57,13 +77,23 @@ export const ResidentDetailModal: React.FC = () => {
     movimientosInventario,
     articulosCatalogo,
     bodegasSede,
-    registrarMovimientoStock
+    registrarMovimientoStock,
+    trabajadores
   } = useAdmin();
 
   const [tabActiva, setTabActiva] = useState<TabFicha>('general');
   const [textoNuevaNota, setTextoNuevaNota] = useState('');
   const [categoriaNuevaNota, setCategoriaNuevaNota] = useState('Rutina');
   const [cargandoBitacora, setCargandoBitacora] = useState(false);
+
+  // Estados de filtros, modo de visualización y paginación para la pestaña de bitácora
+  const [viewModeBitacora, setViewModeBitacora] = useState<ViewMode>('list');
+  const [paginaBitacora, setPaginaBitacora] = useState(1);
+  const [busquedaBitacora, setBusquedaBitacora] = useState('');
+  const [filtroCategoriaBitacora, setFiltroCategoriaBitacora] = useState('TODAS');
+  const [fechaDesdeBitacora, setFechaDesdeBitacora] = useState('');
+  const [fechaHastaBitacora, setFechaHastaBitacora] = useState('');
+  const [filtroAutorBitacora, setFiltroAutorBitacora] = useState('TODOS');
 
   const [mostrarFormAgregarDotacion, setMostrarFormAgregarDotacion] = useState(false);
   const [nuevoArticuloDotacion, setNuevoArticuloDotacion] = useState({
@@ -112,6 +142,97 @@ export const ResidentDetailModal: React.FC = () => {
     const movs = (movimientosInventario || []).filter((m) => m.idResidente === resident.id);
     return new Set(movs.flatMap((m) => m.detalles.map((d) => d.idArticulo))).size;
   }, [movimientosInventario, resident?.id]);
+
+  // Autores disponibles para las notas del residente
+  const autoresBitacoraModal = useMemo(() => {
+    const setAutores = new Set<string>();
+    (resident?.bitacora || []).forEach((n) => {
+      const a = (n.nombreUsuario || n.nombreEmpleado || '').trim();
+      if (a) setAutores.add(a);
+    });
+    trabajadores.forEach((t) => {
+      if (t.nombreCompleto) setAutores.add(t.nombreCompleto.trim());
+    });
+    return Array.from(setAutores).sort();
+  }, [resident?.bitacora, trabajadores]);
+
+  // Resetear página al modificar filtros de bitácora
+  useEffect(() => {
+    setPaginaBitacora(1);
+  }, [
+    resident?.id,
+    busquedaBitacora,
+    filtroCategoriaBitacora,
+    fechaDesdeBitacora,
+    fechaHastaBitacora,
+    filtroAutorBitacora,
+    viewModeBitacora
+  ]);
+
+  const notasFiltradasModal = useMemo(() => {
+    if (!resident?.bitacora) return [];
+    return resident.bitacora.filter((nota) => {
+      if (filtroCategoriaBitacora !== 'TODAS') {
+        if (filtroCategoriaBitacora === 'Incidente / Evento Adverso') {
+          if (nota.categoria !== 'Incidente / Evento Adverso' && !extraerDatosIncidente(nota)) {
+            return false;
+          }
+        } else if ((nota.categoria || 'Rutina') !== filtroCategoriaBitacora) {
+          return false;
+        }
+      }
+      const fNorm = normalizarFecha(nota.fecha);
+      if (fechaDesdeBitacora && fNorm && fNorm < fechaDesdeBitacora) return false;
+      if (fechaHastaBitacora && fNorm && fNorm > fechaHastaBitacora) return false;
+      if (filtroAutorBitacora !== 'TODOS') {
+        const autorNota = (nota.nombreUsuario || nota.nombreEmpleado || '').toLowerCase().trim();
+        const fLower = filtroAutorBitacora.toLowerCase().trim();
+        if (!autorNota.includes(fLower) && !fLower.includes(autorNota)) return false;
+      }
+      if (busquedaBitacora.trim()) {
+        const q = busquedaBitacora.toLowerCase();
+        const dInc = extraerDatosIncidente(nota);
+        const match =
+          nota.contenido.toLowerCase().includes(q) ||
+          (dInc && (dInc.tipo.toLowerCase().includes(q) || dInc.severidad.toLowerCase().includes(q))) ||
+          (nota.nombreUsuario && nota.nombreUsuario.toLowerCase().includes(q)) ||
+          (nota.nombreEmpleado && nota.nombreEmpleado.toLowerCase().includes(q)) ||
+          nota.fecha.includes(q);
+        if (!match) return false;
+      }
+      return true;
+    });
+  }, [
+    resident?.bitacora,
+    filtroCategoriaBitacora,
+    fechaDesdeBitacora,
+    fechaHastaBitacora,
+    filtroAutorBitacora,
+    busquedaBitacora
+  ]);
+
+  const itemsPorPaginaBitacora = viewModeBitacora === 'grid' ? 6 : 8;
+  const totalPaginasBitacora = Math.ceil(notasFiltradasModal.length / itemsPorPaginaBitacora) || 1;
+  const notasBitacoraPaginadas = useMemo(() => {
+    const inicio = (paginaBitacora - 1) * itemsPorPaginaBitacora;
+    return notasFiltradasModal.slice(inicio, inicio + itemsPorPaginaBitacora);
+  }, [notasFiltradasModal, paginaBitacora, itemsPorPaginaBitacora]);
+
+  const hayFiltrosActivosModal = Boolean(
+    busquedaBitacora ||
+      filtroCategoriaBitacora !== 'TODAS' ||
+      fechaDesdeBitacora ||
+      fechaHastaBitacora ||
+      filtroAutorBitacora !== 'TODOS'
+  );
+
+  const limpiarFiltrosBitacoraModal = () => {
+    setBusquedaBitacora('');
+    setFiltroCategoriaBitacora('TODAS');
+    setFechaDesdeBitacora('');
+    setFechaHastaBitacora('');
+    setFiltroAutorBitacora('TODOS');
+  };
 
   const dotacionesResidente = (dotaciones || []).filter((d) => d.idResidente === resident?.id);
   const dotacionesSolicitadas = dotacionesResidente.filter((d) => d.estadoElemento === 'Solicitado');
@@ -631,41 +752,230 @@ export const ResidentDetailModal: React.FC = () => {
                 </div>
               </div>
 
-              {/* Lista de entradas de bitácora */}
-              {resident.bitacora && resident.bitacora.length > 0 ? (
-                <div className="space-y-3">
-                  {resident.bitacora.map((item, idx) => {
+              {/* Barra de Filtros de Bitácora */}
+              <div className="p-3.5 bg-[#F7F6F2] rounded-xl border border-[#DEDBD1] space-y-3">
+                <div className="flex flex-wrap items-center justify-between gap-3">
+                  <div className="flex flex-wrap items-center gap-2 flex-1 min-w-[220px]">
+                    <div className="relative flex-1 min-w-[160px]">
+                      <Search className="w-3.5 h-3.5 absolute left-3 top-1/2 -translate-y-1/2 text-[#7A745F]" />
+                      <input
+                        type="text"
+                        placeholder="Buscar en la bitácora..."
+                        value={busquedaBitacora}
+                        onChange={(e) => setBusquedaBitacora(e.target.value)}
+                        className="w-full pl-8 pr-6 py-1.5 rounded-lg border border-[#DEDBD1] bg-white text-xs text-[#182F28] focus:outline-none focus:border-[#B3803F]"
+                      />
+                      {busquedaBitacora && (
+                        <button
+                          type="button"
+                          onClick={() => setBusquedaBitacora('')}
+                          className="absolute right-2 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-0.5"
+                        >
+                          <X className="w-3 h-3" />
+                        </button>
+                      )}
+                    </div>
+
+                    <select
+                      value={filtroCategoriaBitacora}
+                      onChange={(e) => setFiltroCategoriaBitacora(e.target.value)}
+                      className="px-2.5 py-1.5 rounded-lg border border-[#DEDBD1] bg-white text-xs font-semibold text-[#26241F] focus:outline-none"
+                    >
+                      <option value="TODAS">Todas las Categorías</option>
+                      <option value="Incidente / Evento Adverso">⚠️ Incidentes / Eventos Adversos</option>
+                      <option value="Rutina">Rutina</option>
+                      <option value="Salud">Salud</option>
+                      <option value="Comportamiento">Comportamiento</option>
+                      <option value="Alimentación">Alimentación</option>
+                      <option value="Visita Familiar">Visita Familiar</option>
+                      <option value="Actividad Recreativa">Actividad Recreativa</option>
+                      <option value="Alerta">Alerta</option>
+                    </select>
+                  </div>
+
+                  <ViewModeSelector viewMode={viewModeBitacora} onChange={setViewModeBitacora} />
+                </div>
+
+                {/* Rango de Fechas y Talento Humano */}
+                <div className="flex flex-wrap items-center justify-between gap-3 pt-2 border-t border-[#DEDBD1]/60 text-xs">
+                  <div className="flex flex-wrap items-center gap-3">
+                    <div className="flex items-center gap-1.5">
+                      <CalendarDays className="w-3.5 h-3.5 text-[#274A3F]" />
+                      <span className="font-mono text-[11px] text-[#7A745F] font-bold">DESDE:</span>
+                      <input
+                        type="date"
+                        value={fechaDesdeBitacora}
+                        onChange={(e) => setFechaDesdeBitacora(e.target.value)}
+                        className="px-2 py-1 rounded-lg border border-[#DEDBD1] bg-white text-xs text-[#182F28] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <span className="font-mono text-[11px] text-[#7A745F] font-bold">HASTA:</span>
+                      <input
+                        type="date"
+                        value={fechaHastaBitacora}
+                        onChange={(e) => setFechaHastaBitacora(e.target.value)}
+                        className="px-2 py-1 rounded-lg border border-[#DEDBD1] bg-white text-xs text-[#182F28] focus:outline-none"
+                      />
+                    </div>
+
+                    <div className="flex items-center gap-1.5">
+                      <Users className="w-3.5 h-3.5 text-[#B3803F]" />
+                      <span className="font-mono text-[11px] text-[#7A745F] font-bold">AUTOR:</span>
+                      <select
+                        value={filtroAutorBitacora}
+                        onChange={(e) => setFiltroAutorBitacora(e.target.value)}
+                        className="px-2 py-1 rounded-lg border border-[#DEDBD1] bg-white text-xs font-semibold text-[#26241F] focus:outline-none max-w-[180px] truncate"
+                      >
+                        <option value="TODOS">Todos los Autores</option>
+                        {autoresBitacoraModal.map((autor, idx) => (
+                          <option key={idx} value={autor}>
+                            {autor}
+                          </option>
+                        ))}
+                      </select>
+                    </div>
+                  </div>
+
+                  <div className="flex items-center gap-2">
+                    {hayFiltrosActivosModal && (
+                      <button
+                        type="button"
+                        onClick={limpiarFiltrosBitacoraModal}
+                        className="text-xs text-[#A4453A] hover:underline flex items-center gap-1 font-bold cursor-pointer"
+                      >
+                        <RotateCcw className="w-3 h-3" />
+                        <span>Limpiar</span>
+                      </button>
+                    )}
+                    <span className="font-mono text-[11px] text-[#7A745F]">
+                      {notasFiltradasModal.length} nota(s)
+                    </span>
+                  </div>
+                </div>
+              </div>
+
+              {/* Visualización 1: Modo Tarjetas (Grid) */}
+              {viewModeBitacora === 'grid' && (
+                <div className="grid grid-cols-1 md:grid-cols-2 gap-3">
+                  {notasBitacoraPaginadas.map((item, idx) => {
                     const esRegistroAdmision = item.contenido.includes('[REGISTRO DEL RESIDENTE]');
                     const esCambioEstado = item.contenido.includes('[CAMBIO DE ESTADO]');
+                    const datosIncidente = extraerDatosIncidente(item);
                     return (
                       <div
                         key={item.id || idx}
-                        className={`p-4 rounded-2xl border transition-all ${
+                        className={`p-4 rounded-2xl border transition-all flex flex-col justify-between ${
                           esRegistroAdmision
                             ? 'bg-[#F2F8F5] border-[#274A3F]/40 shadow-xs'
                             : esCambioEstado
                             ? 'bg-[#FEF9F2] border-amber-300/80 shadow-xs'
+                            : datosIncidente
+                            ? 'bg-[#FFF8F7] border-[#F5C2BC] shadow-xs'
                             : 'bg-white border-[#DEDBD1] hover:border-[#B3803F]/50 shadow-2xs'
                         }`}
                       >
-                        <div className="flex items-center justify-between gap-2 mb-2">
+                        <div>
+                          <div className="flex items-center justify-between gap-2 mb-2">
+                            <div className="flex items-center gap-2 flex-wrap">
+                              {esRegistroAdmision ? (
+                                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#182F28] text-[#DCB87F] border border-[#DCB87F]/40 flex items-center gap-1 shadow-2xs">
+                                  <span>⭐</span>
+                                  <span>Registro Inicial</span>
+                                </span>
+                              ) : esCambioEstado ? (
+                                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300/70 flex items-center gap-1 shadow-2xs">
+                                  <span>🔄</span>
+                                  <span>Cambio Estado</span>
+                                </span>
+                              ) : datosIncidente ? (
+                                <div className="flex items-center gap-1.5 flex-wrap">
+                                  <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#FBE8E6] text-[#A4453A] border border-[#F5C2BC] flex items-center gap-1 shadow-2xs">
+                                    <ShieldAlert className="w-3 h-3 text-[#A4453A] shrink-0" />
+                                    <span>Incidente: {datosIncidente.tipo}</span>
+                                  </span>
+                                  <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${obtenerClasesSeveridad(datosIncidente.severidad)}`}>
+                                    {datosIncidente.severidad}
+                                  </span>
+                                </div>
+                              ) : (
+                                <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EAE7DC] text-[#274A3F] border border-[#DEDBD1]">
+                                  {item.categoria || 'Rutina'}
+                                </span>
+                              )}
+                              <span className="text-xs text-[#7A745F] font-mono flex items-center gap-1">
+                                <Calendar className="w-3 h-3 text-[#274A3F]" />
+                                <span>{item.fecha}</span>
+                                <span>•</span>
+                                <Clock className="w-3 h-3 text-[#274A3F]" />
+                                <span>{item.hora}</span>
+                              </span>
+                            </div>
+                          </div>
+
+                          <p className="text-xs text-[#182F28] leading-relaxed whitespace-pre-wrap pl-1">
+                            {item.contenido}
+                          </p>
+                        </div>
+
+                        <div className="mt-3 pt-2 border-t border-[#DEDBD1]/60 text-[11px] text-[#7A745F]">
+                          Por: <strong className="text-[#182F28]">{item.nombreUsuario || item.nombreEmpleado || 'Administrador'}</strong>
+                        </div>
+                      </div>
+                    );
+                  })}
+                </div>
+              )}
+
+              {/* Visualización 2: Modo Lista Compacta */}
+              {viewModeBitacora === 'list' && (
+                <div className="space-y-2.5">
+                  {notasBitacoraPaginadas.map((item, idx) => {
+                    const esRegistroAdmision = item.contenido.includes('[REGISTRO DEL RESIDENTE]');
+                    const esCambioEstado = item.contenido.includes('[CAMBIO DE ESTADO]');
+                    const datosIncidente = extraerDatosIncidente(item);
+                    return (
+                      <div
+                        key={item.id || idx}
+                        className={`p-3.5 rounded-xl border transition-all ${
+                          esRegistroAdmision
+                            ? 'bg-[#F2F8F5] border-[#274A3F]/40 shadow-xs'
+                            : esCambioEstado
+                            ? 'bg-[#FEF9F2] border-amber-300/80 shadow-xs'
+                            : datosIncidente
+                            ? 'bg-[#FFF8F7] border-[#F5C2BC] shadow-xs'
+                            : 'bg-white border-[#DEDBD1] hover:border-[#B3803F]/50 shadow-2xs'
+                        }`}
+                      >
+                        <div className="flex flex-col sm:flex-row sm:items-center justify-between gap-2 mb-1.5">
                           <div className="flex items-center gap-2 flex-wrap">
                             {esRegistroAdmision ? (
                               <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#182F28] text-[#DCB87F] border border-[#DCB87F]/40 flex items-center gap-1 shadow-2xs">
                                 <span>⭐</span>
-                                <span>Registro Inicial de Admisión</span>
+                                <span>Registro Inicial</span>
                               </span>
                             ) : esCambioEstado ? (
                               <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-amber-100 text-amber-900 border border-amber-300/70 flex items-center gap-1 shadow-2xs">
                                 <span>🔄</span>
-                                <span>Cambio de Estado Administrativo</span>
+                                <span>Cambio Estado</span>
                               </span>
+                            ) : datosIncidente ? (
+                              <div className="flex items-center gap-1.5 flex-wrap">
+                                <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#FBE8E6] text-[#A4453A] border border-[#F5C2BC] flex items-center gap-1 shadow-2xs">
+                                  <ShieldAlert className="w-3 h-3 text-[#A4453A] shrink-0" />
+                                  <span>Incidente: {datosIncidente.tipo}</span>
+                                </span>
+                                <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${obtenerClasesSeveridad(datosIncidente.severidad)}`}>
+                                  {datosIncidente.severidad}
+                                </span>
+                              </div>
                             ) : (
                               <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EAE7DC] text-[#274A3F] border border-[#DEDBD1]">
                                 {item.categoria || 'Rutina'}
                               </span>
                             )}
-                            <span className="text-xs text-[#7A745F] font-medium flex items-center gap-1">
+                            <span className="text-xs text-[#7A745F] font-mono flex items-center gap-1">
                               <Calendar className="w-3 h-3 text-[#274A3F]" />
                               <span>{item.fecha}</span>
                               <span>•</span>
@@ -679,18 +989,106 @@ export const ResidentDetailModal: React.FC = () => {
                           </span>
                         </div>
 
-                        <p className="text-xs text-[#182F28] leading-relaxed whitespace-pre-wrap">
+                        <p className="text-xs text-[#182F28] leading-relaxed whitespace-pre-wrap pl-1">
                           {item.contenido}
                         </p>
                       </div>
                     );
                   })}
                 </div>
-              ) : (
-                <div className="p-8 bg-[#F7F6F2] rounded-2xl text-center text-xs text-[#7A745F] border border-[#DEDBD1]">
-                  No hay anotaciones registradas en la bitácora aún.
+              )}
+
+              {/* Visualización 3: Modo Tabla de Datos */}
+              {viewModeBitacora === 'table' && (
+                <div className="bg-white rounded-2xl border border-[#DEDBD1] shadow-xs overflow-hidden">
+                  <div className="overflow-x-auto">
+                    <table className="w-full text-left border-collapse text-xs">
+                      <thead>
+                        <tr className="bg-[#182F28] text-white border-b border-[#274A3F]">
+                          <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[11px] whitespace-nowrap">
+                            Fecha & Hora
+                          </th>
+                          <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[11px] whitespace-nowrap">
+                            Categoría
+                          </th>
+                          <th className="py-2.5 px-3 font-semibold uppercase tracking-wider text-[11px]">
+                            Talento Humano / Autor
+                          </th>
+                          <th className="py-2.5 px-4 font-semibold uppercase tracking-wider text-[11px]">
+                            Observación
+                          </th>
+                        </tr>
+                      </thead>
+                      <tbody className="divide-y divide-[#DEDBD1]/60">
+                        {notasBitacoraPaginadas.map((item, idx) => {
+                          const esRegistroAdmision = item.contenido.includes('[REGISTRO DEL RESIDENTE]');
+                          const esCambioEstado = item.contenido.includes('[CAMBIO DE ESTADO]');
+                          const datosIncidente = extraerDatosIncidente(item);
+                          return (
+                            <tr key={item.id || idx} className="hover:bg-[#F7F6F2]/70 transition-colors">
+                              <td className="py-2.5 px-3 font-mono text-[#5C6058] whitespace-nowrap">
+                                <div>{item.fecha}</div>
+                                <div className="text-[10px] text-[#7A745F]">{item.hora}</div>
+                              </td>
+                              <td className="py-2.5 px-3 whitespace-nowrap">
+                                {esRegistroAdmision ? (
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#182F28] text-[#DCB87F]">
+                                    ⭐ Admisión
+                                  </span>
+                                ) : esCambioEstado ? (
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-amber-100 text-amber-900">
+                                    🔄 Cambio
+                                  </span>
+                                ) : datosIncidente ? (
+                                  <div className="flex items-center gap-1.5 flex-wrap">
+                                    <span className="text-[10px] font-bold px-2.5 py-0.5 rounded-full bg-[#FBE8E6] text-[#A4453A] border border-[#F5C2BC] flex items-center gap-1 shadow-2xs">
+                                      <ShieldAlert className="w-3 h-3 text-[#A4453A] shrink-0" />
+                                      <span>Incidente: {datosIncidente.tipo}</span>
+                                    </span>
+                                    <span className={`text-[9px] font-bold px-1.5 py-0.5 rounded-md border ${obtenerClasesSeveridad(datosIncidente.severidad)}`}>
+                                      {datosIncidente.severidad}
+                                    </span>
+                                  </div>
+                                ) : (
+                                  <span className="text-[10px] font-bold px-2 py-0.5 rounded-full bg-[#EAE7DC] text-[#274A3F] border border-[#DEDBD1]">
+                                    {item.categoria || 'Rutina'}
+                                  </span>
+                                )}
+                              </td>
+                              <td className="py-2.5 px-3 font-bold text-[#182F28] whitespace-nowrap">
+                                {item.nombreUsuario || item.nombreEmpleado || 'Administrador'}
+                              </td>
+                              <td className="py-2.5 px-4 text-[#182F28] font-serif leading-relaxed max-w-[340px]">
+                                {item.contenido}
+                              </td>
+                            </tr>
+                          );
+                        })}
+                      </tbody>
+                    </table>
+                  </div>
                 </div>
               )}
+
+              {/* Estado vacío si no hay notas */}
+              {notasFiltradasModal.length === 0 && (
+                <div className="p-8 bg-[#F7F6F2] rounded-2xl text-center text-xs text-[#7A745F] border border-[#DEDBD1]">
+                  {hayFiltrosActivosModal
+                    ? 'No hay anotaciones con los filtros aplicados (fechas, categoría o autor).'
+                    : 'No hay anotaciones registradas en la bitácora aún.'}
+                </div>
+              )}
+
+              {/* Paginador */}
+              <PaginadorTabla
+                paginaActual={paginaBitacora}
+                totalPaginas={totalPaginasBitacora}
+                totalItems={notasFiltradasModal.length}
+                itemsPorPagina={itemsPorPaginaBitacora}
+                itemLabel="notas de bitácora"
+                onCambiarPagina={setPaginaBitacora}
+                className="rounded-xl border border-[#DEDBD1]"
+              />
             </div>
           )}
 

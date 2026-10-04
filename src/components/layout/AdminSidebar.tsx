@@ -12,7 +12,8 @@ import {
   ShieldCheck,
   LogOut,
   UserCog,
-  Boxes
+  Boxes,
+  BookOpen
 } from 'lucide-react';
 import { resolverAvatarUrl, DEFAULT_AVATAR, obtenerIniciales } from '../../utils/avatarUtils';
 
@@ -92,8 +93,8 @@ export const AdminSidebar: React.FC = () => {
     },
     {
       tab: 'clinico',
-      label: 'Supervisión Clínica',
-      icon: <Stethoscope className="w-5 h-5" />
+      label: 'Bitácora',
+      icon: <BookOpen className="w-5 h-5" />
     },
     // Módulo condicional por Sede: Solo visible si la sede no tiene deshabilitado manejaInventario = false
     ...(activeSede && activeSede.manejaInventario !== false ? [{

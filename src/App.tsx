@@ -20,6 +20,7 @@ import { RegisterResidentModal } from './components/modals/RegisterResidentModal
 import { RegisterFamilyModal } from './components/modals/RegisterFamilyModal';
 import { RegisterWorkerModal } from './components/modals/RegisterWorkerModal';
 import { RegisterLeaveModal } from './components/modals/RegisterLeaveModal';
+import { RegisterIncidentModal } from './components/modals/RegisterIncidentModal';
 import { ResidentDetailModal } from './components/modals/ResidentDetailModal';
 import { EditResidentModal } from './components/modals/EditResidentModal';
 import { EditWorkerModal } from './components/modals/EditWorkerModal';
@@ -30,7 +31,7 @@ import { SolicitarDotacionModal } from './components/modals/SolicitarDotacionMod
 import { ProgramarTurnosModal } from './components/modals/ProgramarTurnosModal';
 import { UserProfileModal } from './components/modals/UserProfileModal';
 import { FichaTecnicaIngresoModal } from './components/modals/FichaTecnicaIngresoModal';
-import { SamanyaAiChat } from './components/chat/SamanyaAiChat';
+// import { SamanyaAiChat } from './components/chat/SamanyaAiChat';
 import { LoginView } from './components/views/LoginView';
 
 const AdminLayout: React.FC = () => {
@@ -62,6 +63,7 @@ const AdminLayout: React.FC = () => {
       <RegisterFamilyModal />
       <RegisterWorkerModal />
       <RegisterLeaveModal />
+      <RegisterIncidentModal />
       <ResidentDetailModal />
       <FichaTecnicaIngresoModal />
       <GestionDotacionModal />
@@ -79,8 +81,8 @@ const AdminLayout: React.FC = () => {
       <ToastNotification />
       <SamanyaAlertModal />
 
-      {/* Asistente Virtual Inteligente con OpenRouter */}
-      <SamanyaAiChat />
+      {/* Asistente Virtual Inteligente con OpenRouter (Oculto) */}
+      {/* <SamanyaAiChat /> */}
     </div>
   );
 };
