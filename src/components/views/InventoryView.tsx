@@ -22,7 +22,9 @@ import {
   Layers,
   X,
   Pencil,
-  Calculator
+  Calculator,
+  ChevronLeft,
+  ChevronRight
 } from 'lucide-react';
 import {
   ArticuloCatalogo,
@@ -34,6 +36,70 @@ import {
   RegistrarMovimientoPayload,
   RegistrarTrasladoPayload
 } from '../../types';
+import { ModalDetalleKPI, TipoKPIModal } from '../modals/ModalDetalleKPI';
+
+// =========================================================================
+// COMPONENTE DE PAGINACIÓN ESTANDARIZADO PARA INVENTARIOS
+// =========================================================================
+interface PaginadorTablaProps {
+  paginaActual: number;
+  totalPaginas: number;
+  totalItems: number;
+  itemsPorPagina: number;
+  itemLabel: string;
+  onCambiarPagina: (p: number) => void;
+}
+
+const PaginadorTabla: React.FC<PaginadorTablaProps> = ({
+  paginaActual,
+  totalPaginas,
+  totalItems,
+  itemsPorPagina,
+  itemLabel,
+  onCambiarPagina
+}) => {
+  if (totalItems <= itemsPorPagina) return null;
+
+  const inicio = (paginaActual - 1) * itemsPorPagina + 1;
+  const fin = Math.min(totalItems, paginaActual * itemsPorPagina);
+
+  return (
+    <div className="flex flex-col sm:flex-row items-center justify-between gap-3 px-5 py-3.5 bg-[#F7F6F2] border-t border-[#DEDBD1] text-xs">
+      <div className="text-[#5C6058] font-mono">
+        Mostrando <span className="font-bold text-[#182F28]">{inicio}</span> a{' '}
+        <span className="font-bold text-[#182F28]">{fin}</span> de{' '}
+        <span className="font-bold text-[#182F28]">{totalItems}</span> {itemLabel}
+      </div>
+      <div className="flex items-center gap-2">
+        <button
+          type="button"
+          disabled={paginaActual === 1}
+          onClick={() => onCambiarPagina(Math.max(1, paginaActual - 1))}
+          className="px-3 py-1.5 rounded-xl border border-[#DEDBD1] bg-white text-[#182F28] hover:bg-[#EAE7DC] disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold inline-flex items-center gap-1 shadow-2xs cursor-pointer"
+        >
+          <ChevronLeft className="w-3.5 h-3.5" />
+          <span>Anterior</span>
+        </button>
+
+        <div className="flex items-center gap-1 px-2">
+          <span className="font-mono font-bold text-[#182F28]">{paginaActual}</span>
+          <span className="text-[#7A745F]">/</span>
+          <span className="font-mono text-[#7A745F]">{totalPaginas}</span>
+        </div>
+
+        <button
+          type="button"
+          disabled={paginaActual === totalPaginas}
+          onClick={() => onCambiarPagina(Math.min(totalPaginas, paginaActual + 1))}
+          className="px-3 py-1.5 rounded-xl border border-[#DEDBD1] bg-white text-[#182F28] hover:bg-[#EAE7DC] disabled:opacity-40 disabled:cursor-not-allowed transition-all font-semibold inline-flex items-center gap-1 shadow-2xs cursor-pointer"
+        >
+          <span>Siguiente</span>
+          <ChevronRight className="w-3.5 h-3.5" />
+        </button>
+      </div>
+    </div>
+  );
+};
 
 export const InventoryView: React.FC = () => {
   const {
@@ -98,6 +164,24 @@ export const InventoryView: React.FC = () => {
 
   // Filtros de Traslados
   const [estadoTrasladoFiltro, setEstadoTrasladoFiltro] = useState<string>('TODOS');
+  const [searchTraslados, setSearchTraslados] = useState('');
+
+  // Filtros de Catálogo
+  const [searchCatalogo, setSearchCatalogo] = useState('');
+  const [categoriaCatalogoFiltro, setCategoriaCatalogoFiltro] = useState<number | 'TODAS'>('TODAS');
+
+  // Estados de paginación por pestaña
+  const [paginaStock, setPaginaStock] = useState(1);
+  const itemsPorPaginaStock = 10;
+
+  const [paginaKardex, setPaginaKardex] = useState(1);
+  const itemsPorPaginaKardex = 8;
+
+  const [paginaTraslados, setPaginaTraslados] = useState(1);
+  const itemsPorPaginaTraslados = 6;
+
+  const [paginaCatalogo, setPaginaCatalogo] = useState(1);
+  const itemsPorPaginaCatalogo = 10;
 
   // Modales
   const [isMovimientoModalOpen, setIsMovimientoModalOpen] = useState(false);
@@ -105,6 +189,24 @@ export const InventoryView: React.FC = () => {
   const [isNuevoArticuloModalOpen, setIsNuevoArticuloModalOpen] = useState(false);
   const [articuloAEditar, setArticuloAEditar] = useState<ArticuloCatalogo | null>(null);
   const [articuloKardexSeleccionado, setArticuloKardexSeleccionado] = useState<ArticuloCatalogo | null>(null);
+  const [modalDetalleKPI, setModalDetalleKPI] = useState<TipoKPIModal | null>(null);
+
+  // Resetear páginas a 1 cuando cambien filtros de búsqueda o selectores
+  useEffect(() => {
+    setPaginaStock(1);
+  }, [searchStock, categoriaFiltro, alertaFiltro, bodegaSeleccionadaId]);
+
+  useEffect(() => {
+    setPaginaKardex(1);
+  }, [searchKardex, tipoMovFiltro]);
+
+  useEffect(() => {
+    setPaginaTraslados(1);
+  }, [searchTraslados, estadoTrasladoFiltro]);
+
+  useEffect(() => {
+    setPaginaCatalogo(1);
+  }, [searchCatalogo, categoriaCatalogoFiltro]);
 
   // Bodegas de la sede activa
   const bodegasDeSede = useMemo(() => {
@@ -136,6 +238,13 @@ export const InventoryView: React.FC = () => {
     });
   }, [inventarioStock, activeSede.id, bodegaSeleccionadaId, categoriaFiltro, alertaFiltro, searchStock, articulosCatalogo]);
 
+  // Paginación Stock
+  const totalPaginasStock = Math.ceil(stockDeSede.length / itemsPorPaginaStock) || 1;
+  const stockDeSedePaginado = useMemo(() => {
+    const inicio = (paginaStock - 1) * itemsPorPaginaStock;
+    return stockDeSede.slice(inicio, inicio + itemsPorPaginaStock);
+  }, [stockDeSede, paginaStock, itemsPorPaginaStock]);
+
   // Movimientos de la sede activa
   const movimientosDeSede = useMemo(() => {
     return movimientosInventario
@@ -155,6 +264,13 @@ export const InventoryView: React.FC = () => {
       .sort((a, b) => new Date(b.fechaMovimiento).getTime() - new Date(a.fechaMovimiento).getTime());
   }, [movimientosInventario, activeSede.id, tipoMovFiltro, searchKardex]);
 
+  // Paginación Kardex
+  const totalPaginasKardex = Math.ceil(movimientosDeSede.length / itemsPorPaginaKardex) || 1;
+  const movimientosDeSedePaginados = useMemo(() => {
+    const inicio = (paginaKardex - 1) * itemsPorPaginaKardex;
+    return movimientosDeSede.slice(inicio, inicio + itemsPorPaginaKardex);
+  }, [movimientosDeSede, paginaKardex, itemsPorPaginaKardex]);
+
   // Traslados vinculados a la sede activa (como origen o destino)
   const trasladosDeSede = useMemo(() => {
     return trasladosSedes
@@ -162,10 +278,49 @@ export const InventoryView: React.FC = () => {
         const participa = t.idCentroOrigen === activeSede.id || t.idCentroDestino === activeSede.id;
         if (!participa) return false;
         if (estadoTrasladoFiltro !== 'TODOS' && t.estadoTraslado !== estadoTrasladoFiltro) return false;
+        if (searchTraslados.trim()) {
+          const q = searchTraslados.toLowerCase();
+          const matchCod = t.codigoTraslado.toLowerCase().includes(q);
+          const matchOri = (t.nombreCentroOrigen || '').toLowerCase().includes(q);
+          const matchDes = (t.nombreCentroDestino || '').toLowerCase().includes(q);
+          const matchObs = (t.notasDespacho || '').toLowerCase().includes(q);
+          const matchItem = t.detalles.some(d => (d.nombreArticulo || '').toLowerCase().includes(q) || (d.codigoArticulo || '').toLowerCase().includes(q));
+          if (!matchCod && !matchOri && !matchDes && !matchObs && !matchItem) return false;
+        }
         return true;
       })
       .sort((a, b) => new Date(b.fechaEnvio).getTime() - new Date(a.fechaEnvio).getTime());
-  }, [trasladosSedes, activeSede.id, estadoTrasladoFiltro]);
+  }, [trasladosSedes, activeSede.id, estadoTrasladoFiltro, searchTraslados]);
+
+  // Paginación Traslados
+  const totalPaginasTraslados = Math.ceil(trasladosDeSede.length / itemsPorPaginaTraslados) || 1;
+  const trasladosDeSedePaginados = useMemo(() => {
+    const inicio = (paginaTraslados - 1) * itemsPorPaginaTraslados;
+    return trasladosDeSede.slice(inicio, inicio + itemsPorPaginaTraslados);
+  }, [trasladosDeSede, paginaTraslados, itemsPorPaginaTraslados]);
+
+  // Catálogo maestro filtrado
+  const catalogoFiltrado = useMemo(() => {
+    return articulosCatalogo.filter(art => {
+      if (categoriaCatalogoFiltro !== 'TODAS' && art.idCategoria !== categoriaCatalogoFiltro) return false;
+      if (searchCatalogo.trim()) {
+        const q = searchCatalogo.toLowerCase();
+        const matchCod = art.codigoArticulo.toLowerCase().includes(q);
+        const matchNom = art.nombreArticulo.toLowerCase().includes(q);
+        const matchDesc = (art.descripcion || '').toLowerCase().includes(q);
+        const matchEmp = (art.tipoEmpaque || '').toLowerCase().includes(q);
+        if (!matchCod && !matchNom && !matchDesc && !matchEmp) return false;
+      }
+      return true;
+    });
+  }, [articulosCatalogo, categoriaCatalogoFiltro, searchCatalogo]);
+
+  // Paginación Catálogo
+  const totalPaginasCatalogo = Math.ceil(catalogoFiltrado.length / itemsPorPaginaCatalogo) || 1;
+  const catalogoPaginado = useMemo(() => {
+    const inicio = (paginaCatalogo - 1) * itemsPorPaginaCatalogo;
+    return catalogoFiltrado.slice(inicio, inicio + itemsPorPaginaCatalogo);
+  }, [catalogoFiltrado, paginaCatalogo, itemsPorPaginaCatalogo]);
 
   // KPIs de la Sede
   const metricasSede = useMemo(() => {
@@ -185,6 +340,13 @@ export const InventoryView: React.FC = () => {
       trasladosPendientesRecepcion
     };
   }, [stockDeSede, trasladosSedes, activeSede.id]);
+
+  // Lista detallada de traslados pendientes con destino a esta sede
+  const trasladosPendientesRecepcionLista = useMemo(() => {
+    return trasladosSedes.filter(
+      t => t.idCentroDestino === activeSede.id && t.estadoTraslado === 'EN_TRANSITO'
+    );
+  }, [trasladosSedes, activeSede.id]);
 
   // Confirmar recepción de traslado
   const handleRecibirTraslado = async (idTraslado: number, numeroDoc: string) => {
@@ -276,10 +438,18 @@ export const InventoryView: React.FC = () => {
       {/* KPI Cards */}
       <div className={`grid grid-cols-1 sm:grid-cols-2 ${permiteTraslados ? 'lg:grid-cols-4' : 'lg:grid-cols-3'} gap-4`}>
         {/* Card 1: Total Artículos */}
-        <div className="bg-white p-5 rounded-2xl border border-[#DEDBD1] shadow-xs flex items-center justify-between">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setModalDetalleKPI('ARTICULOS_STOCK')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setModalDetalleKPI('ARTICULOS_STOCK'); } }}
+          title="Haga clic para ver el detalle de todos los artículos en stock"
+          className="bg-white p-5 rounded-2xl border border-[#DEDBD1] hover:border-[#274A3F] hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-between group text-left relative overflow-hidden"
+        >
           <div>
-            <div className="text-[11px] font-mono uppercase tracking-wider text-[#7A745F] font-semibold">
-              Artículos en Stock
+            <div className="text-[11px] font-mono uppercase tracking-wider text-[#7A745F] group-hover:text-[#274A3F] font-semibold transition-colors flex items-center gap-1.5">
+              <span>Artículos en Stock</span>
+              <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity font-sans font-normal text-[#274A3F]">Ver detalle →</span>
             </div>
             <div className="text-2xl font-serif font-bold text-[#182F28] mt-1">
               {metricasSede.totalArticulosRegistrados}
@@ -288,21 +458,29 @@ export const InventoryView: React.FC = () => {
               En {bodegasDeSede.length} bodega(s) de la sede
             </div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-[#274A3F]/10 text-[#182F28] flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-[#274A3F]/10 group-hover:bg-[#274A3F] text-[#182F28] group-hover:text-white flex items-center justify-center transition-all shadow-xs">
             <Package className="w-6 h-6" />
           </div>
         </div>
 
         {/* Card 2: Stock Bajo / Alertas */}
-        <div className={`p-5 rounded-2xl border shadow-xs flex items-center justify-between ${
-          metricasSede.itemsEnStockBajo > 0
-            ? 'bg-[#FEF7EE] border-[#DCB87F]'
-            : 'bg-white border-[#DEDBD1]'
-        }`}>
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setModalDetalleKPI('STOCK_BAJO')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setModalDetalleKPI('STOCK_BAJO'); } }}
+          title="Haga clic para ver artículos con stock bajo o necesidad de reorden"
+          className={`p-5 rounded-2xl border shadow-xs hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-between group text-left relative overflow-hidden ${
+            metricasSede.itemsEnStockBajo > 0
+              ? 'bg-[#FEF7EE] border-[#DCB87F] hover:border-[#9A5B12]'
+              : 'bg-white border-[#DEDBD1] hover:border-[#B3803F]'
+          }`}
+        >
           <div>
             <div className="text-[11px] font-mono uppercase tracking-wider text-[#9A5B12] font-semibold flex items-center gap-1.5">
               <AlertTriangle className="w-3.5 h-3.5 text-[#B3803F]" />
-              Stock Bajo / Reorden
+              <span>Stock Bajo / Reorden</span>
+              <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity font-sans font-normal text-[#9A5B12]">Ver detalle →</span>
             </div>
             <div className="text-2xl font-serif font-bold text-[#9A5B12] mt-1">
               {metricasSede.itemsEnStockBajo}
@@ -311,16 +489,24 @@ export const InventoryView: React.FC = () => {
               {metricasSede.itemsEnStockBajo > 0 ? 'Requieren reabastecimiento' : 'Niveles óptimos de suministro'}
             </div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-[#B3803F]/20 text-[#B3803F] flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-[#B3803F]/20 group-hover:bg-[#B3803F] text-[#B3803F] group-hover:text-white flex items-center justify-center transition-all shadow-xs">
             <TrendingDown className="w-6 h-6" />
           </div>
         </div>
 
         {/* Card 3: Valor Total Inventario o Unidades Físicas (según manejaPrecios) */}
-        <div className="bg-white p-5 rounded-2xl border border-[#DEDBD1] shadow-xs flex items-center justify-between">
+        <div
+          role="button"
+          tabIndex={0}
+          onClick={() => setModalDetalleKPI('UNIDADES_TOTALES')}
+          onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setModalDetalleKPI('UNIDADES_TOTALES'); } }}
+          title="Haga clic para ver el desglose por bodegas y categorías"
+          className="bg-white p-5 rounded-2xl border border-[#DEDBD1] hover:border-[#182F28] hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-between group text-left relative overflow-hidden"
+        >
           <div>
-            <div className="text-[11px] font-mono uppercase tracking-wider text-[#7A745F] font-semibold">
-              {manejaPrecios ? 'Valorización de Stock' : 'Unidades Físicas Totales'}
+            <div className="text-[11px] font-mono uppercase tracking-wider text-[#7A745F] group-hover:text-[#182F28] font-semibold transition-colors flex items-center gap-1.5">
+              <span>{manejaPrecios ? 'Valorización de Stock' : 'Unidades Físicas Totales'}</span>
+              <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity font-sans font-normal text-[#182F28]">Ver detalle →</span>
             </div>
             <div className="text-2xl font-serif font-bold text-[#182F28] mt-1">
               {manejaPrecios
@@ -331,17 +517,25 @@ export const InventoryView: React.FC = () => {
               {manejaPrecios ? 'Costo estándar valorizado (COP)' : 'Existencias en todas las bodegas'}
             </div>
           </div>
-          <div className="w-12 h-12 rounded-xl bg-[#182F28]/10 text-[#182F28] flex items-center justify-center">
+          <div className="w-12 h-12 rounded-xl bg-[#182F28]/10 group-hover:bg-[#182F28] text-[#182F28] group-hover:text-white flex items-center justify-center transition-all shadow-xs">
             {manejaPrecios ? <DollarSign className="w-6 h-6" /> : <Layers className="w-6 h-6" />}
           </div>
         </div>
 
         {/* Card 4: Traslados en Tránsito */}
         {permiteTraslados && (
-          <div className="bg-white p-5 rounded-2xl border border-[#DEDBD1] shadow-xs flex items-center justify-between">
+          <div
+            role="button"
+            tabIndex={0}
+            onClick={() => setModalDetalleKPI('TRASLADOS_RECIBIR')}
+            onKeyDown={(e) => { if (e.key === 'Enter' || e.key === ' ') { e.preventDefault(); setModalDetalleKPI('TRASLADOS_RECIBIR'); } }}
+            title="Haga clic para ver los traslados pendientes de recepción en esta sede"
+            className="bg-white p-5 rounded-2xl border border-[#DEDBD1] hover:border-[#7A4F9E] hover:shadow-md hover:-translate-y-0.5 transition-all cursor-pointer flex items-center justify-between group text-left relative overflow-hidden"
+          >
             <div>
-              <div className="text-[11px] font-mono uppercase tracking-wider text-[#7A745F] font-semibold">
-                Traslados Por Recibir
+              <div className="text-[11px] font-mono uppercase tracking-wider text-[#7A745F] group-hover:text-[#7A4F9E] font-semibold transition-colors flex items-center gap-1.5">
+                <span>Traslados Por Recibir</span>
+                <span className="text-[10px] opacity-0 group-hover:opacity-100 transition-opacity font-sans font-normal text-[#7A4F9E]">Ver detalle →</span>
               </div>
               <div className="text-2xl font-serif font-bold text-[#182F28] mt-1">
                 {metricasSede.trasladosPendientesRecepcion}
@@ -350,7 +544,7 @@ export const InventoryView: React.FC = () => {
                 Envíos inter-sedes en tránsito
               </div>
             </div>
-            <div className="w-12 h-12 rounded-xl bg-[#7A4F9E]/15 text-[#7A4F9E] flex items-center justify-center">
+            <div className="w-12 h-12 rounded-xl bg-[#7A4F9E]/15 group-hover:bg-[#7A4F9E] text-[#7A4F9E] group-hover:text-white flex items-center justify-center transition-all shadow-xs">
               <ArrowLeftRight className="w-6 h-6" />
             </div>
           </div>
@@ -522,6 +716,7 @@ export const InventoryView: React.FC = () => {
                     <th className="py-3.5 px-4">Artículo & Categoría</th>
                     <th className="py-3.5 px-4">Bodega / Ubicación</th>
                     <th className="py-3.5 px-4 text-center">Nivel de Stock</th>
+                    <th className="py-3.5 px-4 text-center min-w-[130px] w-36">Estado</th>
                     <th className="py-3.5 px-4 text-right">Disponible</th>
                     {manejaPrecios && <th className="py-3.5 px-4 text-right">Costo Unit.</th>}
                     {manejaPrecios && <th className="py-3.5 px-4 text-right">Valor Total</th>}
@@ -531,7 +726,7 @@ export const InventoryView: React.FC = () => {
                 <tbody className="divide-y divide-[#EAE7DC]">
                   {stockDeSede.length === 0 ? (
                     <tr>
-                      <td colSpan={manejaPrecios ? 8 : 6} className="py-12 text-center text-[#7A745F]">
+                      <td colSpan={manejaPrecios ? 9 : 7} className="py-12 text-center text-[#7A745F]">
                         <div className="max-w-sm mx-auto space-y-2">
                           <Package className="w-8 h-8 mx-auto text-[#B3803F]/60" />
                           <p className="font-bold text-[#182F28]">No se encontraron artículos</p>
@@ -540,7 +735,7 @@ export const InventoryView: React.FC = () => {
                       </td>
                     </tr>
                   ) : (
-                    stockDeSede.map((item) => {
+                    stockDeSedePaginado.map((item) => {
                       const art = articulosCatalogo.find(a => a.id === item.idArticulo);
                       const cat = categoriasArticulos.find(c => c.id === art?.idCategoria);
                       const bod = bodegasSede.find(b => b.id === item.idBodega);
@@ -602,6 +797,19 @@ export const InventoryView: React.FC = () => {
                             </div>
                           </td>
 
+                          {/* Estado Badge Ampliado sin saltos de línea */}
+                          <td className="py-3 px-4 text-center min-w-[130px]">
+                            <span
+                              className={`text-[11px] font-bold px-3 py-1 rounded-full whitespace-nowrap inline-flex items-center justify-center shadow-2xs ${
+                                esBajo
+                                  ? 'bg-rose-100 text-rose-800 border border-rose-300'
+                                  : 'bg-emerald-100 text-emerald-800 border border-emerald-300'
+                              }`}
+                            >
+                              {esBajo ? 'Stock Bajo' : 'Óptimo'}
+                            </span>
+                          </td>
+
                           {/* Cantidad Disponible */}
                           <td className="py-3 px-4 text-right">
                             <span className={`text-sm font-bold font-mono px-2 py-0.5 rounded-lg ${
@@ -652,6 +860,16 @@ export const InventoryView: React.FC = () => {
                 </tbody>
               </table>
             </div>
+
+            {/* Paginación de Stock */}
+            <PaginadorTabla
+              paginaActual={paginaStock}
+              totalPaginas={totalPaginasStock}
+              totalItems={stockDeSede.length}
+              itemsPorPagina={itemsPorPaginaStock}
+              itemLabel="artículos en existencias"
+              onCambiarPagina={setPaginaStock}
+            />
           </div>
         </div>
       )}
@@ -709,7 +927,7 @@ export const InventoryView: React.FC = () => {
                 <p className="text-xs">Los movimientos de almacén para esta sede aparecerán registrados aquí.</p>
               </div>
             ) : (
-              movimientosDeSede.map((mov) => {
+              movimientosDeSedePaginados.map((mov) => {
                 const esEntrada = mov.tipoMovimiento.startsWith('ENTRADA') || mov.tipoMovimiento === 'AJUSTE_FISICO_POSITIVO' || mov.tipoMovimiento === 'TRASLADO_ENTRADA';
 
                 return (
@@ -801,6 +1019,16 @@ export const InventoryView: React.FC = () => {
                 );
               })
             )}
+
+            {/* Paginación de Kardex */}
+            <PaginadorTabla
+              paginaActual={paginaKardex}
+              totalPaginas={totalPaginasKardex}
+              totalItems={movimientosDeSede.length}
+              itemsPorPagina={itemsPorPaginaKardex}
+              itemLabel="movimientos registrados"
+              onCambiarPagina={setPaginaKardex}
+            />
           </div>
         </div>
       )}
@@ -811,28 +1039,52 @@ export const InventoryView: React.FC = () => {
       {subTab === 'traslados' && permiteTraslados && (
         <div className="space-y-4">
           <div className="bg-white p-4 rounded-2xl border border-[#DEDBD1] shadow-xs flex flex-wrap items-center justify-between gap-3">
-            <div className="flex items-center gap-3">
-              <span className="text-xs font-bold text-[#182F28]">Filtrar por Estado:</span>
-              <div className="flex items-center gap-1.5 p-1 bg-[#F7F6F2] rounded-xl border border-[#DEDBD1]">
-                {['TODOS', 'EN_TRANSITO', 'RECIBIDO_CONFORME', 'CANCELADO'].map((st) => (
+            <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
+              {/* Buscador de Traslados */}
+              <div className="relative flex-1 min-w-[220px]">
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7A745F]" />
+                <input
+                  type="text"
+                  placeholder="Buscar por guía, sede de origen/destino o insumo..."
+                  value={searchTraslados}
+                  onChange={(e) => setSearchTraslados(e.target.value)}
+                  className="w-full pl-10 pr-8 py-2 rounded-xl border border-[#DEDBD1] bg-[#F7F6F2] text-xs font-semibold text-[#182F28] focus:outline-none focus:border-[#B3803F]"
+                />
+                {searchTraslados && (
                   <button
-                    key={st}
                     type="button"
-                    onClick={() => setEstadoTrasladoFiltro(st)}
-                    className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
-                      estadoTrasladoFiltro === st ? 'bg-white text-[#182F28] shadow-xs' : 'text-[#7A745F]'
-                    }`}
+                    onClick={() => setSearchTraslados('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
                   >
-                    {st === 'TODOS' ? 'Todos' : st.replace(/_/g, ' ')}
+                    <X className="w-3.5 h-3.5" />
                   </button>
-                ))}
+                )}
+              </div>
+
+              {/* Filtro Estado */}
+              <div className="flex items-center gap-2">
+                <span className="text-xs font-bold text-[#182F28]">Estado:</span>
+                <div className="flex items-center gap-1.5 p-1 bg-[#F7F6F2] rounded-xl border border-[#DEDBD1]">
+                  {['TODOS', 'EN_TRANSITO', 'RECIBIDO_CONFORME', 'CANCELADO'].map((st) => (
+                    <button
+                      key={st}
+                      type="button"
+                      onClick={() => setEstadoTrasladoFiltro(st)}
+                      className={`px-3 py-1 text-xs font-bold rounded-lg transition-all cursor-pointer ${
+                        estadoTrasladoFiltro === st ? 'bg-white text-[#182F28] shadow-xs' : 'text-[#7A745F]'
+                      }`}
+                    >
+                      {st === 'TODOS' ? 'Todos' : st.replace(/_/g, ' ')}
+                    </button>
+                  ))}
+                </div>
               </div>
             </div>
 
             <button
               type="button"
               onClick={() => setIsTrasladoModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#B3803F] hover:bg-[#9a6c32] text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-[#B3803F] hover:bg-[#9a6c32] text-white rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
               <span>Solicitar Nuevo Traslado</span>
@@ -847,7 +1099,7 @@ export const InventoryView: React.FC = () => {
                 <p className="text-xs">No hay envíos ni recepciones entre sedes para los criterios seleccionados.</p>
               </div>
             ) : (
-              trasladosDeSede.map((tras) => {
+              trasladosDeSedePaginados.map((tras) => {
                 const esOrigen = tras.idCentroOrigen === activeSede.id;
                 const esDestino = tras.idCentroDestino === activeSede.id;
                 const puedeRecibir = esDestino && tras.estadoTraslado === 'EN_TRANSITO';
@@ -921,6 +1173,16 @@ export const InventoryView: React.FC = () => {
                 );
               })
             )}
+
+            {/* Paginación de Traslados */}
+            <PaginadorTabla
+              paginaActual={paginaTraslados}
+              totalPaginas={totalPaginasTraslados}
+              totalItems={trasladosDeSede.length}
+              itemsPorPagina={itemsPorPaginaTraslados}
+              itemLabel="traslados de insumos"
+              onCambiarPagina={setPaginaTraslados}
+            />
           </div>
         </div>
       )}
@@ -930,17 +1192,49 @@ export const InventoryView: React.FC = () => {
       {/* ========================================================================= */}
       {subTab === 'catalogo' && (
         <div className="space-y-4">
-          <div className="bg-white p-4 rounded-2xl border border-[#DEDBD1] shadow-xs flex items-center justify-between">
-            <div>
-              <h3 className="text-sm font-bold text-[#182F28]">Catálogo Maestro Institucional</h3>
-              <p className="text-xs text-[#7A745F]">
-                Artículos, medicamentos, dotaciones y suministros compartidos en toda la red de centros.
-              </p>
+          <div className="bg-white p-4 rounded-2xl border border-[#DEDBD1] shadow-xs flex flex-wrap items-center justify-between gap-3">
+            <div className="flex flex-wrap items-center gap-3 flex-1 min-w-[280px]">
+              {/* Buscador de Catálogo */}
+              <div className="relative flex-1 min-w-[220px]">
+                <Search className="w-4 h-4 absolute left-3.5 top-1/2 -translate-y-1/2 text-[#7A745F]" />
+                <input
+                  type="text"
+                  placeholder="Buscar en catálogo por código, nombre o empaque..."
+                  value={searchCatalogo}
+                  onChange={(e) => setSearchCatalogo(e.target.value)}
+                  className="w-full pl-10 pr-8 py-2 rounded-xl border border-[#DEDBD1] bg-[#F7F6F2] text-xs font-semibold text-[#182F28] focus:outline-none focus:border-[#B3803F]"
+                />
+                {searchCatalogo && (
+                  <button
+                    type="button"
+                    onClick={() => setSearchCatalogo('')}
+                    className="absolute right-2.5 top-1/2 -translate-y-1/2 text-gray-400 hover:text-gray-600 p-1"
+                  >
+                    <X className="w-3.5 h-3.5" />
+                  </button>
+                )}
+              </div>
+
+              {/* Filtro por Categoría */}
+              <div className="flex items-center gap-2">
+                <Filter className="w-4 h-4 text-[#7A745F]" />
+                <select
+                  value={categoriaCatalogoFiltro}
+                  onChange={(e) => setCategoriaCatalogoFiltro(e.target.value === 'TODAS' ? 'TODAS' : Number(e.target.value))}
+                  className="px-3 py-2 rounded-xl border border-[#DEDBD1] bg-[#F7F6F2] text-xs font-semibold text-[#182F28] focus:outline-none focus:border-[#B3803F]"
+                >
+                  <option value="TODAS">Todas las Categorías</option>
+                  {categoriasArticulos.map((c) => (
+                    <option key={c.id} value={c.id}>{c.nombreCategoria}</option>
+                  ))}
+                </select>
+              </div>
             </div>
+
             <button
               type="button"
               onClick={() => setIsNuevoArticuloModalOpen(true)}
-              className="flex items-center gap-2 px-4 py-2 bg-[#B3803F] hover:bg-[#9a6c32] text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer"
+              className="flex items-center gap-2 px-4 py-2 bg-[#B3803F] hover:bg-[#9a6c32] text-white rounded-xl text-xs font-bold shadow-xs cursor-pointer whitespace-nowrap"
             >
               <Plus className="w-4 h-4" />
               <span>Nuevo Artículo al Catálogo</span>
@@ -948,76 +1242,100 @@ export const InventoryView: React.FC = () => {
           </div>
 
           <div className="bg-white rounded-2xl border border-[#DEDBD1] shadow-xs overflow-hidden">
-            <table className="w-full text-left text-xs">
-              <thead className="bg-[#F7F6F2] border-b border-[#DEDBD1] text-[#7A745F] font-mono uppercase tracking-wider font-semibold">
-                <tr>
-                  <th className="py-3 px-4">Código SKU</th>
-                  <th className="py-3 px-4">Nombre del Artículo</th>
-                  <th className="py-3 px-4">Categoría</th>
-                  <th className="py-3 px-4">Empaque Comercial</th>
-                  <th className="py-3 px-4">Unidad Base</th>
-                  {manejaPrecios && <th className="py-3 px-4 text-right">Costo Estándar</th>}
-                  <th className="py-3 px-4 text-center">Control Lote</th>
-                  <th className="py-3 px-4 text-center">Acciones</th>
-                </tr>
-              </thead>
-              <tbody className="divide-y divide-[#EAE7DC]">
-                {articulosCatalogo.map((art) => {
-                  const cat = categoriasArticulos.find(c => c.id === art.idCategoria);
-                  return (
-                    <tr key={art.id} className="hover:bg-[#FDFBF7] transition-colors">
-                      <td className="py-3 px-4 font-mono font-bold text-[#182F28]">{art.codigoArticulo}</td>
-                      <td className="py-3 px-4">
-                        <div className="font-bold text-[#182F28]">{art.nombreArticulo}</div>
-                        {art.descripcion && (
-                          <div className="text-[11px] text-[#7A745F]">{art.descripcion}</div>
-                        )}
-                      </td>
-                      <td className="py-3 px-4">
-                        <span className="px-2 py-0.5 bg-[#F7F6F2] rounded text-[11px] font-mono border border-[#DEDBD1]">
-                          {cat?.nombreCategoria || 'General'}
-                        </span>
-                      </td>
-                      <td className="py-3 px-4">
-                        {art.unidadesPorEmpaque && art.unidadesPorEmpaque > 1 ? (
-                          <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FEF7EE] text-[#9A5B12] border border-[#DCB87F]/40 font-mono text-[11px] font-semibold">
-                            1 {art.tipoEmpaque || 'paquete'} = {art.unidadesPorEmpaque} uds
-                          </span>
-                        ) : (
-                          <span className="text-[#A5A08D] italic text-[11px]">1 a 1 (Directo)</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 font-mono">{art.unidadMedida}</td>
-                      {manejaPrecios && (
-                        <td className="py-3 px-4 text-right font-mono font-bold text-[#182F28]">
-                          ${art.costoEstandar.toLocaleString('es-CO')}
-                        </td>
-                      )}
-                      <td className="py-3 px-4 text-center">
-                        {art.requiereLoteVencimiento ? (
-                          <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EBF3EF] text-[#274A3F]">
-                            Obligatorio
-                          </span>
-                        ) : (
-                          <span className="text-gray-400 text-[10px]">No</span>
-                        )}
-                      </td>
-                      <td className="py-3 px-4 text-center">
-                        <button
-                          type="button"
-                          onClick={() => setArticuloAEditar(art)}
-                          className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F7F6F2] hover:bg-[#EAE7DC] text-[#182F28] border border-[#DEDBD1] rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
-                          title="Editar información del artículo"
-                        >
-                          <Pencil className="w-3.5 h-3.5 text-[#B3803F]" />
-                          <span>Editar</span>
-                        </button>
+            <div className="overflow-x-auto">
+              <table className="w-full text-left text-xs">
+                <thead className="bg-[#F7F6F2] border-b border-[#DEDBD1] text-[#7A745F] font-mono uppercase tracking-wider font-semibold">
+                  <tr>
+                    <th className="py-3 px-4">Código SKU</th>
+                    <th className="py-3 px-4">Nombre del Artículo</th>
+                    <th className="py-3 px-4">Categoría</th>
+                    <th className="py-3 px-4">Empaque Comercial</th>
+                    <th className="py-3 px-4">Unidad Base</th>
+                    {manejaPrecios && <th className="py-3 px-4 text-right">Costo Estándar</th>}
+                    <th className="py-3 px-4 text-center">Control Lote</th>
+                    <th className="py-3 px-4 text-center">Acciones</th>
+                  </tr>
+                </thead>
+                <tbody className="divide-y divide-[#EAE7DC]">
+                  {catalogoFiltrado.length === 0 ? (
+                    <tr>
+                      <td colSpan={manejaPrecios ? 8 : 7} className="py-12 text-center text-[#7A745F]">
+                        <div className="max-w-sm mx-auto space-y-2">
+                          <Tag className="w-8 h-8 mx-auto text-[#B3803F]/60" />
+                          <p className="font-bold text-[#182F28]">No se encontraron artículos en catálogo</p>
+                          <p className="text-xs">No hay insumos que coincidan con la búsqueda o filtro de categoría.</p>
+                        </div>
                       </td>
                     </tr>
-                  );
-                })}
-              </tbody>
-            </table>
+                  ) : (
+                    catalogoPaginado.map((art) => {
+                      const cat = categoriasArticulos.find(c => c.id === art.idCategoria);
+                      return (
+                        <tr key={art.id} className="hover:bg-[#FDFBF7] transition-colors">
+                          <td className="py-3 px-4 font-mono font-bold text-[#182F28]">{art.codigoArticulo}</td>
+                          <td className="py-3 px-4">
+                            <div className="font-bold text-[#182F28]">{art.nombreArticulo}</div>
+                            {art.descripcion && (
+                              <div className="text-[11px] text-[#7A745F]">{art.descripcion}</div>
+                            )}
+                          </td>
+                          <td className="py-3 px-4">
+                            <span className="px-2 py-0.5 bg-[#F7F6F2] rounded text-[11px] font-mono border border-[#DEDBD1]">
+                              {cat?.nombreCategoria || 'General'}
+                            </span>
+                          </td>
+                          <td className="py-3 px-4">
+                            {art.unidadesPorEmpaque && art.unidadesPorEmpaque > 1 ? (
+                              <span className="inline-flex items-center gap-1 px-2 py-0.5 rounded-lg bg-[#FEF7EE] text-[#9A5B12] border border-[#DCB87F]/40 font-mono text-[11px] font-semibold">
+                                1 {art.tipoEmpaque || 'paquete'} = {art.unidadesPorEmpaque} uds
+                              </span>
+                            ) : (
+                              <span className="text-[#A5A08D] italic text-[11px]">1 a 1 (Directo)</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 font-mono">{art.unidadMedida}</td>
+                          {manejaPrecios && (
+                            <td className="py-3 px-4 text-right font-mono font-bold text-[#182F28]">
+                              ${art.costoEstandar.toLocaleString('es-CO')}
+                            </td>
+                          )}
+                          <td className="py-3 px-4 text-center">
+                            {art.requiereLoteVencimiento ? (
+                              <span className="px-2 py-0.5 rounded-full text-[10px] font-bold bg-[#EBF3EF] text-[#274A3F]">
+                                Obligatorio
+                              </span>
+                            ) : (
+                              <span className="text-gray-400 text-[10px]">No</span>
+                            )}
+                          </td>
+                          <td className="py-3 px-4 text-center">
+                            <button
+                              type="button"
+                              onClick={() => setArticuloAEditar(art)}
+                              className="inline-flex items-center gap-1.5 px-3 py-1.5 bg-[#F7F6F2] hover:bg-[#EAE7DC] text-[#182F28] border border-[#DEDBD1] rounded-xl text-xs font-bold transition-all shadow-xs cursor-pointer"
+                              title="Editar información del artículo"
+                            >
+                              <Pencil className="w-3.5 h-3.5 text-[#B3803F]" />
+                              <span>Editar</span>
+                            </button>
+                          </td>
+                        </tr>
+                      );
+                    })
+                  )}
+                </tbody>
+              </table>
+            </div>
+
+            {/* Paginación Catálogo Maestro */}
+            <PaginadorTabla
+              paginaActual={paginaCatalogo}
+              totalPaginas={totalPaginasCatalogo}
+              totalItems={catalogoFiltrado.length}
+              itemsPorPagina={itemsPorPaginaCatalogo}
+              itemLabel="artículos del catálogo institucional"
+              onCambiarPagina={setPaginaCatalogo}
+            />
           </div>
         </div>
       )}
@@ -1084,6 +1402,38 @@ export const InventoryView: React.FC = () => {
           articulo={articuloKardexSeleccionado}
           movimientos={movimientosInventario.filter(m => m.idCentro === activeSede.id)}
           onClose={() => setArticuloKardexSeleccionado(null)}
+        />
+      )}
+
+      {/* ========================================================================= */}
+      {/* MODAL 5: DETALLE INTERACTIVO DE KPIS */}
+      {/* ========================================================================= */}
+      {modalDetalleKPI && (
+        <ModalDetalleKPI
+          isOpen={modalDetalleKPI !== null}
+          tipoKPI={modalDetalleKPI}
+          onClose={() => setModalDetalleKPI(null)}
+          activeSede={activeSede}
+          stockDeSede={stockDeSede}
+          bodegasDeSede={bodegasDeSede}
+          articulosCatalogo={articulosCatalogo}
+          trasladosPendientes={trasladosPendientesRecepcionLista}
+          manejaPrecios={manejaPrecios}
+          permiteTraslados={permiteTraslados}
+          onVerEnTablaStock={(filtroAlerta) => {
+            setSubTab('stock');
+            if (filtroAlerta) {
+              setAlertaFiltro(filtroAlerta);
+            }
+          }}
+          onVerEnTraslados={() => {
+            setSubTab('traslados');
+            setEstadoTrasladoFiltro('EN_TRANSITO');
+          }}
+          onRecibirTraslado={handleRecibirTraslado}
+          onAbrirMovimiento={() => setIsMovimientoModalOpen(true)}
+          onAbrirTraslado={() => setIsTrasladoModalOpen(true)}
+          onVerKardexArticulo={(articulo) => setArticuloKardexSeleccionado(articulo)}
         />
       )}
     </div>

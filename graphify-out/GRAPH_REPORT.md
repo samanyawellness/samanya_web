@@ -1,17 +1,17 @@
 # Graph Report - SAMANYA_WEB  (2026-10-04)
 
 ## Corpus Check
-- 435 files · ~1,087,024 words
+- 436 files · ~1,091,666 words
 - Verdict: corpus is large enough that graph structure adds value.
 - Unclassified: 13 file(s) not represented in the graph (top: .pkb 4, .pks 4, (none) 3)
 
 ## Summary
-- 3586 nodes · 7319 edges · 376 communities (210 shown, 166 thin omitted)
+- 3592 nodes · 7340 edges · 353 communities (187 shown, 166 thin omitted)
 - Extraction: 98% EXTRACTED · 2% INFERRED · 0% AMBIGUOUS · INFERRED: 122 edges (avg confidence: 0.87)
 - Token cost: 0 input · 0 output
 
 ## Graph Freshness
-- Built from commit: `6173358e`
+- Built from commit: `0541726b`
 - Run `git rev-parse HEAD` and compare to check if the graph is stale.
 - Run `graphify update .` after code changes (no API cost).
 
@@ -36,53 +36,53 @@
 - properties
 - update-notifier.test.mjs
 - App.tsx
-- finder-browser.test.mjs
+- commandDeliver
 - properties
 - properties
 - types.ts
 - start-page.test.mjs
 - properties
-- guided-views-browser.test.mjs
+- preview-contract.test.mjs
 - properties
 - story-horizon.test.mjs
-- ResidentDetailModal.tsx
+- cli.test.mjs
 - preview.mjs
 - Delivery contract
 - architecture-delta.mjs
 - properties
-- preview-contract.test.mjs
+- story-shelf.test.mjs
 - workflow-compiler.test.mjs
-- ref_node_assert_strict
+- motion-governor.test.mjs
 - offline-font-browser.test.mjs
 - properties
 - workflow-migration.test.mjs
 - compareArchitecture
-- site-language-continuity.test.mjs
+- ResidentDetailModal.tsx
 - $defs
-- cli-output-types.test.mjs
+- chapter-handoff.test.mjs
 - properties
 - properties
-- cli.test.mjs
+- generated-artifact-xml.test.mjs
 - InventoryView.tsx
 - properties
 - golden.mjs
 - package.json
-- resolverAvatarUrl
+- semantic-passport.test.mjs
 - entries
-- release-package-gates.test.mjs
+- ref_node_child_process
 - ordinary-model-floor.test.mjs
 - scripts
 - properties
 - properties
 - $ref
 - properties
-- relationship-direct-explorer.test.mjs
+- finder.test.mjs
 - workflow-compiler.mjs
 - legend-contract.test.mjs
 - mockData.ts
 - driveService.ts
 - assertSafeDirectory
-- chapter-delta-preview.test.mjs
+- ref_node_os
 - i18n.test.mjs
 - repository
 - properties
@@ -90,7 +90,7 @@
 - output-path.mjs
 - workflow-compiler-hard-contract.test.mjs
 - V_SMY_TIMELINE_RESIDENTE
-- ref_node_child_process
+- FichaTecnicaIngresoModal.tsx
 - properties
 - items
 - generate-validators.mjs
@@ -99,10 +99,8 @@
 - architecture-delta.test.mjs
 - items
 - lifecycle.schema.json
-- ChromeVisualBrowser
 - ref_node_path
-- readme-showcase.test.mjs
-- preview.test.mjs
+- ref_node_fs
 - repository-evidence.mjs
 - items
 - items
@@ -112,7 +110,7 @@
 - items
 - entries
 - degraded.test.mjs
-- ref_node_os
+- guided-views.test.mjs
 - labelAt
 - compilerOptions
 - entries
@@ -121,28 +119,21 @@
 - workflow-v2.mjs
 - output-path.test.mjs
 - SamanyaAiChat.tsx
-- motion-governor-browser.test.mjs
 - items
 - semanticRelation
-- reader-layout-browser.test.mjs
 - release-identity.test.mjs
-- PipeCdp
+- vertical-edge.test.mjs
 - v1-compatibility.test.mjs
-- artifact
-- focus-browser.test.mjs
+- .send
 - fromCol
 - story-carrier.test.mjs
 - wraps
 - vercel.json
-- story-director-strip.test.mjs
 - cellH
 - relationship-permalink.test.mjs
 - components
-- guided-views.test.mjs
 - gapX
-- .send
 - story-follow-camera.test.mjs
-- story-moment-link.test.mjs
 - sequence-column-fit.test.mjs
 - gapY
 - pad
@@ -164,13 +155,11 @@
 - size
 - viewBox
 - point
-- story-shelf.test.mjs
 - focus
-- vertical-edge.test.mjs
 - common.schema.json
 - via
 - width
-- engineering-profiles.mjs
+- engineering-profile.test.mjs
 - via
 - inspectActiveClaim
 - width
@@ -184,9 +173,7 @@
 - guidedViews
 - relationshipWidth
 - Viewer Runtime reference
-- route-probe.test.mjs
 - cornerRadius
-- semantic-flow.test.mjs
 - label
 - labelSegment
 - label
@@ -196,36 +183,26 @@
 - re
 - width
 - semantic-camera.test.mjs
-- intent-trace-browser.test.mjs
-- semantic-lens.test.mjs
+- guided-views-browser.test.mjs
 - story-beat-navigator.test.mjs
-- Archify JSON IR Schemas
 - ref_node_url
 - repository-evidence-replacement.test.mjs
 - devDependencies
 - width
 - stage
-- findChrome
 - graphify reference: extra exports and benchmark
 - Mode placement
-- repository-evidence.test.mjs
-- viewer-camera-browser.test.mjs
 - fromSide
-- FichaTecnicaIngresoModal.tsx
 - animation.test.mjs
-- ref_node_fs
 - preset-tryon.test.mjs
 - reach-share-card.test.mjs
-- route-share-card.test.mjs
 - stable-update-manifest.test.mjs
 - SMY_VALORACIONES_INGRESO
-- chapter-rail.test.mjs
 - SMY_VALORACIONES_INGRESO
 - diagram-guide.test.mjs
 - Estándar de Manejo de Excepciones y Logging Centralizado
 - Sequence Renderer
 - ref_url
-- route-journey.test.mjs
 - Data Flow Renderer
 - Third-party notices
 - graphify reference: query, path, explain
@@ -254,10 +231,10 @@
 1. `compileWorkflowInternal()` - 175 edges
 2. `useAdmin()` - 60 edges
 3. `asArray()` - 54 edges
-4. `textUnits()` - 38 edges
-5. `react` - 38 edges
+4. `react` - 39 edges
+5. `textUnits()` - 38 edges
 6. `escapeHtml()` - 37 edges
-7. `lucide-react` - 34 edges
+7. `lucide-react` - 35 edges
 8. `validateReadablePinnedGeometry()` - 31 edges
 9. `isFinitePoint()` - 29 edges
 10. `rectsOverlap()` - 28 edges
@@ -277,7 +254,7 @@
 ## Import Cycles
 - None detected.
 
-## Communities (376 total, 166 thin omitted)
+## Communities (353 total, 166 thin omitted)
 
 ### Community 0 - "compileWorkflowInternal"
 Cohesion: 0.06
@@ -288,32 +265,32 @@ Cohesion: 0.04
 Nodes (122): renderComponent(), renderConnectionPath(), automaticPorts, compositionFrames, __dirname, flowLabelSize(), layout, LEGEND_CATALOG (+114 more)
 
 ### Community 2 - "archify/package.json"
-Cohesion: 0.12
-Nodes (15): bin, archify, description, engines, node, license, name, overrides (+7 more)
+Cohesion: 0.13
+Nodes (14): bin, archify, description, engines, node, license, name, overrides (+6 more)
 
 ### Community 3 - "viewer-chrome-layout.test.mjs"
-Cohesion: 0.16
-Nodes (10): CASES, __dirname, edgePaintHitsUnderDock(), evaluate(), finalGeometry(), load(), resize(), skillRoot (+2 more)
+Cohesion: 0.07
+Nodes (22): architecture, base, cli, head, root, workflow, cli, here (+14 more)
 
 ### Community 4 - "render-architecture.mjs"
 Cohesion: 0.06
 Nodes (54): DEFAULT_GRID, gridLayout(), resolveComponentPos(), validateGridPlacement(), alignFacingPorts(), architectureLegendEntries, automaticPorts, autoViewBoxFor() (+46 more)
 
 ### Community 5 - "archify.mjs"
-Cohesion: 0.12
-Nodes (50): assertEvidenceType(), CHECK_FIXES, checkerDiagnostics(), [command, ...args], commandBrands(), commandCheck(), commandCompare(), commandDeliver() (+42 more)
+Cohesion: 0.13
+Nodes (27): CHECK_FIXES, [command, ...args], commandBrands(), commandCheck(), commandCompare(), commandDoctor(), commandExamples(), commandGuide() (+19 more)
 
 ### Community 6 - "AdminContext.tsx"
 Cohesion: 0.09
-Nodes (49): ImprimirSolicitudDotacionModalProps, AdminContext, AdminContextType, AdminProvider(), obtenerFechaBogota(), obtenerHoraBogota(), obtenerIsoBogota(), SEED_ARTICULOS_CATALOGO (+41 more)
+Nodes (47): LeaveAttachmentModal(), LeaveAttachmentModalProps, LeavesView(), AdminContext, AdminContextType, AdminProvider(), AdminTab, obtenerFechaBogota() (+39 more)
 
 ### Community 7 - "check-render-output.mjs"
 Cohesion: 0.06
 Nodes (51): DESKTOP_READABILITY_VIEWPORT, DESKTOP_READER_DIAGRAM_WIDTH, DESKTOP_READER_HORIZONTAL_CHROME, DESKTOP_READER_MIN_WIDTH, MIN_PROJECTED_NODE_TEXT_PX, minimumReadableSourceTextPx(), projectedNodeTextPx(), attrEntries() (+43 more)
 
 ### Community 8 - "visual-check.mjs"
-Cohesion: 0.09
-Nodes (30): baseReceipt(), CAPTURE_VIEWPORTS, CHROME_NO_SANDBOX_ENV, cleanupCaptureSidecars(), contactSheetHtml(), EXIT, failureDiagnostic(), htmlEscape() (+22 more)
+Cohesion: 0.07
+Nodes (36): baseReceipt(), CAPTURE_VIEWPORTS, CHROME_NO_SANDBOX_ENV, ChromeVisualBrowser, chromeVisualBrowserArgs(), cleanupCaptureSidecars(), contactSheetHtml(), evaluate() (+28 more)
 
 ### Community 9 - "brand-marks.mjs"
 Cohesion: 0.07
@@ -321,7 +298,7 @@ Nodes (39): asUrl(), attribute(), beforeDeadline(), captureBrandReference(), cap
 
 ### Community 10 - "generated-validators.mjs"
 Cohesion: 0.06
-Nodes (43): architecture, dataflow, func3(), lifecycle, pattern17, pattern18, pattern20, pattern4 (+35 more)
+Nodes (46): architecture, dataflow, func3(), lifecycle, pattern17, pattern18, pattern20, pattern4 (+38 more)
 
 ### Community 11 - "webm-artifact.smoke.mjs"
 Cohesion: 0.09
@@ -356,12 +333,12 @@ Cohesion: 0.07
 Nodes (26): assertUnsafeCacheStateIsIgnored(), baseTime, checkerPath, committedStateFiles(), compactStateSource(), contractPath, fixture(), get() (+18 more)
 
 ### Community 19 - "App.tsx"
-Cohesion: 0.12
-Nodes (32): lucide-react, react, ref_react_dom_client, AdminLayout(), App(), AppContent(), SamanyaAlertModal(), ToastNotification() (+24 more)
+Cohesion: 0.10
+Nodes (45): lucide-react, react, ref_react_dom_client, AdminLayout(), App(), AppContent(), ResidentAvatar(), ResidentAvatarProps (+37 more)
 
-### Community 20 - "finder-browser.test.mjs"
-Cohesion: 0.39
-Nodes (7): key(), load(), opened(), run(), search(), skillRoot, snapshot()
+### Community 20 - "commandDeliver"
+Cohesion: 0.25
+Nodes (23): assertEvidenceType(), checkerDiagnostics(), commandDeliver(), commandDemo(), commandMigrate(), commandPreview(), commandRender(), commandValidate() (+15 more)
 
 ### Community 21 - "properties"
 Cohesion: 0.08
@@ -383,9 +360,9 @@ Nodes (16): detectGuideLanguage(), formatScenarioList(), listScenarioRecipes(), 
 Cohesion: 0.06
 Nodes (31): $ref, minimum, type, $ref, $ref, properties, enum, type (+23 more)
 
-### Community 26 - "guided-views-browser.test.mjs"
-Cohesion: 0.28
-Nodes (11): activate(), click(), hash(), key(), load(), move(), point(), run() (+3 more)
+### Community 26 - "preview-contract.test.mjs"
+Cohesion: 0.22
+Nodes (8): chinese, delivery, english, here, readme, repoRoot, skill, skillRoot
 
 ### Community 27 - "properties"
 Cohesion: 0.05
@@ -395,13 +372,13 @@ Nodes (42): $ref, type, type, maximum, minimum, type, $ref, minimum (+34 more)
 Cohesion: 0.29
 Nodes (5): CASES, __dirname, skillRoot, template, tmp
 
-### Community 29 - "ResidentDetailModal.tsx"
-Cohesion: 0.50
-Nodes (3): ImprimirSolicitudDotacionModal(), TabFicha, ResidentInventoryTabContent()
+### Community 29 - "cli.test.mjs"
+Cohesion: 0.22
+Nodes (4): cli, __dirname, skillRoot, tmp
 
 ### Community 30 - "preview.mjs"
 Cohesion: 0.16
-Nodes (28): cliPath, compactMessage(), diagramTypes, here, initialAuthoredOutput(), parseReceipt(), previewPage(), redactDiagnostic() (+20 more)
+Nodes (27): cliPath, compactMessage(), diagramTypes, here, initialAuthoredOutput(), parseReceipt(), previewPage(), redactDiagnostic() (+19 more)
 
 ### Community 31 - "Delivery contract"
 Cohesion: 0.25
@@ -415,21 +392,21 @@ Nodes (26): addNodeMarker(), addState(), annotateArchitectureSideSvg(), BOUNDARY
 Cohesion: 0.05
 Nodes (43): $ref, type, type, type, $ref, $ref, $ref, properties (+35 more)
 
-### Community 34 - "preview-contract.test.mjs"
-Cohesion: 0.22
-Nodes (8): chinese, delivery, english, here, readme, repoRoot, skill, skillRoot
+### Community 34 - "story-shelf.test.mjs"
+Cohesion: 0.25
+Nodes (5): CASES, __dirname, skillRoot, template, tmp
 
 ### Community 35 - "workflow-compiler.test.mjs"
 Cohesion: 0.12
 Nodes (16): asciiGroupLabelTextRect(), assertReadableAdjacentResult(), assertRectInsideViewBox(), attribute(), attributeOrUndefined(), cli, compileSuccessfully(), __dirname (+8 more)
 
-### Community 36 - "ref_node_assert_strict"
-Cohesion: 0.14
-Nodes (15): createViewerClick(), installClickObserver(), arm(), sample(), CASES, __dirname, skillRoot, tmp (+7 more)
+### Community 36 - "motion-governor.test.mjs"
+Cohesion: 0.29
+Nodes (4): CASES, __dirname, skillRoot, tmp
 
 ### Community 37 - "offline-font-browser.test.mjs"
-Cohesion: 0.05
-Nodes (32): base, cases, cli, head, skillRoot, cli, __dirname, example (+24 more)
+Cohesion: 0.04
+Nodes (42): Validate and deliver, Delivery, base, cases, cli, head, skillRoot, checker (+34 more)
 
 ### Community 38 - "properties"
 Cohesion: 0.08
@@ -443,17 +420,17 @@ Nodes (5): cli, __dirname, fixture, skillRoot, tmp
 Cohesion: 0.13
 Nodes (22): boundaryIndex(), boundaryKey(), canonical(), canonicalArchitecture(), canonicalArchitectureJson(), compareArchitecture(), compareEntities(), equal() (+14 more)
 
-### Community 41 - "site-language-continuity.test.mjs"
-Cohesion: 0.10
-Nodes (13): CASES, __dirname, skillRoot, tmp, values(), clickAndNavigate(), __dirname, evaluate() (+5 more)
+### Community 41 - "ResidentDetailModal.tsx"
+Cohesion: 0.36
+Nodes (6): ImprimirSolicitudDotacionModal(), ImprimirSolicitudDotacionModalProps, ResidentDetailModal(), TabFicha, ResidentInventoryTabContent(), DotacionResidente
 
 ### Community 42 - "$defs"
 Cohesion: 0.09
 Nodes (22): enum, oneOf, enum, $defs, animation, brandMark, componentType, id (+14 more)
 
-### Community 43 - "cli-output-types.test.mjs"
-Cohesion: 0.08
-Nodes (15): checker, cli, skillRoot, tmp, architecture, base, cli, head (+7 more)
+### Community 43 - "chapter-handoff.test.mjs"
+Cohesion: 0.29
+Nodes (4): CASES, __dirname, skillRoot, tmp
 
 ### Community 44 - "properties"
 Cohesion: 0.10
@@ -463,13 +440,13 @@ Nodes (21): $ref, $ref, type, $ref, properties, type, $ref, brand (+13 more)
 Cohesion: 0.10
 Nodes (19): additionalProperties, type, $ref, const, $id, additionalProperties, required, type (+11 more)
 
-### Community 46 - "cli.test.mjs"
-Cohesion: 0.13
-Nodes (11): cli, __dirname, skillRoot, tmp, artifactRoots, __dirname, repoRoot, skillRoot (+3 more)
+### Community 46 - "generated-artifact-xml.test.mjs"
+Cohesion: 0.21
+Nodes (9): artifactRoots, __dirname, repoRoot, skillRoot, extractSvgs(), parseXml(), visit(), parse5 (+1 more)
 
 ### Community 47 - "InventoryView.tsx"
-Cohesion: 0.15
-Nodes (21): ImprimirConstanciaInventarioModal(), ImprimirConstanciaInventarioModalProps, InsumoResidenteData, InsumoDisponibleDispensar, ModalDispensarInsumoResidente(), ModalDispensarInsumoResidenteProps, ModalRecibirInsumoFamiliar(), ModalRecibirInsumoFamiliarProps (+13 more)
+Cohesion: 0.12
+Nodes (28): ImprimirConstanciaInventarioModal(), ImprimirConstanciaInventarioModalProps, InsumoResidenteData, ModalDetalleKPI(), ModalDetalleKPIProps, TipoKPIModal, InsumoDisponibleDispensar, ModalDispensarInsumoResidente() (+20 more)
 
 ### Community 48 - "properties"
 Cohesion: 0.11
@@ -483,17 +460,17 @@ Nodes (15): check(), __dirname, expectFailure(), GOLDEN, landingPage, landingVer
 Cohesion: 0.06
 Nodes (35): dependencies, lucide-react, react, react-dom, tailwindcss, @tailwindcss/vite, description, devDependencies (+27 more)
 
-### Community 51 - "resolverAvatarUrl"
-Cohesion: 0.17
-Nodes (18): ResidentAvatar(), ResidentAvatarProps, AdminHeader(), AdminSidebar(), DIAS_SEMANA_OPCIONES, PLANTILLAS_PREDEFINIDAS, ProgramarTurnosModal(), UserProfileModal() (+10 more)
+### Community 51 - "semantic-passport.test.mjs"
+Cohesion: 0.29
+Nodes (4): CASES, __dirname, skillRoot, tmp
 
 ### Community 52 - "entries"
 Cohesion: 0.20
 Nodes (10): additionalProperties, properties, type, additionalProperties, properties, type, $ref, entries (+2 more)
 
-### Community 53 - "release-package-gates.test.mjs"
-Cohesion: 0.12
-Nodes (9): canonicalNotices, git(), repositoryFixture(), stagerPath, write(), currentNodeMajor, __dirname, repoRoot (+1 more)
+### Community 53 - "ref_node_child_process"
+Cohesion: 0.06
+Nodes (22): __dirname, outputRoot, skillRoot, TARGETS, canonicalNotices, git(), repositoryFixture(), stagerPath (+14 more)
 
 ### Community 54 - "ordinary-model-floor.test.mjs"
 Cohesion: 0.20
@@ -519,9 +496,9 @@ Nodes (21): items, type, items, type, $ref, allowedRoots, allowedTerminals, requ
 Cohesion: 0.10
 Nodes (21): $ref, const, minItems, type, items, minItems, type, additionalProperties (+13 more)
 
-### Community 60 - "relationship-direct-explorer.test.mjs"
-Cohesion: 0.25
-Nodes (5): CASES, __dirname, skillRoot, template, tmp
+### Community 60 - "finder.test.mjs"
+Cohesion: 0.29
+Nodes (4): CASES, __dirname, skillRoot, tmp
 
 ### Community 61 - "workflow-compiler.mjs"
 Cohesion: 0.13
@@ -537,15 +514,15 @@ Nodes (15): INITIAL_ACTIVITY_TIMELINE, INITIAL_BITACORA, INITIAL_CLINICAL_RECORD
 
 ### Community 64 - "driveService.ts"
 Cohesion: 0.24
-Nodes (14): RegisterLeaveModal(), calcularSha256(), fileToBase64(), normalizarExtension(), sanitizarIdentificador(), subirArchivoResidente(), subirFotoTalentoHumano(), subirSoportePermiso() (+6 more)
+Nodes (14): EditWorkerModal(), calcularSha256(), fileToBase64(), normalizarExtension(), sanitizarIdentificador(), subirArchivoResidente(), subirFotoTalentoHumano(), subirSoportePermiso() (+6 more)
 
 ### Community 65 - "assertSafeDirectory"
 Cohesion: 0.19
 Nodes (28): assertCacheTargetAbsent(), assertRenameableCacheEntry(), assertSafeCacheEntry(), assertSafeDirectory(), cacheMkdir(), cacheMkdirWithToken(), CacheOperationRaceError, cacheRename() (+20 more)
 
-### Community 66 - "chapter-delta-preview.test.mjs"
-Cohesion: 0.22
-Nodes (5): CASES, __dirname, PROOF_CASES, skillRoot, tmp
+### Community 66 - "ref_node_os"
+Cohesion: 0.05
+Nodes (22): __dirname, skillRoot, CASES, __dirname, PROOF_CASES, skillRoot, tmp, repoRoot (+14 more)
 
 ### Community 67 - "i18n.test.mjs"
 Cohesion: 0.12
@@ -575,9 +552,9 @@ Nodes (14): Archify, Authoring invariants, Fast authoring path, Mermaid input, O
 Cohesion: 0.09
 Nodes (22): SMY_DOTACION_CATALOGO, SMY_ESTADOS_ORGANIZACIONES, SMY_ARCHIVOS, SMY_CENTROS, SMY_RESIDENTES, SMY_USUARIOS, V_SMY_TIMELINE_RESIDENTE, VW_SMY_ARCHIVOS_ACTIVOS (+14 more)
 
-### Community 74 - "ref_node_child_process"
-Cohesion: 0.07
-Nodes (20): workflow, __dirname, outputRoot, skillRoot, TARGETS, __dirname, repoRoot, skillRoot (+12 more)
+### Community 74 - "FichaTecnicaIngresoModal.tsx"
+Cohesion: 0.33
+Nodes (5): FichaTab, FichaTecnicaIngresoModal(), DatosGenograma, NodoGenograma, SignosVitalesIngreso
 
 ### Community 75 - "properties"
 Cohesion: 0.14
@@ -611,21 +588,13 @@ Nodes (13): items, items, items, type, additionalProperties, required, type, con
 Cohesion: 0.29
 Nodes (6): additionalProperties, $id, required, $schema, title, type
 
-### Community 83 - "ChromeVisualBrowser"
-Cohesion: 0.33
-Nodes (3): ChromeVisualBrowser, chromeVisualBrowserArgs(), evaluate()
-
 ### Community 84 - "ref_node_path"
-Cohesion: 0.11
-Nodes (14): launchTarget(), openArtifact(), OPENERS, openLoopbackUrl(), here, skillRoot, tmp, here (+6 more)
+Cohesion: 0.07
+Nodes (22): launchTarget(), openArtifact(), OPENERS, openLoopbackUrl(), authoringContract, __dirname, schemaReadme, skill (+14 more)
 
-### Community 85 - "readme-showcase.test.mjs"
-Cohesion: 0.20
-Nodes (7): assetPath, __dirname, inspectGif(), receiptPath, repoRoot, skillRoot, skipSubBlocks()
-
-### Community 86 - "preview.test.mjs"
-Cohesion: 0.08
-Nodes (16): CASES, __dirname, skillRoot, template, tmp, __dirname, repoRoot, skillRoot (+8 more)
+### Community 86 - "ref_node_fs"
+Cohesion: 0.05
+Nodes (31): CASES, __dirname, skillRoot, template, tmp, originalRmSync, __dirname, repoRoot (+23 more)
 
 ### Community 87 - "repository-evidence.mjs"
 Cohesion: 0.41
@@ -663,9 +632,9 @@ Nodes (10): additionalProperties, properties, type, additionalProperties, proper
 Cohesion: 0.20
 Nodes (8): ARRAY_FIELDS, assertFriendlyFailure(), __dirname, EXAMPLES, installedRoot, render(), skillRoot, tmp
 
-### Community 96 - "ref_node_os"
-Cohesion: 0.06
-Nodes (18): repoRoot, CASES, __dirname, skillRoot, tmp, CASES, __dirname, skillRoot (+10 more)
+### Community 96 - "guided-views.test.mjs"
+Cohesion: 0.25
+Nodes (4): CASES, __dirname, skillRoot, tmp
 
 ### Community 98 - "compilerOptions"
 Cohesion: 0.11
@@ -691,10 +660,6 @@ Nodes (6): baseFixture, cli, headFixture, here, skillRoot, workflowFixture
 Cohesion: 0.32
 Nodes (7): buildWelcomeMessage(), SamanyaAiChat(), SUGERENCIAS_PREGUNTAS, buildSystemPrompt(), ChatMessage, getFechaBogota(), sendChatMessage()
 
-### Community 105 - "motion-governor-browser.test.mjs"
-Cohesion: 0.48
-Nodes (6): load(), media(), run(), screenshot(), skillRoot, snapshot()
-
 ### Community 106 - "items"
 Cohesion: 0.31
 Nodes (9): items, type, cards, items, additionalProperties, items, required, type (+1 more)
@@ -703,29 +668,21 @@ Nodes (9): items, type, cards, items, additionalProperties, items, required, typ
 Cohesion: 0.22
 Nodes (9): semanticRelation, $ref, from, to, additionalProperties, properties, required, type (+1 more)
 
-### Community 108 - "reader-layout-browser.test.mjs"
-Cohesion: 0.29
-Nodes (8): cases, evaluate(), load(), media(), skillRoot, snapshot(), stable(), viewport()
-
 ### Community 109 - "release-identity.test.mjs"
 Cohesion: 0.33
 Nodes (7): checker, here, repoRoot, stableUpdateManifest(), writeFile(), writeValidDevelopmentFixture(), writeValidStableFixture()
 
-### Community 110 - "PipeCdp"
-Cohesion: 0.24
-Nodes (6): PipeCdp, Design Rules, Input, Layout budget, Legend, Lifecycle Renderer
+### Community 110 - "vertical-edge.test.mjs"
+Cohesion: 0.07
+Nodes (22): PipeCdp, Design Rules, Input, Layout budget, Legend, Lifecycle Renderer, Archify JSON IR Schemas, Error format (+14 more)
 
 ### Community 111 - "v1-compatibility.test.mjs"
 Cohesion: 0.22
 Nodes (4): __dirname, OFFICIAL_V1_EXAMPLES, skillRoot, tmp
 
-### Community 112 - "artifact"
-Cohesion: 0.25
-Nodes (8): Executable geometry rules, Repair order, Repository evidence, Spacing and labels, Validate and deliver, Delivery, validate(), artifact()
-
-### Community 113 - "focus-browser.test.mjs"
-Cohesion: 0.31
-Nodes (11): click(), focus(), key(), load(), move(), point(), run(), select() (+3 more)
+### Community 113 - ".send"
+Cohesion: 0.05
+Nodes (69): executable(), findChrome(), findOnPath(), click(), key(), load(), record(), run() (+61 more)
 
 ### Community 114 - "fromCol"
 Cohesion: 0.50
@@ -743,10 +700,6 @@ Nodes (8): $ref, via, wraps, items, type, items, minItems, type
 Cohesion: 0.33
 Nodes (5): buildCommand, headers, outputDirectory, rewrites, version
 
-### Community 118 - "story-director-strip.test.mjs"
-Cohesion: 0.25
-Nodes (5): CASES, __dirname, skillRoot, template, tmp
-
 ### Community 119 - "cellH"
 Cohesion: 0.67
 Nodes (3): minimum, type, cellH
@@ -759,23 +712,11 @@ Nodes (4): CASES, __dirname, skillRoot, tmp
 Cohesion: 0.67
 Nodes (3): minItems, type, components
 
-### Community 122 - "guided-views.test.mjs"
-Cohesion: 0.25
-Nodes (4): CASES, __dirname, skillRoot, tmp
-
 ### Community 123 - "gapX"
 Cohesion: 0.67
 Nodes (3): minimum, type, gapX
 
-### Community 124 - ".send"
-Cohesion: 0.19
-Nodes (18): click(), key(), load(), record(), run(), skillRoot, key(), click() (+10 more)
-
 ### Community 125 - "story-follow-camera.test.mjs"
-Cohesion: 0.25
-Nodes (5): CASES, __dirname, skillRoot, template, tmp
-
-### Community 126 - "story-moment-link.test.mjs"
 Cohesion: 0.25
 Nodes (5): CASES, __dirname, skillRoot, template, tmp
 
@@ -824,16 +765,16 @@ Cohesion: 0.08
 Nodes (44): chat_openrouter(), dispatch_oracle_api(), execute_oracle_request(), get_connection(), get_drive_photo(), get_wallet_directory(), health_check(), Localiza o extrae la Oracle Wallet para el runtime de Vercel Linux o local.… (+36 more)
 
 ### Community 141 - "Authoring contract"
-Cohesion: 0.22
-Nodes (9): Authoring contract, Engineering profile default, Hand-placed fallback, Language consistency, Legend contract, Schema lookup, Title hierarchy, Visual preset default (+1 more)
+Cohesion: 0.15
+Nodes (13): Authoring contract, Engineering profile default, Executable geometry rules, Hand-placed fallback, Language consistency, Legend contract, Repair order, Repository evidence (+5 more)
 
 ### Community 143 - "Estándar Arquitectónico PL/SQL para Oracle"
 Cohesion: 0.09
 Nodes (21): 10.1 Errores Inesperados (`WHEN OTHERS`), 10. Estándar Obligatorio de Manejo de Excepciones y Logging, 11. Lista de Chequeo Arquitectónica Obligatoria (Pre-entrega), 12. Formato Estándar de Respuesta al Usuario, 1. Misión y Carácter Obligatorio, 2.1 Prohibición Absoluta de la Nomenclatura `JOIN` (Sintaxis Relacional Tradicional Oracle), 2.2 Parámetros de Entrada en `CLOB` JSON y Extracción con `JSON_VALUE`, 2.3 Manejo de Fechas y Zona Horaria (Bogotá, Colombia - UTC-5) (+13 more)
 
 ### Community 145 - "generate-brand-marks.mjs"
-Cohesion: 0.16
-Nodes (14): catalog, catalogPath, domains, fail(), generated, here, ids, lookupForms() (+6 more)
+Cohesion: 0.18
+Nodes (13): catalog, catalogPath, domains, fail(), generated, here, ids, lookupForms() (+5 more)
 
 ### Community 147 - "size"
 Cohesion: 0.33
@@ -847,17 +788,9 @@ Nodes (6): viewBox, items, maxItems, minItems, prefixItems, type
 Cohesion: 0.33
 Nodes (6): point, items, maxItems, minItems, prefixItems, type
 
-### Community 150 - "story-shelf.test.mjs"
-Cohesion: 0.25
-Nodes (5): CASES, __dirname, skillRoot, template, tmp
-
 ### Community 152 - "focus"
 Cohesion: 0.40
 Nodes (5): items, minItems, type, $ref, focus
-
-### Community 153 - "vertical-edge.test.mjs"
-Cohesion: 0.25
-Nodes (5): bin, __dirname, REPRO, skillRoot, tmp
 
 ### Community 154 - "common.schema.json"
 Cohesion: 0.50
@@ -871,9 +804,9 @@ Nodes (4): $ref, via, items, type
 Cohesion: 0.50
 Nodes (4): width, minimum, $ref, type
 
-### Community 157 - "engineering-profiles.mjs"
-Cohesion: 0.43
-Nodes (6): DEPLOYMENT_BOUNDARY_KINDS, deploymentOwnershipDiagnostics(), membership(), PRIVATE_STATE_TYPES, subject(), validateEngineeringProfile()
+### Community 157 - "engineering-profile.test.mjs"
+Cohesion: 0.18
+Nodes (11): DEPLOYMENT_BOUNDARY_KINDS, deploymentOwnershipDiagnostics(), membership(), PRIVATE_STATE_TYPES, subject(), validateEngineeringProfile(), cli, __dirname (+3 more)
 
 ### Community 158 - "via"
 Cohesion: 0.50
@@ -927,17 +860,9 @@ Nodes (3): relationshipWidth, minimum, type
 Cohesion: 0.20
 Nodes (9): Canonical exports, Exploration, Guided views and story, Motion and presentation, Reach Share Card, Route Share Card, Share Card, Truth boundary (+1 more)
 
-### Community 178 - "route-probe.test.mjs"
-Cohesion: 0.29
-Nodes (4): CASES, __dirname, skillRoot, tmp
-
 ### Community 179 - "cornerRadius"
 Cohesion: 0.67
 Nodes (3): minimum, type, cornerRadius
-
-### Community 180 - "semantic-flow.test.mjs"
-Cohesion: 0.29
-Nodes (4): CASES, __dirname, skillRoot, tmp
 
 ### Community 181 - "label"
 Cohesion: 0.67
@@ -971,25 +896,17 @@ Nodes (3): width, minimum, type
 Cohesion: 0.29
 Nodes (4): CASES, __dirname, skillRoot, tmp
 
-### Community 191 - "intent-trace-browser.test.mjs"
-Cohesion: 0.24
-Nodes (12): desktopBrowser(), desktopPointerCheck(), afterTimer(), click(), key(), load(), media(), move() (+4 more)
-
-### Community 192 - "semantic-lens.test.mjs"
-Cohesion: 0.29
-Nodes (4): CASES, __dirname, skillRoot, tmp
+### Community 191 - "guided-views-browser.test.mjs"
+Cohesion: 0.10
+Nodes (32): activate(), click(), hash(), key(), load(), move(), point(), run() (+24 more)
 
 ### Community 196 - "story-beat-navigator.test.mjs"
 Cohesion: 0.29
 Nodes (5): CASES, __dirname, skillRoot, template, tmp
 
-### Community 197 - "Archify JSON IR Schemas"
-Cohesion: 0.20
-Nodes (9): Archify JSON IR Schemas, Error format, Files, Legend presentation contract, Runtime validation, schema_version policy, Shared definitions (common.schema.json), Visual quality and engineering truth (+1 more)
-
 ### Community 199 - "ref_node_url"
-Cohesion: 0.05
-Nodes (31): authoringContract, __dirname, schemaReadme, skill, skillRoot, CASES, __dirname, skillRoot (+23 more)
+Cohesion: 0.02
+Nodes (69): here, skillRoot, tmp, CASES, __dirname, skillRoot, tmp, here (+61 more)
 
 ### Community 200 - "repository-evidence-replacement.test.mjs"
 Cohesion: 0.33
@@ -1003,10 +920,6 @@ Nodes (5): devDependencies, ajv, parse5, saxes, simple-icons
 Cohesion: 0.67
 Nodes (3): stage, minimum, type
 
-### Community 207 - "findChrome"
-Cohesion: 0.31
-Nodes (8): executable(), findChrome(), findOnPath(), cases, evaluate(), exported(), load(), skillRoot
-
 ### Community 208 - "graphify reference: extra exports and benchmark"
 Cohesion: 0.22
 Nodes (8): graphify reference: extra exports and benchmark, Step 6b - Wiki (only if --wiki flag), Step 7 - Neo4j export (only if --neo4j or --neo4j-push flag), Step 7a - FalkorDB export (only if --falkordb or --falkordb-push flag), Step 7b - SVG export (only if --svg flag), Step 7c - GraphML export (only if --graphml flag), Step 7d - MCP server (only if --mcp flag), Step 8 - Token reduction benchmark (only if total_words > 5000)
@@ -1015,35 +928,15 @@ Nodes (8): graphify reference: extra exports and benchmark, Step 6b - Wiki (only
 Cohesion: 0.33
 Nodes (6): Architecture, Dataflow, Lifecycle, Mode placement, Sequence, Workflow
 
-### Community 210 - "repository-evidence.test.mjs"
-Cohesion: 0.25
-Nodes (5): cli, fixture(), git(), here, skillRoot
-
-### Community 211 - "viewer-camera-browser.test.mjs"
-Cohesion: 0.33
-Nodes (8): cases, load(), run(), screenshot(), skillRoot, snapshot(), stable(), viewport()
-
-### Community 213 - "FichaTecnicaIngresoModal.tsx"
-Cohesion: 0.40
-Nodes (4): FichaTab, DatosGenograma, NodoGenograma, SignosVitalesIngreso
-
 ### Community 214 - "animation.test.mjs"
 Cohesion: 0.25
 Nodes (5): CASES, __dirname, NODE_COLLECTION, skillRoot, tmp
-
-### Community 215 - "ref_node_fs"
-Cohesion: 0.08
-Nodes (15): __dirname, skillRoot, originalRmSync, __dirname, docsRoot, landing, manifest, proofs (+7 more)
 
 ### Community 216 - "preset-tryon.test.mjs"
 Cohesion: 0.25
 Nodes (4): CASES, __dirname, skillRoot, tmp
 
 ### Community 217 - "reach-share-card.test.mjs"
-Cohesion: 0.25
-Nodes (5): CASES, __dirname, repoRoot, skillRoot, tmp
-
-### Community 220 - "route-share-card.test.mjs"
 Cohesion: 0.25
 Nodes (5): CASES, __dirname, repoRoot, skillRoot, tmp
 
@@ -1054,10 +947,6 @@ Nodes (5): annotatedTaggerTime(), checker, git(), here, repoRoot
 ### Community 223 - "SMY_VALORACIONES_INGRESO"
 Cohesion: 0.29
 Nodes (6): SMY_ESTADOS_CIVILES, SMY_VALORACIONES_INGRESO, SMY_ARCHIVOS, SMY_CENTROS, SMY_RESIDENTES, SMY_USUARIOS
-
-### Community 224 - "chapter-rail.test.mjs"
-Cohesion: 0.29
-Nodes (4): CASES, __dirname, skillRoot, tmp
 
 ### Community 225 - "SMY_VALORACIONES_INGRESO"
 Cohesion: 0.29
@@ -1074,10 +963,6 @@ Nodes (7): 1. Clasificación de Excepciones, 2. Estructura de `SMY_ERRORES` y Re
 ### Community 339 - "Sequence Renderer"
 Cohesion: 0.29
 Nodes (6): Column fit, Design Rules, Input, Layout budget, Legend, Sequence Renderer
-
-### Community 347 - "route-journey.test.mjs"
-Cohesion: 0.25
-Nodes (5): CASES, __dirname, skillRoot, template, tmp
 
 ### Community 348 - "Data Flow Renderer"
 Cohesion: 0.33
@@ -1120,24 +1005,24 @@ Cohesion: 0.67
 Nodes (3): row, minimum, type
 
 ## Knowledge Gaps
-- **1309 isolated node(s):** `__dirname`, `skillRoot`, `TYPES`, `COMPOSITION_CHECKS`, `CHECK_FIXES` (+1304 more)
-  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1807 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
+- **1310 isolated node(s):** `__dirname`, `skillRoot`, `TYPES`, `COMPOSITION_CHECKS`, `CHECK_FIXES` (+1305 more)
+  These have ≤1 connection - possible missing edges or undocumented components. (Counts symbols only; 1809 node(s) total have ≤1 connection when file, concept and rationale nodes are included.)
 - **166 thin communities (<3 nodes) omitted from report** — run `graphify query` to explore isolated nodes.
 
 ## Suggested Questions
 _Questions this graph is uniquely positioned to answer:_
 
 - **Why does `compileWorkflowInternal()` connect `compileWorkflowInternal` to `render-lifecycle.mjs`, `workflow-v2.mjs`, `validateSchema`, `diagnostics.mjs`, `geometry.mjs`, `workflow-compiler.mjs`?**
-  _High betweenness centrality (0.010) - this node is a cross-community bridge._
+  _High betweenness centrality (0.009) - this node is a cross-community bridge._
+- **Why does `Repository evidence` connect `Authoring contract` to `offline-font-browser.test.mjs`, `architecture-delta-markers.test.mjs`?**
+  _High betweenness centrality (0.005) - this node is a cross-community bridge._
 - **What connects `__dirname`, `skillRoot`, `TYPES` to the rest of the system?**
-  _1309 weakly-connected nodes found - possible documentation gaps or missing edges._
+  _1310 weakly-connected nodes found - possible documentation gaps or missing edges._
 - **Should `compileWorkflowInternal` be split into smaller, more focused modules?**
   _Cohesion score 0.058435255290234904 - nodes in this community are weakly interconnected._
 - **Should `render-lifecycle.mjs` be split into smaller, more focused modules?**
   _Cohesion score 0.04469476744186047 - nodes in this community are weakly interconnected._
 - **Should `archify/package.json` be split into smaller, more focused modules?**
-  _Cohesion score 0.125 - nodes in this community are weakly interconnected._
-- **Should `render-architecture.mjs` be split into smaller, more focused modules?**
-  _Cohesion score 0.05868118572292801 - nodes in this community are weakly interconnected._
-- **Should `archify.mjs` be split into smaller, more focused modules?**
-  _Cohesion score 0.12313725490196079 - nodes in this community are weakly interconnected._
+  _Cohesion score 0.13333333333333333 - nodes in this community are weakly interconnected._
+- **Should `viewer-chrome-layout.test.mjs` be split into smaller, more focused modules?**
+  _Cohesion score 0.06890756302521009 - nodes in this community are weakly interconnected._

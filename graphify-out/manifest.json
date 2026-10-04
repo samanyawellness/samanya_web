@@ -2700,9 +2700,9 @@
     "semantic_hash": ""
   },
   "src/components/views/InventoryView.tsx": {
-    "mtime": 1791088287.83176,
-    "seen": 1791088463.4799845,
-    "ast_hash": "f9f6d2cbb2874c91e742aae32b3937c7",
+    "mtime": 1791126924.5781443,
+    "seen": 1791127102.2881014,
+    "ast_hash": "d9dbde21985361ab747b6099bdce550f",
     "semantic_hash": ""
   },
   "backend/db/scripts/agregar_maneja_costos.sql": {
@@ -2739,6 +2739,12 @@
     "mtime": 1791123599.0573175,
     "seen": 1791123823.9225867,
     "ast_hash": "e37b0ca55d46d55139f7b1b48a46025d",
+    "semantic_hash": ""
+  },
+  "src/components/modals/ModalDetalleKPI.tsx": {
+    "mtime": 1791126975.9149294,
+    "seen": 1791127102.2880688,
+    "ast_hash": "ce3b6605a53d823d2a3b55cb83b6bf72",
     "semantic_hash": ""
   }
 }
