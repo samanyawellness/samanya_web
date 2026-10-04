@@ -2298,9 +2298,9 @@
     "semantic_hash": ""
   },
   "src/components/views/FamilyMembersView.tsx": {
-    "mtime": 1790385407.4009423,
-    "seen": 1790385614.5080733,
-    "ast_hash": "a78a3a3ece258276921462ccbabdebeb",
+    "mtime": 1791127739.991418,
+    "seen": 1791127965.298965,
+    "ast_hash": "ff32f95fa91d34eeab108a066b90210b",
     "semantic_hash": ""
   },
   "src/components/views/LeavesView.tsx": {
@@ -2310,9 +2310,9 @@
     "semantic_hash": ""
   },
   "src/components/views/ResidentsView.tsx": {
-    "mtime": 1791124404.3333938,
-    "seen": 1791125164.5198069,
-    "ast_hash": "388c786967cecc149ad3eb78bc9a4ebb",
+    "mtime": 1791127616.930725,
+    "seen": 1791127965.298973,
+    "ast_hash": "3cdc4964e5224f08fd896152c250519f",
     "semantic_hash": ""
   },
   "src/components/views/ShiftsView.tsx": {
@@ -2322,9 +2322,9 @@
     "semantic_hash": ""
   },
   "src/components/views/WorkersView.tsx": {
-    "mtime": 1790385392.32614,
-    "seen": 1790385614.508092,
-    "ast_hash": "afad63bd0091f0dfb9375e4ba6ff1760",
+    "mtime": 1791127744.897838,
+    "seen": 1791127965.2989771,
+    "ast_hash": "b757fe12040450ff852e07d36303a260",
     "semantic_hash": ""
   },
   "src/context/AdminContext.tsx": {
@@ -2745,6 +2745,18 @@
     "mtime": 1791126975.9149294,
     "seen": 1791127102.2880688,
     "ast_hash": "ce3b6605a53d823d2a3b55cb83b6bf72",
+    "semantic_hash": ""
+  },
+  "src/components/common/PaginadorTabla.tsx": {
+    "mtime": 1791127544.12653,
+    "seen": 1791127965.298889,
+    "ast_hash": "5b1d1d31729b869db3e49ea09582c612",
+    "semantic_hash": ""
+  },
+  "src/components/common/ViewModeSelector.tsx": {
+    "mtime": 1791127554.3392806,
+    "seen": 1791127965.2988985,
+    "ast_hash": "c66a04ddfbac6daebaece15b9eb3f770",
     "semantic_hash": ""
   }
 }
