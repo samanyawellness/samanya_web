@@ -2,17 +2,17 @@
 -- PROYECTO: SAMANYA OS
 -- ARCHIVO: build_all.sql
 -- DESCRIPCIÓN: Script maestro orquestador de compilación PL/SQL.
---              Invoca secuencialmente cada uno de los 122 artefactos PL/SQL
+--              Invoca secuencialmente cada uno de los 139 artefactos PL/SQL
 --              en su estricto orden lógico de dependencias utilizando directivas relativas "@@".
 --              Compatible con SQL*Plus, SQLcl, Oracle SQL Developer y scripts de migración.
 --
---              Estructura Arquitectónica de Artefactos (128 objetos):
+--              Estructura Arquitectónica de Artefactos (139 objetos):
 --              - 2 Utilidades base de fecha y transacciones (f_fecha_actual.sql, p_do_commit.sql)
---              - 96 Paquetes DAO de acceso a datos por PK/ROWID (pkgsmy_*_dao.sql)
+--              - 102 Paquetes DAO de acceso a datos por PK/ROWID (pkgsmy_*_dao.sql)
 --              - 1 Paquete de utilidades de excepciones y logging (uti_ge_excepciones_pkg.sql)
---              - 12 Paquetes de consultas, filtros y DML no-PK (pkgca_residentes, pkgca_smy_usuarios, pkgca_smy_dispositivos_push, pkgca_smy_consentimientos, pkgca_smy_archivos, pkgca_smy_residente_acudiente, pkgca_smy_dotacion_catalogo, pkgca_smy_dotacion_residentes, pkgca_smy_empleados, pkgca_smy_acudientes, pkgca_smy_bitacora_residente, pkgca_smy_valoraciones_ingreso)
---              - 6 Paquetes DML/JSON de proceso multi-tabla (pkgcn_auth, pkgcn_consentimientos, pkgcn_archivos, pkgcn_superadmin, pkgcn_dashboard_administrador, pkgcn_cuadrantes_turnos)
---              - 11 Paquetes de Lógica de Negocio con COMMIT (pkgln_archivos, pkgln_auth, pkgln_consentimientos, pkgln_superadmin, pkgln_dashboard_administrador, pkgln_admision_residente, pkgln_gestion_familiares, pkgln_talento_humano, pkgln_cuadrantes_turnos, pkgln_permisos_ausencias, pkgln_dotacion_residentes)
+--              - 15 Paquetes de consultas, filtros y DML no-PK (pkgca_residentes, pkgca_smy_usuarios, pkgca_smy_dispositivos_push, pkgca_smy_consentimientos, pkgca_smy_archivos, pkgca_smy_residente_acudiente, pkgca_smy_dotacion_catalogo, pkgca_smy_dotacion_residentes, pkgca_smy_empleados, pkgca_smy_acudientes, pkgca_smy_bitacora_residente, pkgca_smy_valoraciones_ingreso, pkgca_smy_plan_nutricional, pkgca_smy_registros_alimentacion, pkgca_smy_minutas_semanales)
+--              - 7 Paquetes DML/JSON de proceso multi-tabla (pkgcn_auth, pkgcn_consentimientos, pkgcn_archivos, pkgcn_superadmin, pkgcn_dashboard_administrador, pkgcn_cuadrantes_turnos, pkgcn_alimentacion)
+--              - 12 Paquetes de Lógica de Negocio con COMMIT (pkgln_archivos, pkgln_auth, pkgln_consentimientos, pkgln_superadmin, pkgln_dashboard_administrador, pkgln_admision_residente, pkgln_gestion_familiares, pkgln_talento_humano, pkgln_cuadrantes_turnos, pkgln_permisos_ausencias, pkgln_dotacion_residentes, pkgln_alimentacion)
 --              - 1 Bloque final de verificación y reporte de objetos inválidos en USER_OBJECTS
 -- =============================================================================
 
@@ -44,7 +44,7 @@ BEGIN
       FROM DUAL;
     DBMS_OUTPUT.PUT_LINE('============================================================================');
     DBMS_OUTPUT.PUT_LINE('  INICIANDO COMPILACIÓN COMPLETA DE ARTEFACTOS PL/SQL - SAMANYA OS');
-    DBMS_OUTPUT.PUT_LINE('  TOTAL OBJETOS A COMPILAR: 128');
+    DBMS_OUTPUT.PUT_LINE('  TOTAL OBJETOS A COMPILAR: 139');
     DBMS_OUTPUT.PUT_LINE('  HORA OFICIAL (Bogotá, Colombia - UTC-5): ' || v_fecha_bogota);
     DBMS_OUTPUT.PUT_LINE('============================================================================');
 END;
@@ -255,6 +255,18 @@ PROMPT >> [89/101] Compilando pkgsmy_vias_administracion_dao.sql...
 @@pkgsmy_vias_administracion_dao.sql
 PROMPT >> Compilando pkgsmy_valoraciones_ingreso_dao.sql...
 @@pkgsmy_valoraciones_ingreso_dao.sql
+PROMPT >> Compilando pkgsmy_tiempos_comida_dao.sql...
+@@pkgsmy_tiempos_comida_dao.sql
+PROMPT >> Compilando pkgsmy_niveles_espesante_dao.sql...
+@@pkgsmy_niveles_espesante_dao.sql
+PROMPT >> Compilando pkgsmy_plan_nutricional_dao.sql...
+@@pkgsmy_plan_nutricional_dao.sql
+PROMPT >> Compilando pkgsmy_minutas_semanales_dao.sql...
+@@pkgsmy_minutas_semanales_dao.sql
+PROMPT >> Compilando pkgsmy_minuta_items_dao.sql...
+@@pkgsmy_minuta_items_dao.sql
+PROMPT >> Compilando pkgsmy_registros_alimentacion_dao.sql...
+@@pkgsmy_registros_alimentacion_dao.sql
 
 PROMPT
 PROMPT ============================================================================
@@ -291,6 +303,12 @@ PROMPT >> Compilando pkgca_smy_bitacora_residente.sql...
 @@pkgca_smy_bitacora_residente.sql
 PROMPT >> Compilando pkgca_smy_valoraciones_ingreso.sql...
 @@pkgca_smy_valoraciones_ingreso.sql
+PROMPT >> Compilando pkgca_smy_plan_nutricional.sql...
+@@pkgca_smy_plan_nutricional.sql
+PROMPT >> Compilando pkgca_smy_registros_alimentacion.sql...
+@@pkgca_smy_registros_alimentacion.sql
+PROMPT >> Compilando pkgca_smy_minutas_semanales.sql...
+@@pkgca_smy_minutas_semanales.sql
 
 PROMPT
 PROMPT ============================================================================
@@ -308,6 +326,8 @@ PROMPT >> Compilando pkgcn_dashboard_administrador.sql...
 @@pkgcn_dashboard_administrador.sql
 PROMPT >> Compilando pkgcn_cuadrantes_turnos.sql...
 @@pkgcn_cuadrantes_turnos.sql
+PROMPT >> Compilando pkgcn_alimentacion.sql...
+@@pkgcn_alimentacion.sql
 
 PROMPT
 PROMPT ============================================================================
@@ -335,6 +355,8 @@ PROMPT >> Compilando pkgln_permisos_ausencias.sql...
 @@pkgln_permisos_ausencias.sql
 PROMPT >> Compilando pkgln_dotacion_residentes.sql...
 @@pkgln_dotacion_residentes.sql
+PROMPT >> Compilando pkgln_alimentacion.sql...
+@@pkgln_alimentacion.sql
 
 PROMPT
 PROMPT ============================================================================
@@ -362,7 +384,7 @@ BEGIN
 
     IF vn_invalidos = 0 THEN
         DBMS_OUTPUT.PUT_LINE('============================================================================');
-        DBMS_OUTPUT.PUT_LINE('  OK: Todos los 128 objetos PL/SQL se encuentran en estado VALID.');
+        DBMS_OUTPUT.PUT_LINE('  OK: Todos los 139 objetos PL/SQL se encuentran en estado VALID.');
         DBMS_OUTPUT.PUT_LINE('============================================================================');
     ELSE
         DBMS_OUTPUT.PUT_LINE('============================================================================');
@@ -383,8 +405,8 @@ BEGIN
       FROM DUAL;
     DBMS_OUTPUT.PUT_LINE('============================================================================');
     DBMS_OUTPUT.PUT_LINE('  COMPILACIÓN COMPLETADA - HORA BOGOTÁ (UTC-5): ' || v_fecha_fin);
-    DBMS_OUTPUT.PUT_LINE('  Total objetos orquestados: 128');
-    DBMS_OUTPUT.PUT_LINE('  (2 Utilidades Base + 96 DAOs + 1 Utilidad Logging + 12 Consultas/DML PKGCA + 6 DML/JSON Multi-Tabla PKGCN + 11 Lógica de Negocio PKGLN)');
+    DBMS_OUTPUT.PUT_LINE('  Total objetos orquestados: 139');
+    DBMS_OUTPUT.PUT_LINE('  (2 Utilidades Base + 102 DAOs + 1 Utilidad Logging + 15 Consultas/DML PKGCA + 7 DML/JSON Multi-Tabla PKGCN + 12 Lógica de Negocio PKGLN)');
     DBMS_OUTPUT.PUT_LINE('============================================================================');
 END;
 /

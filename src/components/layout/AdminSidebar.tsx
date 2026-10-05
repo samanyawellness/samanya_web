@@ -13,7 +13,8 @@ import {
   LogOut,
   UserCog,
   Boxes,
-  BookOpen
+  BookOpen,
+  UtensilsCrossed
 } from 'lucide-react';
 import { resolverAvatarUrl, DEFAULT_AVATAR, obtenerIniciales } from '../../utils/avatarUtils';
 
@@ -41,6 +42,13 @@ export const AdminSidebar: React.FC = () => {
   // Si la sede actual tiene deshabilitado el inventario y se encuentra en esa pestaña, redirigir al resumen general
   useEffect(() => {
     if (activeTab === 'inventario' && activeSede && activeSede.manejaInventario === false) {
+      setActiveTab('dashboard');
+    }
+  }, [activeTab, activeSede, setActiveTab]);
+
+  // Si la sede actual tiene deshabilitada la alimentación y se encuentra en esa pestaña, redirigir al resumen general
+  useEffect(() => {
+    if (activeTab === 'alimentacion' && activeSede && activeSede.manejaAlimentacion === false) {
       setActiveTab('dashboard');
     }
   }, [activeTab, activeSede, setActiveTab]);
@@ -103,6 +111,12 @@ export const AdminSidebar: React.FC = () => {
       icon: <Boxes className="w-5 h-5" />,
       badge: stockBajoCount > 0 ? stockBajoCount : undefined,
       badgeColor: 'bg-amber-600 text-white'
+    }] : []),
+    // Módulo condicional por Sede: Solo visible si la sede no tiene deshabilitado manejaAlimentacion = false
+    ...(activeSede && activeSede.manejaAlimentacion !== false ? [{
+      tab: 'alimentacion' as AdminTab,
+      label: 'Alimentación & Dietas',
+      icon: <UtensilsCrossed className="w-5 h-5" />
     }] : [])
   ];
 

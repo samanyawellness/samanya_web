@@ -1182,15 +1182,15 @@
     "semantic_hash": "b03454a5e38fe63cb9689f922148ae21"
   },
   "backend/db/scripts/build_all.sql": {
-    "mtime": 1791075587.3633835,
-    "seen": 1791075655.9474852,
-    "ast_hash": "410a7b4e5ce6ab784064688d06e351ae",
+    "mtime": 1791164242.7639246,
+    "seen": 1791165095.8918793,
+    "ast_hash": "8392be225157911e13f4cd3d2e90db46",
     "semantic_hash": ""
   },
   "backend/db/scripts/datos_prueba_dummy.sql": {
-    "mtime": 1791136977.931465,
-    "seen": 1791137246.9150522,
-    "ast_hash": "2245c62da05c994c5b0554fb43e2f2ee",
+    "mtime": 1791164530.0117157,
+    "seen": 1791165095.8918982,
+    "ast_hash": "3b85f1085002d27326979a2496540063",
     "semantic_hash": ""
   },
   "backend/db/scripts/f_fecha_actual.sql": {
@@ -1854,9 +1854,9 @@
     "semantic_hash": "cbb25f9314d7994543575432aeb7511a"
   },
   "creacion_modelo_relacional.sql": {
-    "mtime": 1791089858.1491768,
-    "seen": 1791090415.4716604,
-    "ast_hash": "40c9e718035dfa9e9f43fc5ee74903a6",
+    "mtime": 1791166042.3366382,
+    "seen": 1791166622.8196626,
+    "ast_hash": "4fc937df10bb94d5a56dc266bf15ac73",
     "semantic_hash": ""
   },
   "docs/diagrams/samanya.architecture.json": {
@@ -2166,9 +2166,9 @@
     "semantic_hash": ""
   },
   "documentacion_esquema.html": {
-    "mtime": 1791090278.9598422,
-    "seen": 1791090415.4742854,
-    "ast_hash": "446af1884bce57e3943d425ecf1bad4d",
+    "mtime": 1791164618.8784587,
+    "seen": 1791165095.8925226,
+    "ast_hash": "37c3af15b500d2e01807f8870f268fb8",
     "semantic_hash": ""
   },
   "estilos.txt": {
@@ -2238,9 +2238,9 @@
     "semantic_hash": ""
   },
   "src/App.tsx": {
-    "mtime": 1791132150.1551857,
-    "seen": 1791132402.7639647,
-    "ast_hash": "d97f2674e33073d1d2613f4bc8b726df",
+    "mtime": 1791164869.6335118,
+    "seen": 1791165095.8922977,
+    "ast_hash": "466b1a766eb65e0cd26b9360c9f8b6f0",
     "semantic_hash": ""
   },
   "src/components/common/ToastNotification.tsx": {
@@ -2256,9 +2256,9 @@
     "semantic_hash": ""
   },
   "src/components/layout/AdminSidebar.tsx": {
-    "mtime": 1791128746.2203505,
-    "seen": 1791128962.4144526,
-    "ast_hash": "c643f9a6818ae1af0354701b5d456583",
+    "mtime": 1791164820.271824,
+    "seen": 1791165095.8923182,
+    "ast_hash": "36c715b2a8f8c4e55d0296cfdb5b8299",
     "semantic_hash": ""
   },
   "src/components/modals/RegisterFamilyModal.tsx": {
@@ -2328,15 +2328,15 @@
     "semantic_hash": ""
   },
   "src/context/AdminContext.tsx": {
-    "mtime": 1791137711.1457336,
-    "seen": 1791137926.9612095,
-    "ast_hash": "60d6c2bc2465448d1e3e745382c72a3a",
+    "mtime": 1791164776.0044422,
+    "seen": 1791165095.892392,
+    "ast_hash": "7e70d75bdbb9545aaddc585cf5086141",
     "semantic_hash": ""
   },
   "src/data/seedData.ts": {
-    "mtime": 1791137680.6900942,
-    "seen": 1791137926.9612122,
-    "ast_hash": "1528b9ea60256587de6808c770a767d9",
+    "mtime": 1791164683.694275,
+    "seen": 1791165095.892394,
+    "ast_hash": "0dd9961218b1ffd2c581cd73495e25d3",
     "semantic_hash": ""
   },
   "src/main.tsx": {
@@ -2352,9 +2352,9 @@
     "semantic_hash": ""
   },
   "src/types/index.ts": {
-    "mtime": 1791132718.985194,
-    "seen": 1791133394.2057095,
-    "ast_hash": "20ceb6c4924f830fbc13c288886f3105",
+    "mtime": 1791164655.2413175,
+    "seen": 1791165095.892406,
+    "ast_hash": "1ffbd4c7cad1988948b6a9a0484fe37e",
     "semantic_hash": ""
   },
   "src/vite-env.d.ts": {
@@ -2418,9 +2418,9 @@
     "semantic_hash": ""
   },
   "src/components/modals/EditSedeModal.tsx": {
-    "mtime": 1791087460.3189528,
-    "seen": 1791087668.5263836,
-    "ast_hash": "af82e50af6c787cbbf6936aa79b2aefe",
+    "mtime": 1791164801.7563562,
+    "seen": 1791165095.8923254,
+    "ast_hash": "a242bad463520c766d16bc737be9a3d7",
     "semantic_hash": ""
   },
   "src/services/driveService.ts": {
@@ -2769,6 +2769,84 @@
     "mtime": 1791132836.0944421,
     "seen": 1791133394.2057188,
     "ast_hash": "3c8b9cccff1fb51727594fff83138c93",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/cambios_alimentacion.sql": {
+    "mtime": 1791166020.9564424,
+    "seen": 1791166622.8191319,
+    "ast_hash": "5961fb0434b4a8b59cdacb748049734d",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgca_smy_minutas_semanales.sql": {
+    "mtime": 1791166083.2140994,
+    "seen": 1791166622.819186,
+    "ast_hash": "6fcf71ddc1cc9e746870a81f35171c38",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgca_smy_plan_nutricional.sql": {
+    "mtime": 1791166905.4738326,
+    "seen": 1791167018.8104715,
+    "ast_hash": "3048365de342f8f9ec928e841f273dd4",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgca_smy_registros_alimentacion.sql": {
+    "mtime": 1791166918.8980353,
+    "seen": 1791167018.8104744,
+    "ast_hash": "dc401dd2b57b9f9c8f4506b6428bc0e4",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgcn_alimentacion.sql": {
+    "mtime": 1791166886.9380016,
+    "seen": 1791167018.8104837,
+    "ast_hash": "3452b7ab48d74911ae8d06b74d0bf7c2",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgln_alimentacion.sql": {
+    "mtime": 1791166937.4088874,
+    "seen": 1791167018.8105016,
+    "ast_hash": "584096620a8412f59dec4d90474774a1",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgsmy_minuta_items_dao.sql": {
+    "mtime": 1791166412.634149,
+    "seen": 1791166622.8194196,
+    "ast_hash": "64ca77ea3aadd6f5d688f85b5cd243a0",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgsmy_minutas_semanales_dao.sql": {
+    "mtime": 1791166397.5975595,
+    "seen": 1791166622.8194222,
+    "ast_hash": "a4a12aa1aba3ba25d0132fba22c4336a",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgsmy_niveles_espesante_dao.sql": {
+    "mtime": 1791166367.9975092,
+    "seen": 1791166622.819425,
+    "ast_hash": "78a33f7015e0a22a9e3d2592d037d38f",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgsmy_plan_nutricional_dao.sql": {
+    "mtime": 1791166383.8121839,
+    "seen": 1791166622.8194456,
+    "ast_hash": "6f302206f3f96de4ac69a92585243677",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgsmy_registros_alimentacion_dao.sql": {
+    "mtime": 1791166428.9733896,
+    "seen": 1791166622.819461,
+    "ast_hash": "cefe7923413a119cee0a95973c02d3be",
+    "semantic_hash": ""
+  },
+  "backend/db/scripts/pkgsmy_tiempos_comida_dao.sql": {
+    "mtime": 1791166351.1412425,
+    "seen": 1791166622.819526,
+    "ast_hash": "10bd7face5a8241d80c429f9b9bd0479",
+    "semantic_hash": ""
+  },
+  "src/components/views/AlimentacionView.tsx": {
+    "mtime": 1791164933.0553913,
+    "seen": 1791165095.8923686,
+    "ast_hash": "6b06a2dd8d1f6813528ad12bd8a83da6",
     "semantic_hash": ""
   }
 }

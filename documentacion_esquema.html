@@ -1402,6 +1402,7 @@ erDiagram
               <tr><td class="col-name">ID_ESTADO_ORGANIZACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>1</td><td>FK hacia SMY_ESTADOS_ORGANIZACIONES(ID).</td></tr>
               <tr><td class="col-name">MANEJA_INVENTARIO</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Flag maestro: Indica si la organización tiene contratado/habilitado el módulo de inventarios ('S' / 'N').</td></tr>
               <tr><td class="col-name">MANEJA_COSTOS_INVENTARIO</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Flag maestro: Indica si la organización gestiona costos/precios (S) o solo control físico de cantidades (N).</td></tr>
+              <tr><td class="col-name">MANEJA_ALIMENTACION</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Flag maestro: Indica si la organización tiene habilitado el módulo de alimentación, nutrición, menús y comedores ('S' / 'N').</td></tr>
               <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Auditoría de registro inicial.</td></tr>
               <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que realizó la última modificación.</td></tr>
             </tbody>
@@ -1429,6 +1430,7 @@ erDiagram
               <tr><td class="col-name">ID_ESTADO_CENTRO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-req">No</span></td><td>1</td><td>Estado operativo de la sede.</td></tr>
               <tr><td class="col-name">MANEJA_INVENTARIO</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Indica si esta sede maneja inventario físico de insumos y bodegas (S/N). Si es 'N', menús y widgets permanecen ocultos.</td></tr>
               <tr><td class="col-name">MANEJA_COSTOS_INVENTARIO</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Indica si la sede gestiona precios/costos (S) o si opera solo por cantidades físicas (N).</td></tr>
+              <tr><td class="col-name">MANEJA_ALIMENTACION</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>Indica si esta sede geriátrica gestiona el módulo de alimentación, comedores y planes de dieta (S/N). Si es 'N', menús y widgets de alimentación permanecen ocultos.</td></tr>
               <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Auditoría de creación.</td></tr>
               <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que realizó la modificación.</td></tr>
             </tbody>
@@ -2353,67 +2355,143 @@ sequenceDiagram
       </div>
 
       <!-- 4.7 NUTRICION -->
-      <h3 id="mod-nutricion">4.7 Módulo de Nutrición, Menú y Consumo</h3>
+      <h3 id="mod-nutricion">4.7 Módulo de Alimentación, Planes Nutricionales, Minutas e Ingestas (Fases 1 y 2)</h3>
+      <p>Gestión clínica y operativa de tiempos de comida, espesantes para disfagia (IDDSI), planes nutricionales individuales, minutas semanales y pase diario de comedor.</p>
 
-      <div class="card table-block" data-table="SMY_PLANES_NUTRICIONALES">
-        <h4>Tabla: SMY_PLANES_NUTRICIONALES</h4>
-        <p>Plan nutricional, consistencia de dieta, restricciones y alergias por residente.</p>
+      <div class="card table-block" data-table="SMY_TIEMPOS_COMIDA">
+        <h4>Tabla: SMY_TIEMPOS_COMIDA</h4>
+        <p>Catálogo maestro de momentos de ingesta diaria con orden de servicio y horario sugerido.</p>
         <div class="table-container">
           <table class="data-dict">
             <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
             <tbody>
-              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_PLANES_NUTRICIONALES</td><td>ID del plan.</td></tr>
-              <tr><td class="col-name">ID_RESIDENTE</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK única hacia SMY_RESIDENTES(ID).</td></tr>
-              <tr><td class="col-name">ID_TIPO_DIETA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_TIPOS_DIETAS(ID).</td></tr>
-              <tr><td class="col-name">ID_CONSISTENCIA_DIETA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CONSISTENCIAS_DIETA(ID).</td></tr>
-              <tr><td class="col-name">RESTRICCIONES_ALIMENTARIAS</td><td class="col-type">VARCHAR2(500)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Hiposódica, baja en azúcar, etc.</td></tr>
-              <tr><td class="col-name">ALERGIAS_ALIMENTARIAS</td><td class="col-type">VARCHAR2(500)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Lactosa, gluten, mariscos, etc.</td></tr>
-              <tr><td class="col-name">OBSERVACIONES</td><td class="col-type">CLOB</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Instrucciones para cocina.</td></tr>
-              <tr><td class="col-name">FECHA_VALORACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de evaluación.</td></tr>
-              <tr><td class="col-name">ID_NUTRICIONISTA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>FK hacia SMY_EMPLEADOS(ID).</td></tr>
-              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de auditoría.</td></tr>
-              <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que modificó.</td></tr>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_TIEMPOS_COMIDA</td><td>ID único del tiempo de comida.</td></tr>
+              <tr><td class="col-name">CODIGO</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Código mnemónico único (DESAYUNO, ALMUERZO, CENA, etc.).</td></tr>
+              <tr><td class="col-name">NOMBRE</td><td class="col-type">VARCHAR2(100)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Nombre visible del tiempo de comida.</td></tr>
+              <tr><td class="col-name">DESCRIPCION</td><td class="col-type">VARCHAR2(300)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Detalle y propósito del tiempo de comida.</td></tr>
+              <tr><td class="col-name">HORA_SUGERIDA</td><td class="col-type">VARCHAR2(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Horario sugerido de servicio (HH24:MI).</td></tr>
+              <tr><td class="col-name">ORDEN</td><td class="col-type">NUMBER(3)</td><td><span class="badge badge-req">No</span></td><td>1</td><td>Orden cronológico en la jornada diaria.</td></tr>
+              <tr><td class="col-name">ESTADO</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-req">No</span></td><td>'ACTIVO'</td><td>ACTIVO / INACTIVO.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>f_fecha_actual</td><td>Fecha de registro en base de datos.</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <div class="card table-block" data-table="SMY_REGISTROS_ALIM_SESION">
-        <h4>Tabla: SMY_REGISTROS_ALIM_SESION</h4>
-        <p>Sesión grupal de comida (Desayuno, Almuerzo, Cena) para el comedor general.</p>
+      <div class="card table-block" data-table="SMY_NIVELES_ESPESANTE">
+        <h4>Tabla: SMY_NIVELES_ESPESANTE</h4>
+        <p>Escala clínica de espesantes para residentes geriátricos con disfagia según estándar internacional IDDSI.</p>
         <div class="table-container">
           <table class="data-dict">
             <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
             <tbody>
-              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_REG_ALIM_SESION</td><td>ID de la sesión de comida.</td></tr>
-              <tr><td class="col-name">FECHA</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Fecha de la comida.</td></tr>
-              <tr><td class="col-name">ID_TIPO_COMIDA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_TIPOS_COMIDAS(ID).</td></tr>
-              <tr><td class="col-name">DESCRIPCION_MENU</td><td class="col-type">VARCHAR2(500)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Plato servido del día.</td></tr>
-              <tr><td class="col-name">ID_USUARIO_REGISTRA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_USUARIOS(ID).</td></tr>
-              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de auditoría.</td></tr>
-              <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que modificó.</td></tr>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_NIVELES_ESPESANTE</td><td>ID único del nivel de espesante.</td></tr>
+              <tr><td class="col-name">CODIGO</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Código clínico (NIVEL_0 a NIVEL_4).</td></tr>
+              <tr><td class="col-name">NOMBRE</td><td class="col-type">VARCHAR2(100)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Nombre descriptivo (Fino, Néctar, Miel, Pudín).</td></tr>
+              <tr><td class="col-name">NIVEL_IDDSI</td><td class="col-type">NUMBER(2)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Nivel numérico de la escala IDDSI (0 al 4).</td></tr>
+              <tr><td class="col-name">DESCRIPCION</td><td class="col-type">VARCHAR2(300)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Comportamiento del flujo e instrucciones clínicas.</td></tr>
+              <tr><td class="col-name">ORDEN</td><td class="col-type">NUMBER(3)</td><td><span class="badge badge-req">No</span></td><td>1</td><td>Orden progresivo de viscosidad.</td></tr>
+              <tr><td class="col-name">ESTADO</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-req">No</span></td><td>'ACTIVO'</td><td>ACTIVO / INACTIVO.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>f_fecha_actual</td><td>Fecha de registro en base de datos.</td></tr>
             </tbody>
           </table>
         </div>
       </div>
 
-      <div class="card table-block" data-table="SMY_REGISTROS_ALIM_DETALLE">
-        <h4>Tabla: SMY_REGISTROS_ALIM_DETALLE</h4>
-        <p>Monitoreo individual de porcentaje de ingesta y líquidos por residente.</p>
+      <div class="card table-block" data-table="SMY_PLAN_NUTRICIONAL">
+        <h4>Tabla: SMY_PLAN_NUTRICIONAL</h4>
+        <p>Plan nutricional individualizado por residente con calorimetría, consistencia, espesantes, alergias y suplementos.</p>
         <div class="table-container">
           <table class="data-dict">
             <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
             <tbody>
-              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_REG_ALIM_DET</td><td>ID del registro individual.</td></tr>
-              <tr><td class="col-name">ID_SESION_ALIMENTACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_REGISTROS_ALIM_SESION(ID).</td></tr>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_PLAN_NUTRICIONAL</td><td>ID único del plan nutricional.</td></tr>
+              <tr><td class="col-name">ID_CENTRO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CENTROS(ID). Sede asistencial.</td></tr>
               <tr><td class="col-name">ID_RESIDENTE</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_RESIDENTES(ID).</td></tr>
-              <tr><td class="col-name">PORCENTAJE_CONSUMIDO</td><td class="col-type">NUMBER(3)</td><td><span class="badge badge-req">No</span></td><td>100</td><td>0 a 100%.</td></tr>
-              <tr><td class="col-name">RECHAZO_ALIMENTOS</td><td class="col-type">CHAR(1)</td><td><span class="badge badge-req">No</span></td><td>'N'</td><td>'S' / 'N'.</td></tr>
-              <tr><td class="col-name">CONSUMIO_LIQUIDOS_ML</td><td class="col-type">NUMBER(5)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Mililitros ingeridos.</td></tr>
-              <tr><td class="col-name">NOTAS</td><td class="col-type">VARCHAR2(255)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Observaciones de apetito.</td></tr>
-              <tr><td class="col-name">ID_EMPLEADO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>FK hacia SMY_EMPLEADOS(ID).</td></tr>
-              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>Hora Bogotá (UTC-5)</td><td>Fecha de auditoría.</td></tr>
-              <tr><td class="col-name">ID_USUARIO_ULTIMA_MODIFICACION</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que modificó.</td></tr>
+              <tr><td class="col-name">ID_TIPO_DIETA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_TIPOS_DIETAS(ID) (Hiposódica, Diabética, etc.).</td></tr>
+              <tr><td class="col-name">ID_CONSISTENCIA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CONSISTENCIAS_DIETA(ID) (Normal, Blanda, Papilla, etc.).</td></tr>
+              <tr><td class="col-name">ID_NIVEL_ESPESANTE</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_NIVELES_ESPESANTE(ID) (IDDSI).</td></tr>
+              <tr><td class="col-name">REQUERIMIENTO_CALORICO_KCAL</td><td class="col-type">NUMBER(6)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Calorías meta diarias (kcal/día).</td></tr>
+              <tr><td class="col-name">RESTRICCIONES_ALERGIAS</td><td class="col-type">VARCHAR2(1000)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Alergias e intolerancias alimentarias declaradas.</td></tr>
+              <tr><td class="col-name">ALIMENTOS_PREFERIDOS</td><td class="col-type">VARCHAR2(1000)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Preferencias gustativas del adulto mayor.</td></tr>
+              <tr><td class="col-name">ALIMENTOS_RECHAZADOS</td><td class="col-type">VARCHAR2(1000)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Alimentos no tolerados o rechazados.</td></tr>
+              <tr><td class="col-name">REQUIERE_ASISTENCIA</td><td class="col-type">VARCHAR2(1)</td><td><span class="badge badge-req">No</span></td><td>'N'</td><td>'S' / 'N'. Si requiere cuidador dedicado para alimentarse.</td></tr>
+              <tr><td class="col-name">SUPLEMENTO_NUTRICIONAL</td><td class="col-type">VARCHAR2(500)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fórmula o suplemento pautado (Ensure, Glucerna, etc.).</td></tr>
+              <tr><td class="col-name">OBSERVACIONES</td><td class="col-type">VARCHAR2(2000)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Directrices para el servicio de alimentación y cocina.</td></tr>
+              <tr><td class="col-name">ESTADO</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-req">No</span></td><td>'ACTIVO'</td><td>ACTIVO / INACTIVO.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>f_fecha_actual</td><td>Fecha de auditoría de creación.</td></tr>
+              <tr><td class="col-name">ACTUALIZADO_POR</td><td class="col-type">VARCHAR2(100)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Usuario que realizó la última actualización.</td></tr>
+              <tr><td class="col-name">FECHA_ACTUALIZACION</td><td class="col-type">DATE</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fecha de última actualización.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card table-block" data-table="SMY_MINUTAS_SEMANALES">
+        <h4>Tabla: SMY_MINUTAS_SEMANALES</h4>
+        <p>Cabecera de menú y minutas semanales planificadas por sede geriátrica con vigencia de fechas.</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_MINUTAS_SEMANALES</td><td>ID único de la minuta semanal.</td></tr>
+              <tr><td class="col-name">ID_CENTRO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CENTROS(ID). Sede que ofrece el menú.</td></tr>
+              <tr><td class="col-name">NOMBRE</td><td class="col-type">VARCHAR2(150)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Título descriptivo del menú semanal.</td></tr>
+              <tr><td class="col-name">DESCRIPCION</td><td class="col-type">VARCHAR2(500)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Observaciones y objetivos dietéticos del menú.</td></tr>
+              <tr><td class="col-name">FECHA_INICIO</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Fecha de inicio del ciclo semanal (Lunes).</td></tr>
+              <tr><td class="col-name">FECHA_FIN</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Fecha de término del ciclo semanal (Domingo).</td></tr>
+              <tr><td class="col-name">ESTADO</td><td class="col-type">VARCHAR2(20)</td><td><span class="badge badge-req">No</span></td><td>'ACTIVO'</td><td>ACTIVO / INACTIVO.</td></tr>
+              <tr><td class="col-name">CREADO_POR</td><td class="col-type">VARCHAR2(100)</td><td><span class="badge badge-req">No</span></td><td>'SISTEMA'</td><td>Usuario que diseñó la minuta.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>f_fecha_actual</td><td>Fecha de auditoría de creación.</td></tr>
+              <tr><td class="col-name">FECHA_ACTUALIZACION</td><td class="col-type">DATE</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fecha de última actualización.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card table-block" data-table="SMY_MINUTA_ITEMS">
+        <h4>Tabla: SMY_MINUTA_ITEMS</h4>
+        <p>Detalle de platos, acompañamiento, bebidas y postres por día de la semana (1-7) y tiempo de comida.</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_MINUTA_ITEMS</td><td>ID único del plato en la minuta.</td></tr>
+              <tr><td class="col-name">ID_MINUTA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_MINUTAS_SEMANALES(ID) ON DELETE CASCADE.</td></tr>
+              <tr><td class="col-name">DIA_SEMANA</td><td class="col-type">NUMBER(2)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>1=Lunes, 2=Martes, ..., 7=Domingo.</td></tr>
+              <tr><td class="col-name">ID_TIEMPO_COMIDA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_TIEMPOS_COMIDA(ID).</td></tr>
+              <tr><td class="col-name">PLATO_PRINCIPAL</td><td class="col-type">VARCHAR2(300)</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Plato fuerte o preparación principal.</td></tr>
+              <tr><td class="col-name">ACOMPANAMIENTO</td><td class="col-type">VARCHAR2(300)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Guarnición, carbohidrato o ensalada.</td></tr>
+              <tr><td class="col-name">BEBIDA</td><td class="col-type">VARCHAR2(200)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Líquido o bebida servida.</td></tr>
+              <tr><td class="col-name">POSTRE</td><td class="col-type">VARCHAR2(200)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Fruta o postre ligero.</td></tr>
+              <tr><td class="col-name">CALORIAS_ESTIMADAS</td><td class="col-type">NUMBER(6)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Aporte calórico estimado del servicio.</td></tr>
+              <tr><td class="col-name">OBSERVACIONES_DIETAS</td><td class="col-type">VARCHAR2(500)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Adaptaciones sugeridas para consistencias o texturas.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>f_fecha_actual</td><td>Fecha de auditoría.</td></tr>
+            </tbody>
+          </table>
+        </div>
+      </div>
+
+      <div class="card table-block" data-table="SMY_REGISTROS_ALIMENTACION">
+        <h4>Tabla: SMY_REGISTROS_ALIMENTACION</h4>
+        <p>Control operativo de comedor: asistencia, porcentaje de consumo ingerido, tolerancia y líquidos por tiempo de comida.</p>
+        <div class="table-container">
+          <table class="data-dict">
+            <thead><tr><th>Columna</th><th>Tipo Oracle</th><th>Nulo</th><th>Defecto (Bogotá UTC-5)</th><th>Descripción y Foráneas</th></tr></thead>
+            <tbody>
+              <tr><td class="col-name">ID</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-pk">PK</span></td><td>SEQ_SMY_REGISTROS_ALIMENTACION</td><td>ID del registro de ingesta.</td></tr>
+              <tr><td class="col-name">ID_CENTRO</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_CENTROS(ID). Sede del comedor.</td></tr>
+              <tr><td class="col-name">ID_RESIDENTE</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_RESIDENTES(ID).</td></tr>
+              <tr><td class="col-name">FECHA</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>-</td><td>Fecha de la ingesta (TRUNC de fecha).</td></tr>
+              <tr><td class="col-name">ID_TIEMPO_COMIDA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-fk">FK</span></td><td>-</td><td>FK hacia SMY_TIEMPOS_COMIDA(ID).</td></tr>
+              <tr><td class="col-name">ID_PLAN_NUTRICIONAL</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>FK hacia SMY_PLAN_NUTRICIONAL(ID) vigente.</td></tr>
+              <tr><td class="col-name">PORCENTAJE_INGESTA</td><td class="col-type">NUMBER(3)</td><td><span class="badge badge-req">No</span></td><td>0</td><td>Porcentaje consumido del plato (0 a 100%).</td></tr>
+              <tr><td class="col-name">LIQUIDOS_ML</td><td class="col-type">NUMBER(6)</td><td><span class="badge badge-opt">Sí</span></td><td>0</td><td>Mililitros de líquidos consumidos.</td></tr>
+              <tr><td class="col-name">TOLERANCIA</td><td class="col-type">VARCHAR2(30)</td><td><span class="badge badge-opt">Sí</span></td><td>'BUENA'</td><td>Tolerancia gástrica (BUENA, REGULAR, MALA/VÓMITO).</td></tr>
+              <tr><td class="col-name">ASISTIO</td><td class="col-type">VARCHAR2(1)</td><td><span class="badge badge-req">No</span></td><td>'S'</td><td>'S' / 'N'. Asistencia al comedor.</td></tr>
+              <tr><td class="col-name">OBSERVACIONES</td><td class="col-type">VARCHAR2(1000)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>Notas del cuidador o auxiliar (motivos de inapetencia).</td></tr>
+              <tr><td class="col-name">ID_EMPLEADO_REGISTRA</td><td class="col-type">NUMBER(10)</td><td><span class="badge badge-opt">Sí</span></td><td>-</td><td>FK hacia SMY_EMPLEADOS(ID) que supervisó la comida.</td></tr>
+              <tr><td class="col-name">FECHA_CREACION</td><td class="col-type">DATE</td><td><span class="badge badge-req">No</span></td><td>f_fecha_actual</td><td>Fecha de auditoría.</td></tr>
             </tbody>
           </table>
         </div>

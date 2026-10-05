@@ -1,6 +1,6 @@
 import React, { useState, useEffect } from 'react';
 import { useAdmin } from '../../context/AdminContext';
-import { X, Save, Building2, Bed, MapPin, Phone, AlertCircle, Boxes, CheckCircle2, DollarSign } from 'lucide-react';
+import { X, Save, Building2, Bed, MapPin, Phone, AlertCircle, Boxes, CheckCircle2, DollarSign, UtensilsCrossed } from 'lucide-react';
 
 export const EditSedeModal: React.FC = () => {
   const {
@@ -18,7 +18,8 @@ export const EditSedeModal: React.FC = () => {
     ciudad: '',
     telefono: '',
     manejaInventario: true,
-    manejaCostosInventario: true
+    manejaCostosInventario: true,
+    manejaAlimentacion: true
   });
 
   const [loading, setLoading] = useState(false);
@@ -38,7 +39,8 @@ export const EditSedeModal: React.FC = () => {
         ciudad: activeSede.ciudad,
         telefono: activeSede.telefono,
         manejaInventario: activeSede.manejaInventario !== false,
-        manejaCostosInventario: activeSede.manejaCostosInventario !== false
+        manejaCostosInventario: activeSede.manejaCostosInventario !== false,
+        manejaAlimentacion: activeSede.manejaAlimentacion !== false
       });
       setError(null);
     }
@@ -77,7 +79,8 @@ export const EditSedeModal: React.FC = () => {
         ciudad: formData.ciudad.trim(),
         telefono: formData.telefono.trim(),
         manejaInventario: formData.manejaInventario,
-        manejaCostosInventario: formData.manejaCostosInventario
+        manejaCostosInventario: formData.manejaCostosInventario,
+        manejaAlimentacion: formData.manejaAlimentacion
       });
       handleClose();
     } catch (err) {
@@ -310,6 +313,44 @@ export const EditSedeModal: React.FC = () => {
                 </button>
               </div>
             )}
+
+            {/* Módulo de Alimentación y Nutrición */}
+            <div className="pt-3 border-t border-[#DEDBD1] flex items-center justify-between">
+              <div className="flex items-center gap-2.5">
+                <div className={`w-8 h-8 rounded-lg flex items-center justify-center ${
+                  formData.manejaAlimentacion ? 'bg-[#182F28] text-[#DCB87F]' : 'bg-[#E5E0D8] text-[#7A745F]'
+                }`}>
+                  <UtensilsCrossed className="w-4 h-4" />
+                </div>
+                <div>
+                  <h4 className="text-xs font-bold text-[#182F28]">
+                    Módulo de Alimentación y Nutrición
+                  </h4>
+                  <p className="text-[11px] text-[#7A745F]">
+                    {formData.manejaAlimentacion
+                      ? 'Habilitado: Planes nutricionales, minutas semanales y control de ingestas en comedor activos.'
+                      : 'Deshabilitado: El menú y registro de alimentación estarán completamente ocultos para esta sede.'}
+                  </p>
+                </div>
+              </div>
+
+              {/* Switch Toggle */}
+              <button
+                type="button"
+                role="switch"
+                aria-checked={formData.manejaAlimentacion}
+                onClick={() => setFormData(prev => ({ ...prev, manejaAlimentacion: !prev.manejaAlimentacion }))}
+                className={`relative inline-flex h-6 w-11 shrink-0 cursor-pointer rounded-full border-2 border-transparent transition-colors duration-200 ease-in-out focus:outline-none ${
+                  formData.manejaAlimentacion ? 'bg-[#182F28]' : 'bg-gray-300'
+                }`}
+              >
+                <span
+                  className={`pointer-events-none inline-block h-5 w-5 transform rounded-full bg-white shadow-md ring-0 transition duration-200 ease-in-out ${
+                    formData.manejaAlimentacion ? 'translate-x-5' : 'translate-x-0'
+                  }`}
+                />
+              </button>
+            </div>
           </div>
 
           {/* Footer de Acciones */}

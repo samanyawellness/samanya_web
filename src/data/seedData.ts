@@ -27,7 +27,8 @@ export const SEED_SEDES: SedeCentro[] = [
     capacidadTotal: 40,
     esSedePrincipal: true,
     manejaInventario: true,
-    manejaCostosInventario: true
+    manejaCostosInventario: true,
+    manejaAlimentacion: true
   },
   {
     id: 2,
@@ -39,7 +40,8 @@ export const SEED_SEDES: SedeCentro[] = [
     capacidadTotal: 45,
     esSedePrincipal: false,
     manejaInventario: true,
-    manejaCostosInventario: false // Ejemplo: La Calera solo controla cantidades físicas
+    manejaCostosInventario: false, // Ejemplo: La Calera solo controla cantidades físicas
+    manejaAlimentacion: true
   },
   {
     id: 3,
@@ -51,7 +53,8 @@ export const SEED_SEDES: SedeCentro[] = [
     capacidadTotal: 15,
     esSedePrincipal: false,
     manejaInventario: false,
-    manejaCostosInventario: false
+    manejaCostosInventario: false,
+    manejaAlimentacion: false
   }
 ];
 

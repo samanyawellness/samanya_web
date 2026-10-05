@@ -99,28 +99,28 @@ USING (
            'S', 'S' FROM DUAL
 ) src ON (dest.ID = src.ID)
 WHEN MATCHED THEN
-UPDATE SET dest.MANEJA_INVENTARIO = src.MANEJA_INVENTARIO, dest.MANEJA_COSTOS_INVENTARIO = src.MANEJA_COSTOS_INVENTARIO
+UPDATE SET dest.MANEJA_INVENTARIO = src.MANEJA_INVENTARIO, dest.MANEJA_COSTOS_INVENTARIO = src.MANEJA_COSTOS_INVENTARIO, dest.MANEJA_ALIMENTACION = 'S'
 WHEN NOT MATCHED THEN
-INSERT (ID, CODIGO_ORGANIZACION, RAZON_SOCIAL, NOMBRE_COMERCIAL, NUMERO_IDENTIFICACION_TRIB, ID_TIPO_IDENTIFICACION, EMAIL_CORPORATIVO, TELEFONO_CONTACTO, ID_ESTADO_ORGANIZACION, MANEJA_INVENTARIO, MANEJA_COSTOS_INVENTARIO)
-VALUES (src.ID, src.CODIGO_ORGANIZACION, src.RAZON_SOCIAL, src.NOMBRE_COMERCIAL, src.NUMERO_IDENTIFICACION_TRIB, src.ID_TIPO_IDENTIFICACION, src.EMAIL_CORPORATIVO, src.TELEFONO_CONTACTO, src.ID_ESTADO_ORGANIZACION, src.MANEJA_INVENTARIO, src.MANEJA_COSTOS_INVENTARIO);
+INSERT (ID, CODIGO_ORGANIZACION, RAZON_SOCIAL, NOMBRE_COMERCIAL, NUMERO_IDENTIFICACION_TRIB, ID_TIPO_IDENTIFICACION, EMAIL_CORPORATIVO, TELEFONO_CONTACTO, ID_ESTADO_ORGANIZACION, MANEJA_INVENTARIO, MANEJA_COSTOS_INVENTARIO, MANEJA_ALIMENTACION)
+VALUES (src.ID, src.CODIGO_ORGANIZACION, src.RAZON_SOCIAL, src.NOMBRE_COMERCIAL, src.NUMERO_IDENTIFICACION_TRIB, src.ID_TIPO_IDENTIFICACION, src.EMAIL_CORPORATIVO, src.TELEFONO_CONTACTO, src.ID_ESTADO_ORGANIZACION, src.MANEJA_INVENTARIO, src.MANEJA_COSTOS_INVENTARIO, 'S');
 
 MERGE INTO SMY_CENTROS dest
 USING (
     SELECT 1 AS ID, 1 AS ID_ORGANIZACION, 'SEDE-CENTRAL' AS CODIGO_CENTRO, 'Sede Central Bogotá' AS NOMBRE_CENTRO,
            'sede_central_bogota' AS SLUG_DIRECTORIO, 'Bogotá D.C.' AS CIUDAD, 'Calle 127 # 19-45, Usaquén' AS DIRECCION, 60 AS CAPACIDAD_RESIDENTES,
-           'S' AS MANEJA_INVENTARIO, 'S' AS MANEJA_COSTOS_INVENTARIO FROM DUAL
+           'S' AS MANEJA_INVENTARIO, 'S' AS MANEJA_COSTOS_INVENTARIO, 'S' AS MANEJA_ALIMENTACION FROM DUAL
     UNION ALL
     SELECT 2, 1, 'SEDE-NORTE', 'Sede Campestre La Calera', 'sede_campestre_calera', 'La Calera', 'Km 4 Vía La Calera', 45,
-           'S', 'S' FROM DUAL
+           'S', 'S', 'S' FROM DUAL
     UNION ALL
     SELECT 3, 2, 'SEDE-VITALIA-MEDELLIN', 'Sede Poblado Medellín', 'sede_poblado_medellin', 'Medellín', 'Carrera 43A # 1-50, El Poblado', 50,
-           'S', 'N' FROM DUAL
+           'S', 'N', 'S' FROM DUAL
 ) src ON (dest.ID = src.ID)
 WHEN MATCHED THEN
-UPDATE SET dest.MANEJA_INVENTARIO = src.MANEJA_INVENTARIO, dest.MANEJA_COSTOS_INVENTARIO = src.MANEJA_COSTOS_INVENTARIO
+UPDATE SET dest.MANEJA_INVENTARIO = src.MANEJA_INVENTARIO, dest.MANEJA_COSTOS_INVENTARIO = src.MANEJA_COSTOS_INVENTARIO, dest.MANEJA_ALIMENTACION = src.MANEJA_ALIMENTACION
 WHEN NOT MATCHED THEN
-INSERT (ID, ID_ORGANIZACION, CODIGO_CENTRO, NOMBRE_CENTRO, SLUG_DIRECTORIO, CIUDAD, DIRECCION, CAPACIDAD_RESIDENTES, MANEJA_INVENTARIO, MANEJA_COSTOS_INVENTARIO)
-VALUES (src.ID, src.ID_ORGANIZACION, src.CODIGO_CENTRO, src.NOMBRE_CENTRO, src.SLUG_DIRECTORIO, src.CIUDAD, src.DIRECCION, src.CAPACIDAD_RESIDENTES, src.MANEJA_INVENTARIO, src.MANEJA_COSTOS_INVENTARIO);
+INSERT (ID, ID_ORGANIZACION, CODIGO_CENTRO, NOMBRE_CENTRO, SLUG_DIRECTORIO, CIUDAD, DIRECCION, CAPACIDAD_RESIDENTES, MANEJA_INVENTARIO, MANEJA_COSTOS_INVENTARIO, MANEJA_ALIMENTACION)
+VALUES (src.ID, src.ID_ORGANIZACION, src.CODIGO_CENTRO, src.NOMBRE_CENTRO, src.SLUG_DIRECTORIO, src.CIUDAD, src.DIRECCION, src.CAPACIDAD_RESIDENTES, src.MANEJA_INVENTARIO, src.MANEJA_COSTOS_INVENTARIO, src.MANEJA_ALIMENTACION);
 
 COMMIT;
 
@@ -2424,6 +2424,107 @@ USING (
 WHEN NOT MATCHED THEN
 INSERT (ID, ID_TRASLADO, ID_ARTICULO, NUMERO_LOTE, FECHA_VENCIMIENTO, CANTIDAD_ENVIADA, CANTIDAD_RECIBIDA, ESTADO_ITEM)
 VALUES (src.ID, src.ID_TRASLADO, src.ID_ARTICULO, src.NUMERO_LOTE, src.FECHA_VENCIMIENTO, src.CANTIDAD_ENVIADA, src.CANTIDAD_RECIBIDA, src.ESTADO_ITEM);
+
+-- =============================================================================
+-- 18.5 MÓDULO DE ALIMENTACIÓN, PLANES NUTRICIONALES Y CONTROL DE INGESTA
+-- =============================================================================
+PROMPT 18.5 Insertando Planes Nutricionales, Minutas Semanales e Ingestas...
+
+-- 18.5.1 Tiempos de Comida Maestros
+MERGE INTO SMY_TIEMPOS_COMIDA dest
+USING (
+    SELECT 1 AS ID, 'DESAYUNO' AS CODIGO, 'Desayuno' AS NOMBRE, 'Primera ingesta matutina principal' AS DESCRIPCION, '07:30' AS HORA_SUGERIDA, 1 AS ORDEN FROM DUAL UNION ALL
+    SELECT 2, 'MEDIAS_NUEVES', 'Medias Nueves', 'Refrigerio ligero de media mañana', '10:00', 2 FROM DUAL UNION ALL
+    SELECT 3, 'ALMUERZO', 'Almuerzo', 'Comida principal del mediodía', '12:30', 3 FROM DUAL UNION ALL
+    SELECT 4, 'ONCES', 'Onces / Merienda', 'Refrigerio de media tarde', '16:00', 4 FROM DUAL UNION ALL
+    SELECT 5, 'CENA', 'Cena', 'Última comida principal de la noche', '18:30', 5 FROM DUAL UNION ALL
+    SELECT 6, 'REFRIGERIO_NOCTURNO', 'Colación Nocturna', 'Aporte calórico previo al descanso', '21:00', 6 FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN MATCHED THEN
+UPDATE SET dest.NOMBRE = src.NOMBRE, dest.HORA_SUGERIDA = src.HORA_SUGERIDA, dest.ORDEN = src.ORDEN
+WHEN NOT MATCHED THEN
+INSERT (ID, CODIGO, NOMBRE, DESCRIPCION, HORA_SUGERIDA, ORDEN, ESTADO, FECHA_CREACION)
+VALUES (src.ID, src.CODIGO, src.NOMBRE, src.DESCRIPCION, src.HORA_SUGERIDA, src.ORDEN, 'ACTIVO', f_fecha_actual);
+
+-- 18.5.2 Niveles de Espesante
+MERGE INTO SMY_NIVELES_ESPESANTE dest
+USING (
+    SELECT 1 AS ID, 'NIVEL_0' AS CODIGO, 'Nivel 0: Líquido Fino (Sin espesante)' AS NOMBRE, 0 AS NIVEL_IDDSI, 'Líquidos estándar' AS DESCRIPCION, 1 AS ORDEN FROM DUAL UNION ALL
+    SELECT 2, 'NIVEL_1', 'Nivel 1: Ligeramente Espeso', 1, 'Fluye fácilmente con pajilla', 2 FROM DUAL UNION ALL
+    SELECT 3, 'NIVEL_2', 'Nivel 2: Néctar / Poco Espeso', 2, 'Cae de cuchara en gotas lentas', 3 FROM DUAL UNION ALL
+    SELECT 4, 'NIVEL_3', 'Nivel 3: Miel / Moderadamente Espeso', 3, 'Se consume en taza o con cuchara', 4 FROM DUAL UNION ALL
+    SELECT 5, 'NIVEL_4', 'Nivel 4: Pudín / Muy Espeso', 4, 'Consumo exclusivo con cuchara', 5 FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN MATCHED THEN
+UPDATE SET dest.NOMBRE = src.NOMBRE, dest.NIVEL_IDDSI = src.NIVEL_IDDSI
+WHEN NOT MATCHED THEN
+INSERT (ID, CODIGO, NOMBRE, NIVEL_IDDSI, DESCRIPCION, ORDEN, ESTADO, FECHA_CREACION)
+VALUES (src.ID, src.CODIGO, src.NOMBRE, src.NIVEL_IDDSI, src.DESCRIPCION, src.ORDEN, 'ACTIVO', f_fecha_actual);
+
+-- 18.5.3 Planes Nutricionales por Residente
+MERGE INTO SMY_PLAN_NUTRICIONAL dest
+USING (
+    SELECT 1 AS ID, 1 AS ID_CENTRO, 1 AS ID_RESIDENTE, 2 AS ID_TIPO_DIETA, 1 AS ID_CONSISTENCIA, 1 AS ID_NIVEL_ESPESANTE, 1900 AS REQ_CAL, 'Baja en sal, sin mariscos' AS RESTRIC, 'Frutas picadas, pescado' AS PREF, 'Brócoli' AS RECH, 'N' AS ASIST, 'Ensure 1 dosis 16:00' AS SUPL, 'Vigilar hidratación matutina' AS OBS FROM DUAL UNION ALL
+    SELECT 2, 1, 2, 1, 2, 3, 1750, 'Diabética estricta, sin azúcar añadido', 'Gelatina dietética, pollo', 'Carne roja dura', 'S', 'Glucerna 1 lata/día', 'Posición semisentada al comer', NULL FROM DUAL UNION ALL
+    SELECT 3, 1, 3, 3, 3, 4, 1600, 'Disfagia severa, dieta papilla/puré', 'Puré de calabaza, compotas', 'Líquidos claros sin espesar', 'S', 'Suplemento proteico espesado', 'Riesgo alto de broncoaspiración', NULL FROM DUAL UNION ALL
+    SELECT 4, 1, 4, 2, 1, 1, 1850, 'Hiposódica', 'Arroz, sopas suaves', 'Comidas grasas', 'N', NULL, 'Autovalente en comedor principal', NULL FROM DUAL UNION ALL
+    SELECT 5, 1, 5, 1, 1, 2, 1800, 'Sin lácteos enteros', 'Caldos desgrasados, pavo', 'Lácteos enteros', 'N', NULL, 'Control glicémico pre-ingesta', NULL FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN MATCHED THEN
+UPDATE SET dest.REQUERIMIENTO_CALORICO_KCAL = src.REQ_CAL, dest.OBSERVACIONES = src.OBS
+WHEN NOT MATCHED THEN
+INSERT (ID, ID_CENTRO, ID_RESIDENTE, ID_TIPO_DIETA, ID_CONSISTENCIA, ID_NIVEL_ESPESANTE, REQUERIMIENTO_CALORICO_KCAL, RESTRICCIONES_ALERGIAS, ALIMENTOS_PREFERIDOS, ALIMENTOS_RECHAZADOS, REQUIERE_ASISTENCIA, SUPLEMENTO_NUTRICIONAL, OBSERVACIONES, ESTADO, CREADO_POR, FECHA_CREACION)
+VALUES (src.ID, src.ID_CENTRO, src.ID_RESIDENTE, src.ID_TIPO_DIETA, src.ID_CONSISTENCIA, src.ID_NIVEL_ESPESANTE, src.REQ_CAL, src.RESTRIC, src.PREF, src.RECH, src.ASIST, src.SUPL, src.OBS, 'ACTIVO', 'SISTEMA', f_fecha_actual);
+
+-- 18.5.4 Minuta Semanal Activa
+MERGE INTO SMY_MINUTAS_SEMANALES dest
+USING (
+    SELECT 1 AS ID, 1 AS ID_CENTRO, 'Minuta Semanal Balanceada Octubre - Ciclo 1' AS NOMBRE,
+           'Menú adaptado a consistencias con control de sodio y carbohidratos complejos' AS DESCRIPCION,
+           TRUNC(f_fecha_actual, 'IW') AS FECHA_INICIO,
+           TRUNC(f_fecha_actual, 'IW') + 6 AS FECHA_FIN,
+           'ACTIVO' AS ESTADO FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN MATCHED THEN
+UPDATE SET dest.NOMBRE = src.NOMBRE, dest.ESTADO = src.ESTADO
+WHEN NOT MATCHED THEN
+INSERT (ID, ID_CENTRO, NOMBRE, DESCRIPCION, FECHA_INICIO, FECHA_FIN, ESTADO, CREADO_POR, FECHA_CREACION)
+VALUES (src.ID, src.ID_CENTRO, src.NOMBRE, src.DESCRIPCION, src.FECHA_INICIO, src.FECHA_FIN, src.ESTADO, 'SISTEMA', f_fecha_actual);
+
+-- 18.5.5 Items de Minuta Semanal
+MERGE INTO SMY_MINUTA_ITEMS dest
+USING (
+    -- Lunes
+    SELECT 1 AS ID, 1 AS ID_MINUTA, 1 AS DIA, 1 AS TIEMPO, 'Huevos revueltos con tomate' AS PLATO, 'Arepa delgada de maíz' AS ACOMP, 'Chocolate bajo en grasa y azúcar' AS BEB, 'Papaya picada' AS POS, 420 AS CAL, 'Preparar textura papilla para disfagia' AS OBS FROM DUAL UNION ALL
+    SELECT 2, 1, 1, 2, 'Yogur descremado con galleta integral', NULL, 'Infusión aromática', NULL, 180, 'Apto diabéticos', NULL FROM DUAL UNION ALL
+    SELECT 3, 1, 1, 3, 'Pechuga campesina a la plancha', 'Arroz blanco con verduras y crema de espinacas', 'Jugo de mora natural sin azúcar', 'Flan ligero de vainilla', 620, 'Espesar bebida a residentes nivel 2 y 3', NULL FROM DUAL UNION ALL
+    SELECT 4, 1, 1, 4, 'Sandwich suave de queso campesino', 'Tostadas integrales', 'Té de frutas', NULL, 220, NULL, NULL FROM DUAL UNION ALL
+    SELECT 5, 1, 1, 5, 'Crema suave de auyama y pollo desmechado', 'Puré de papa criolla', 'Jugo de guayaba', 'Pera cocida en almíbar dietético', 450, 'Textura blanda fácil masticación', NULL FROM DUAL UNION ALL
+    -- Martes
+    SELECT 6, 1, 2, 1, 'Tortilla de claras de huevo con queso bajo en sal', 'Pan integral suave', 'Café con leche deslactosada', 'Melón picado', 400, NULL, NULL FROM DUAL UNION ALL
+    SELECT 7, 1, 2, 3, 'Filete de pescado blanco al vapor', 'Puré de zanahoria y arroz con fideos', 'Limonada natural', 'Compota casera de manzana', 580, 'Verificar ausencia total de espinas', NULL FROM DUAL UNION ALL
+    SELECT 8, 1, 2, 5, 'Consomé concentrado con vegetales y huevo escalfado', 'Arepa suave', 'Aromática de hierbabuena', 'Gelatina dietética', 380, NULL, NULL FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN MATCHED THEN
+UPDATE SET dest.PLATO_PRINCIPAL = src.PLATO, dest.CALORIAS_ESTIMADAS = src.CAL
+WHEN NOT MATCHED THEN
+INSERT (ID, ID_MINUTA, DIA_SEMANA, ID_TIEMPO_COMIDA, PLATO_PRINCIPAL, ACOMPANAMIENTO, BEBIDA, POSTRE, CALORIAS_ESTIMADAS, OBSERVACIONES_DIETAS, CREADO_POR, FECHA_CREACION)
+VALUES (src.ID, src.ID_MINUTA, src.DIA, src.TIEMPO, src.PLATO, src.ACOMP, src.BEB, src.POS, src.CAL, src.OBS, 'SISTEMA', f_fecha_actual);
+
+-- 18.5.6 Registros de Comedor del Día
+MERGE INTO SMY_REGISTROS_ALIMENTACION dest
+USING (
+    SELECT 1 AS ID, 1 AS ID_CENTRO, 1 AS ID_RESIDENTE, TRUNC(f_fecha_actual) AS FECHA, 1 AS ID_TIEMPO, 1 AS ID_PLAN, 90 AS PORC, 250 AS LIQ, 'BUENA' AS TOL, 'S' AS ASIST, 'Comió todo con buen apetito' AS OBS, 2 AS ID_EMP FROM DUAL UNION ALL
+    SELECT 2, 1, 2, TRUNC(f_fecha_actual), 1, 2, 60, 180, 'BUENA', 'S', 'Consumió huevos y fruta, dejó la arepa', 2 FROM DUAL UNION ALL
+    SELECT 3, 1, 3, TRUNC(f_fecha_actual), 1, 3, 40, 100, 'REGULAR', 'S', 'Inapetente, se asistió lentamente, requirió suplemento espesado', 2 FROM DUAL UNION ALL
+    SELECT 4, 1, 1, TRUNC(f_fecha_actual), 3, 1, 85, 300, 'BUENA', 'S', 'Aceptó muy bien el almuerzo', 2 FROM DUAL UNION ALL
+    SELECT 5, 1, 2, TRUNC(f_fecha_actual), 3, 2, 75, 200, 'BUENA', 'S', 'Comió en posición fowler con asistencia', 2 FROM DUAL
+) src ON (dest.ID = src.ID)
+WHEN MATCHED THEN
+UPDATE SET dest.PORCENTAJE_INGESTA = src.PORC, dest.TOLERANCIA = src.TOL
+WHEN NOT MATCHED THEN
+INSERT (ID, ID_CENTRO, ID_RESIDENTE, FECHA, ID_TIEMPO_COMIDA, ID_PLAN_NUTRICIONAL, PORCENTAJE_INGESTA, LIQUIDOS_ML, TOLERANCIA, ASISTIO, OBSERVACIONES, ID_EMPLEADO_REGISTRA, CREADO_POR, FECHA_CREACION)
+VALUES (src.ID, src.ID_CENTRO, src.ID_RESIDENTE, src.FECHA, src.ID_TIEMPO, src.ID_PLAN, src.PORC, src.LIQ, src.TOL, src.ASIST, src.OBS, src.ID_EMP, 'SISTEMA', f_fecha_actual);
 
 COMMIT;
 

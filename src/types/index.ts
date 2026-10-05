@@ -10,6 +10,7 @@ export type SedeCentro = {
   idOrganizacion?: number;
   manejaInventario?: boolean;
   manejaCostosInventario?: boolean;
+  manejaAlimentacion?: boolean;
 };
 
 export type MedicamentoPrescrito = {
@@ -651,5 +652,104 @@ export type RegistrarTrasladoPayload = {
     fechaVencimiento?: string;
   }>;
 };
+
+// =============================================================================
+// MÓDULO DE ALIMENTACIÓN Y NUTRICIÓN (FASES 1 Y 2)
+// =============================================================================
+
+export type TiempoComida = {
+  id: number;
+  codigo: string;
+  nombre: string;
+  descripcion?: string;
+  horaSugerida?: string;
+  orden: number;
+  estado: 'ACTIVO' | 'INACTIVO';
+};
+
+export type NivelEspesante = {
+  id: number;
+  codigo: string;
+  nombre: string;
+  nivelIddsi?: number;
+  descripcion?: string;
+  orden: number;
+  estado: 'ACTIVO' | 'INACTIVO';
+};
+
+export type PlanNutricional = {
+  id: number;
+  idCentro: number;
+  idResidente: number;
+  idTipoDieta?: number;
+  tipoDietaNombre?: string;
+  idConsistencia?: number;
+  consistenciaNombre?: string;
+  idNivelEspesante?: number;
+  nivelEspesanteNombre?: string;
+  requerimientoCaloricoKcal?: number;
+  restriccionesAlergias?: string;
+  alimentosPreferidos?: string;
+  alimentosRechazados?: string;
+  requiereAsistencia: boolean;
+  suplementoNutricional?: string;
+  observaciones?: string;
+  estado: 'ACTIVO' | 'INACTIVO';
+  fechaCreacion?: string;
+  fechaActualizacion?: string;
+};
+
+export type MinutaItem = {
+  id: number;
+  idMinuta: number;
+  diaSemana: number; // 1 = Lunes, ..., 7 = Domingo
+  nombreDia?: string;
+  idTiempoComida: number;
+  tiempoComidaNombre?: string;
+  horaSugerida?: string;
+  platoPrincipal: string;
+  acompanamiento?: string;
+  bebida?: string;
+  postre?: string;
+  caloriasEstimadas?: number;
+  observacionesDietas?: string;
+};
+
+export type MinutaSemanal = {
+  id: number;
+  idCentro: number;
+  nombreCentro?: string;
+  nombre: string;
+  descripcion?: string;
+  fechaInicio: string; // YYYY-MM-DD
+  fechaFin: string; // YYYY-MM-DD
+  estado: 'ACTIVO' | 'INACTIVO';
+  items?: MinutaItem[];
+};
+
+export type RegistroAlimentacion = {
+  id: number;
+  idCentro: number;
+  idResidente: number;
+  residenteNombre?: string;
+  habitacion?: string;
+  cama?: string;
+  fecha: string; // YYYY-MM-DD
+  idTiempoComida: number;
+  tiempoComidaNombre?: string;
+  idPlanNutricional?: number;
+  tipoDieta?: string;
+  consistencia?: string;
+  espesante?: string;
+  requiereAsistencia?: boolean;
+  porcentajeIngesta: number;
+  liquidosMl?: number;
+  tolerancia: 'BUENA' | 'REGULAR' | 'MALA';
+  asistio: boolean;
+  observaciones?: string;
+  idEmpleadoRegistra?: number;
+  nombreEmpleadoRegistra?: string;
+};
+
 
 

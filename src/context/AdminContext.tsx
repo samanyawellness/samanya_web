@@ -78,7 +78,8 @@ export type AdminTab =
   | 'turnos'
   | 'permisos'
   | 'clinico'
-  | 'inventario';
+  | 'inventario'
+  | 'alimentacion';
 
 interface AdminContextType {
   // Autenticación y Perfil de Administradores
@@ -316,7 +317,8 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
             const seedMatch = SEED_SEDES.find((seed) => seed.id === s.id);
             const manejaInv = s.manejaInventario !== undefined ? s.manejaInventario : (seedMatch?.manejaInventario ?? true);
             const manejaCostos = s.manejaCostosInventario !== undefined ? s.manejaCostosInventario : (seedMatch?.manejaCostosInventario ?? true);
-            let updated: SedeCentro = { ...s, manejaInventario: manejaInv, manejaCostosInventario: manejaCostos };
+            const manejaAlim = s.manejaAlimentacion !== undefined ? s.manejaAlimentacion : (seedMatch?.manejaAlimentacion ?? true);
+            let updated: SedeCentro = { ...s, manejaInventario: manejaInv, manejaCostosInventario: manejaCostos, manejaAlimentacion: manejaAlim };
 
             if (s.id === 1 && (s.nombre.includes('Santa Bárbara') || s.nombre.includes('Santa Barbara'))) {
               updated = { ...updated, nombre: 'Sede Central Bogotá', codigo: 'SEDE-CENTRAL' };
