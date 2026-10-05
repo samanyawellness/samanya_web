@@ -25,7 +25,13 @@ import {
   MovimientoInventario,
   TrasladoSedes,
   RegistrarMovimientoPayload,
-  RegistrarTrasladoPayload
+  RegistrarTrasladoPayload,
+  TiempoComida,
+  NivelEspesante,
+  PlanNutricional,
+  MinutaSemanal,
+  MinutaItem,
+  RegistroAlimentacion
 } from '../types';
 import {
   SEED_SEDES,
@@ -42,7 +48,12 @@ import {
   SEED_BODEGAS_SEDE,
   SEED_INVENTARIO_STOCK,
   SEED_MOVIMIENTOS_INVENTARIO,
-  SEED_TRASLADOS_SEDES
+  SEED_TRASLADOS_SEDES,
+  SEED_TIEMPOS_COMIDA,
+  SEED_NIVELES_ESPESANTE,
+  SEED_PLANES_NUTRICIONALES,
+  SEED_MINUTAS_SEMANALES,
+  SEED_REGISTROS_ALIMENTACION
 } from '../data/seedData';
 import { adminApi } from '../services/api';
 import { limpiarIdentificacion } from '../utils/formatters';
@@ -183,6 +194,19 @@ interface AdminContextType {
   recibirTraslado: (idTraslado: number, notasRecepcion?: string) => Promise<boolean>;
   crearArticuloCatalogo: (articulo: Omit<ArticuloCatalogo, 'id'>) => Promise<boolean>;
   actualizarArticuloCatalogo: (id: number, datos: Partial<ArticuloCatalogo>) => Promise<boolean>;
+
+  // Módulo de Alimentación y Nutrición Multisede (Fase 2)
+  tiemposComida: TiempoComida[];
+  nivelesEspesante: NivelEspesante[];
+  planesNutricionales: PlanNutricional[];
+  minutasSemanales: MinutaSemanal[];
+  registrosAlimentacion: RegistroAlimentacion[];
+  guardarPlanNutricional: (plan: Partial<PlanNutricional> & { idCentro: number; idResidente: number }) => Promise<boolean>;
+  guardarMinutaSemanal: (minuta: Partial<MinutaSemanal> & { idCentro: number; nombre: string; fechaInicio: string; fechaFin: string }) => Promise<boolean>;
+  guardarItemMinuta: (idMinuta: number, item: Partial<MinutaItem>) => Promise<boolean>;
+  eliminarItemMinuta: (idMinuta: number, idItem: number) => Promise<boolean>;
+  registrarIngestaComedor: (registro: Partial<RegistroAlimentacion> & { idCentro: number; idResidente: number; fecha: string; idTiempoComida: number; porcentajeIngesta: number }) => Promise<boolean>;
+  precargarComedorDia: (idCentro: number, fecha: string, idTiempoComida: number) => Promise<boolean>;
 
   // Modales de Edición
   editingResidente: Residente | null;
@@ -498,6 +522,52 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     const saved = localStorage.getItem('samanya_admin_traslados_inv');
     return saved ? JSON.parse(saved) : SEED_TRASLADOS_SEDES;
   });
+
+  // Módulo de Alimentación y Nutrición Multisede (Fase 2)
+  const [tiemposComida, setTiemposComida] = useState<TiempoComida[]>(() => {
+    const saved = localStorage.getItem('samanya_admin_tiempos_comida');
+    return saved ? JSON.parse(saved) : SEED_TIEMPOS_COMIDA;
+  });
+
+  const [nivelesEspesante, setNivelesEspesante] = useState<NivelEspesante[]>(() => {
+    const saved = localStorage.getItem('samanya_admin_niveles_espesante');
+    return saved ? JSON.parse(saved) : SEED_NIVELES_ESPESANTE;
+  });
+
+  const [planesNutricionales, setPlanesNutricionales] = useState<PlanNutricional[]>(() => {
+    const saved = localStorage.getItem('samanya_admin_planes_nutricionales');
+    return saved ? JSON.parse(saved) : SEED_PLANES_NUTRICIONALES;
+  });
+
+  const [minutasSemanales, setMinutasSemanales] = useState<MinutaSemanal[]>(() => {
+    const saved = localStorage.getItem('samanya_admin_minutas_semanales');
+    return saved ? JSON.parse(saved) : SEED_MINUTAS_SEMANALES;
+  });
+
+  const [registrosAlimentacion, setRegistrosAlimentacion] = useState<RegistroAlimentacion[]>(() => {
+    const saved = localStorage.getItem('samanya_admin_registros_alimentacion');
+    return saved ? JSON.parse(saved) : SEED_REGISTROS_ALIMENTACION;
+  });
+
+  useEffect(() => {
+    localStorage.setItem('samanya_admin_tiempos_comida', JSON.stringify(tiemposComida));
+  }, [tiemposComida]);
+
+  useEffect(() => {
+    localStorage.setItem('samanya_admin_niveles_espesante', JSON.stringify(nivelesEspesante));
+  }, [nivelesEspesante]);
+
+  useEffect(() => {
+    localStorage.setItem('samanya_admin_planes_nutricionales', JSON.stringify(planesNutricionales));
+  }, [planesNutricionales]);
+
+  useEffect(() => {
+    localStorage.setItem('samanya_admin_minutas_semanales', JSON.stringify(minutasSemanales));
+  }, [minutasSemanales]);
+
+  useEffect(() => {
+    localStorage.setItem('samanya_admin_registros_alimentacion', JSON.stringify(registrosAlimentacion));
+  }, [registrosAlimentacion]);
 
   useEffect(() => {
     localStorage.setItem('samanya_admin_categorias_inv', JSON.stringify(categoriasArticulos));
@@ -3268,6 +3338,331 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
     }
   };
 
+  // =========================================================================
+  // MÉTODOS DE NEGOCIO: ALIMENTACIÓN Y NUTRICIÓN MULTISEDE (FASE 2)
+  // =========================================================================
+
+  const guardarPlanNutricional = async (
+    plan: Partial<PlanNutricional> & { idCentro: number; idResidente: number }
+  ): Promise<boolean> => {
+    try {
+      const residente = residentes.find(r => r.id === plan.idResidente);
+      const existe = planesNutricionales.find(
+        p => p.id === plan.id || (p.idCentro === plan.idCentro && p.idResidente === plan.idResidente)
+      );
+
+      if (existe) {
+        setPlanesNutricionales(prev =>
+          prev.map(p => {
+            if (p.id === existe.id) {
+              return {
+                ...p,
+                ...plan,
+                fechaActualizacion: obtenerIsoBogota()
+              };
+            }
+            return p;
+          })
+        );
+        showToast(
+          `Plan nutricional de ${residente ? residente.nombreCompleto : 'residente'} actualizado correctamente`,
+          'success'
+        );
+      } else {
+        const nuevoPlan: PlanNutricional = {
+          id: plan.id || Date.now(),
+          idCentro: plan.idCentro,
+          idResidente: plan.idResidente,
+          idTipoDieta: plan.idTipoDieta,
+          tipoDietaNombre: plan.tipoDietaNombre || 'Normal / General',
+          idConsistencia: plan.idConsistencia,
+          consistenciaNombre: plan.consistenciaNombre || 'Sólida Regular',
+          idNivelEspesante: plan.idNivelEspesante,
+          nivelEspesanteNombre: plan.nivelEspesanteNombre,
+          requerimientoCaloricoKcal: plan.requerimientoCaloricoKcal || 1800,
+          restriccionesAlergias: plan.restriccionesAlergias,
+          alimentosPreferidos: plan.alimentosPreferidos,
+          alimentosRechazados: plan.alimentosRechazados,
+          requiereAsistencia: plan.requiereAsistencia ?? false,
+          suplementoNutricional: plan.suplementoNutricional,
+          observaciones: plan.observaciones,
+          estado: plan.estado || 'ACTIVO',
+          fechaCreacion: obtenerIsoBogota()
+        };
+        setPlanesNutricionales(prev => [nuevoPlan, ...prev]);
+        showToast(
+          `Nuevo plan nutricional prescrito para ${residente ? residente.nombreCompleto : 'residente'}`,
+          'success'
+        );
+      }
+      return true;
+    } catch (e) {
+      console.error(e);
+      showToast('Error guardando plan nutricional', 'alert');
+      return false;
+    }
+  };
+
+  const guardarMinutaSemanal = async (
+    minuta: Partial<MinutaSemanal> & {
+      idCentro: number;
+      nombre: string;
+      fechaInicio: string;
+      fechaFin: string;
+    }
+  ): Promise<boolean> => {
+    try {
+      const centro = sedes.find(s => s.id === minuta.idCentro);
+      if (minuta.id) {
+        setMinutasSemanales(prev =>
+          prev.map(m => {
+            if (m.id === minuta.id) {
+              return {
+                ...m,
+                ...minuta,
+                nombreCentro: centro ? centro.nombre : m.nombreCentro
+              };
+            }
+            return m;
+          })
+        );
+        showToast(`Minuta semanal "${minuta.nombre}" actualizada`, 'success');
+      } else {
+        const nuevaMinuta: MinutaSemanal = {
+          id: Date.now(),
+          idCentro: minuta.idCentro,
+          nombreCentro: centro ? centro.nombre : '',
+          nombre: minuta.nombre,
+          descripcion: minuta.descripcion,
+          fechaInicio: minuta.fechaInicio,
+          fechaFin: minuta.fechaFin,
+          estado: minuta.estado || 'ACTIVO',
+          items: minuta.items || []
+        };
+        setMinutasSemanales(prev => [nuevaMinuta, ...prev]);
+        showToast(`Minuta semanal "${minuta.nombre}" creada con éxito`, 'success');
+      }
+      return true;
+    } catch (e) {
+      console.error(e);
+      showToast('Error guardando minuta semanal', 'alert');
+      return false;
+    }
+  };
+
+  const guardarItemMinuta = async (idMinuta: number, item: Partial<MinutaItem>): Promise<boolean> => {
+    try {
+      setMinutasSemanales(prev =>
+        prev.map(m => {
+          if (m.id !== idMinuta) return m;
+          const itemsActuales = m.items || [];
+          const existe = item.id ? itemsActuales.find(i => i.id === item.id) : null;
+          let itemsActualizados: MinutaItem[];
+
+          if (existe) {
+            itemsActualizados = itemsActuales.map(i =>
+              i.id === item.id ? ({ ...i, ...item } as MinutaItem) : i
+            );
+          } else {
+            const diasNombres = ['', 'Lunes', 'Martes', 'Miércoles', 'Jueves', 'Viernes', 'Sábado', 'Domingo'];
+            const tc = tiemposComida.find(t => t.id === item.idTiempoComida);
+            const nuevoItem: MinutaItem = {
+              id: Date.now(),
+              idMinuta: idMinuta,
+              diaSemana: item.diaSemana || 1,
+              nombreDia: item.nombreDia || diasNombres[item.diaSemana || 1] || 'Día',
+              idTiempoComida: item.idTiempoComida || 1,
+              tiempoComidaNombre: tc ? tc.nombre : item.tiempoComidaNombre,
+              horaSugerida: tc?.horaSugerida,
+              platoPrincipal: item.platoPrincipal || 'Preparación balanceada',
+              acompanamiento: item.acompanamiento,
+              bebida: item.bebida,
+              postre: item.postre,
+              caloriasEstimadas: item.caloriasEstimadas || 450,
+              observacionesDietas: item.observacionesDietas
+            };
+            itemsActualizados = [...itemsActuales, nuevoItem];
+          }
+
+          return { ...m, items: itemsActualizados };
+        })
+      );
+      showToast('Preparación guardada en la minuta semanal', 'success');
+      return true;
+    } catch (e) {
+      console.error(e);
+      showToast('Error guardando preparación de minuta', 'alert');
+      return false;
+    }
+  };
+
+  const eliminarItemMinuta = async (idMinuta: number, idItem: number): Promise<boolean> => {
+    try {
+      setMinutasSemanales(prev =>
+        prev.map(m => {
+          if (m.id !== idMinuta) return m;
+          return {
+            ...m,
+            items: (m.items || []).filter(i => i.id !== idItem)
+          };
+        })
+      );
+      showToast('Preparación eliminada de la minuta', 'success');
+      return true;
+    } catch (e) {
+      console.error(e);
+      showToast('Error eliminando preparación', 'alert');
+      return false;
+    }
+  };
+
+  const registrarIngestaComedor = async (
+    registro: Partial<RegistroAlimentacion> & {
+      idCentro: number;
+      idResidente: number;
+      fecha: string;
+      idTiempoComida: number;
+      porcentajeIngesta: number;
+    }
+  ): Promise<boolean> => {
+    try {
+      const res = residentes.find(r => r.id === registro.idResidente);
+      const plan = planesNutricionales.find(
+        p => p.idResidente === registro.idResidente && p.idCentro === registro.idCentro
+      );
+      const tc = tiemposComida.find(t => t.id === registro.idTiempoComida);
+      const toleranciaCalculada =
+        registro.tolerancia ||
+        (registro.porcentajeIngesta <= 25
+          ? 'MALA'
+          : registro.porcentajeIngesta <= 50
+          ? 'REGULAR'
+          : 'BUENA');
+
+      setRegistrosAlimentacion(prev => {
+        const indice = prev.findIndex(
+          r =>
+            r.idCentro === registro.idCentro &&
+            r.idResidente === registro.idResidente &&
+            r.fecha === registro.fecha &&
+            r.idTiempoComida === registro.idTiempoComida
+        );
+
+        if (indice >= 0) {
+          const actual = prev[indice];
+          const actualizado: RegistroAlimentacion = {
+            ...actual,
+            ...registro,
+            tolerancia: toleranciaCalculada,
+            idEmpleadoRegistra: currentUser?.id || actual.idEmpleadoRegistra || 1,
+            nombreEmpleadoRegistra:
+              currentUser?.nombreCompleto || actual.nombreEmpleadoRegistra || 'Auxiliar'
+          };
+          const nuevaLista = [...prev];
+          nuevaLista[indice] = actualizado;
+          return nuevaLista;
+        } else {
+          const nuevo: RegistroAlimentacion = {
+            id: Date.now(),
+            idCentro: registro.idCentro,
+            idResidente: registro.idResidente,
+            residenteNombre: res ? `${res.nombres} ${res.apellidos}` : 'Residente',
+            habitacion: res?.habitacion || '101',
+            cama: res?.cama || 'A',
+            fecha: registro.fecha,
+            idTiempoComida: registro.idTiempoComida,
+            tiempoComidaNombre: tc ? tc.nombre : 'Comida',
+            idPlanNutricional: plan?.id,
+            tipoDieta: plan?.tipoDietaNombre || 'Normal',
+            consistencia: plan?.consistenciaNombre || 'Sólida Regular',
+            espesante: plan?.nivelEspesanteNombre,
+            requiereAsistencia: plan?.requiereAsistencia ?? false,
+            porcentajeIngesta: registro.porcentajeIngesta,
+            liquidosMl: registro.liquidosMl || 200,
+            tolerancia: toleranciaCalculada,
+            asistio: registro.asistio ?? true,
+            observaciones: registro.observaciones || '',
+            idEmpleadoRegistra: currentUser?.id || 1,
+            nombreEmpleadoRegistra: currentUser?.nombreCompleto || 'Auxiliar'
+          };
+          return [...prev, nuevo];
+        }
+      });
+
+      return true;
+    } catch (e) {
+      console.error(e);
+      showToast('Error guardando registro de comedor', 'alert');
+      return false;
+    }
+  };
+
+  const precargarComedorDia = async (
+    idCentro: number,
+    fecha: string,
+    idTiempoComida: number
+  ): Promise<boolean> => {
+    try {
+      const residentesActivos = residentes.filter(
+        r => r.idCentro === idCentro && r.estado === 'Activo'
+      );
+      const tc = tiemposComida.find(t => t.id === idTiempoComida);
+
+      setRegistrosAlimentacion(prev => {
+        const nuevaLista = [...prev];
+        residentesActivos.forEach(res => {
+          const existe = nuevaLista.some(
+            r =>
+              r.idCentro === idCentro &&
+              r.idResidente === res.id &&
+              r.fecha === fecha &&
+              r.idTiempoComida === idTiempoComida
+          );
+
+          if (!existe) {
+            const plan = planesNutricionales.find(
+              p => p.idResidente === res.id && p.idCentro === idCentro
+            );
+            nuevaLista.push({
+              id: Date.now() + res.id,
+              idCentro: idCentro,
+              idResidente: res.id,
+              residenteNombre: `${res.nombres} ${res.apellidos}`,
+              habitacion: res.habitacion || '101',
+              cama: res.cama || 'A',
+              fecha: fecha,
+              idTiempoComida: idTiempoComida,
+              tiempoComidaNombre: tc ? tc.nombre : 'Comida',
+              idPlanNutricional: plan?.id,
+              tipoDieta: plan?.tipoDietaNombre || 'Normal / General',
+              consistencia: plan?.consistenciaNombre || 'Sólida Regular',
+              espesante: plan?.nivelEspesanteNombre,
+              requiereAsistencia: plan?.requiereAsistencia ?? false,
+              porcentajeIngesta: 100,
+              liquidosMl: 250,
+              tolerancia: 'BUENA',
+              asistio: true,
+              observaciones: '',
+              idEmpleadoRegistra: currentUser?.id || 1,
+              nombreEmpleadoRegistra: currentUser?.nombreCompleto || 'Auxiliar'
+            });
+          }
+        });
+        return nuevaLista;
+      });
+
+      showToast(
+        `Asistencia precargada para ${residentesActivos.length} comensales en ${tc?.nombre || 'comedor'}`,
+        'success'
+      );
+      return true;
+    } catch (e) {
+      console.error(e);
+      showToast('Error precargando comensales', 'alert');
+      return false;
+    }
+  };
+
   // 13. Métodos de Gestión y Registro de Incidentes
   const registrarIncidente = async (datos: {
     idResidente: number;
@@ -3570,7 +3965,19 @@ export const AdminProvider: React.FC<{ children: React.ReactNode }> = ({ childre
         despacharTraslado,
         recibirTraslado,
         crearArticuloCatalogo,
-        actualizarArticuloCatalogo
+        actualizarArticuloCatalogo,
+        // Alimentación y Nutrición Multisede (Fase 2)
+        tiemposComida,
+        nivelesEspesante,
+        planesNutricionales,
+        minutasSemanales,
+        registrosAlimentacion,
+        guardarPlanNutricional,
+        guardarMinutaSemanal,
+        guardarItemMinuta,
+        eliminarItemMinuta,
+        registrarIngestaComedor,
+        precargarComedorDia
       }}
     >
       {children}

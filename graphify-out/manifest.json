@@ -1182,9 +1182,9 @@
     "semantic_hash": "b03454a5e38fe63cb9689f922148ae21"
   },
   "backend/db/scripts/build_all.sql": {
-    "mtime": 1791164242.7639246,
-    "seen": 1791165095.8918793,
-    "ast_hash": "8392be225157911e13f4cd3d2e90db46",
+    "mtime": 1791167685.6472592,
+    "seen": 1791168924.9856265,
+    "ast_hash": "3ac98b8e7d5515601bd818852d5dcbc9",
     "semantic_hash": ""
   },
   "backend/db/scripts/datos_prueba_dummy.sql": {
@@ -2328,15 +2328,15 @@
     "semantic_hash": ""
   },
   "src/context/AdminContext.tsx": {
-    "mtime": 1791164776.0044422,
-    "seen": 1791165095.892392,
-    "ast_hash": "7e70d75bdbb9545aaddc585cf5086141",
+    "mtime": 1791168592.0915413,
+    "seen": 1791168924.9861474,
+    "ast_hash": "3b8ae539e4fdd3a812f20586807cd91c",
     "semantic_hash": ""
   },
   "src/data/seedData.ts": {
-    "mtime": 1791164683.694275,
-    "seen": 1791165095.892394,
-    "ast_hash": "0dd9961218b1ffd2c581cd73495e25d3",
+    "mtime": 1791168518.078212,
+    "seen": 1791168924.9861495,
+    "ast_hash": "f7575b03f538d630e0949fe2aaa5e8a7",
     "semantic_hash": ""
   },
   "src/main.tsx": {
@@ -2771,12 +2771,6 @@
     "ast_hash": "3c8b9cccff1fb51727594fff83138c93",
     "semantic_hash": ""
   },
-  "backend/db/scripts/cambios_alimentacion.sql": {
-    "mtime": 1791166020.9564424,
-    "seen": 1791166622.8191319,
-    "ast_hash": "5961fb0434b4a8b59cdacb748049734d",
-    "semantic_hash": ""
-  },
   "backend/db/scripts/pkgca_smy_minutas_semanales.sql": {
     "mtime": 1791166083.2140994,
     "seen": 1791166622.819186,
@@ -2844,9 +2838,33 @@
     "semantic_hash": ""
   },
   "src/components/views/AlimentacionView.tsx": {
-    "mtime": 1791164933.0553913,
-    "seen": 1791165095.8923686,
-    "ast_hash": "6b06a2dd8d1f6813528ad12bd8a83da6",
+    "mtime": 1791169435.462819,
+    "seen": 1791169608.9119616,
+    "ast_hash": "4f5fd8688ef6f99d09c8f62f62723af6",
+    "semantic_hash": ""
+  },
+  "src/components/modals/DetalleIngestaComedorModal.tsx": {
+    "mtime": 1791168701.0039823,
+    "seen": 1791168924.9860594,
+    "ast_hash": "aa616d13ef68a52599cfe87e28d04230",
+    "semantic_hash": ""
+  },
+  "src/components/modals/ImprimirMinutaSemanalModal.tsx": {
+    "mtime": 1791168685.4707513,
+    "seen": 1791168924.9860795,
+    "ast_hash": "50e9f677906bda44decbd670591d991d",
+    "semantic_hash": ""
+  },
+  "src/components/modals/PrescribirPlanNutricionalModal.tsx": {
+    "mtime": 1791168646.731966,
+    "seen": 1791168924.9860892,
+    "ast_hash": "b24ec98f64e092dd379da45eac5ce311",
+    "semantic_hash": ""
+  },
+  "src/components/modals/ProgramarMinutaModal.tsx": {
+    "mtime": 1791168669.0871534,
+    "seen": 1791168924.9860914,
+    "ast_hash": "c55d59ba71dc26b80ffb441391851637",
     "semantic_hash": ""
   }
 }
